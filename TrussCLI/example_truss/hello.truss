@@ -1,0 +1,41 @@
+# 结构如图所示：
+#      2
+#      /\
+#     /  \
+#  ▲ /    \
+#  │/      \
+#  @───►────$
+# 0        1
+#############################
+# 平面点
+PlaneNode:
+[
+    { key:0, x:0.000, y:0.000 }
+    { key:1, x:1.000, y:0.000 }
+    { key:2, x:0.500, y:0.866 }
+]
+# 材料
+Material:
+[
+    # 线弹性，低碳钢
+    { key:0, type:"Elastic", name:"Steel", rho:7850.0, E:2.10E11, pr:0.3 }
+]
+# 单元
+Element:
+[
+    { key:0, type:"Bar", node1_key:0, node2_key:1, mat_key:0, area:3.1415926E-4 }
+    { key:1, type:"Bar", node1_key:1, node2_key:2, mat_key:0, area:3.1415926E-4 }
+    { key:2, type:"Bar", node1_key:2, node2_key:0, mat_key:0, area:3.1415926E-4 }
+]
+# 约束
+Constraint:
+[
+    { key:0, type:"PlaneNodeDisplacement", node_key:0, x:true, y:true }
+    { key:1, type:"PlaneNodeDisplacement", node_key:1, x:false, y:true }
+]
+# 荷载
+Load:
+[
+    # 作用于2节点，Y方向的荷载为：-30kN
+    { key:0, type:"PlaneNodeForce", node_key:2, XForce:0.000, YForce:-30E3 }
+]
