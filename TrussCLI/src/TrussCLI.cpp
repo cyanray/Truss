@@ -10,14 +10,20 @@ using namespace Truss;
 using namespace Eigen;
 
 
-int main()
+int main(int argc, char* argv[])
 {
 #ifdef _WIN32
     system("chcp 65001");
 #endif
 
-    ifstream tfile("example_truss/hello.truss");
-    std::string input((std::istreambuf_iterator<char>(tfile)), std::istreambuf_iterator<char>());
+    if (argc < 2)
+    {
+        cout << "Usage: TrussCLI.exe <input_file_path>" << endl;
+        ::exit(-1);
+    }
+    string input_file_path = argv[1];
+    ifstream input_file(input_file_path);
+    std::string input((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 
     TrussSolver solver;
     TrussDocument doc = TrussDocument::Parse(input);
