@@ -3,11 +3,10 @@
 
 namespace Truss
 {
-	template<typename T = NumericType>
 	struct PlaneNode
 	{
-		int Id = INVALID_ID;
-		T X = 0;
-		T Y = 0;
+        ID Id = INVALID_ID;
+		Numeric X = 0;
+		Numeric Y = 0;
 	};
 }

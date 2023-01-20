@@ -5,13 +5,12 @@
 
 namespace Truss::Constraint
 {
-    template<typename T = NumericType>
-    class Constraint_PlaneNodeDisplacement
+    class PlaneNodeDisplacement
     {
     public:
-        int Id = INVALID_ID;
+        ID Id = INVALID_ID;
         bool XConstraint = false;
         bool YConstraint = false;
-        PlaneNode<T>* PlaneNode = nullptr;
+        PlaneNode* PlaneNode = nullptr;
     };
 }

@@ -5,12 +5,14 @@
 namespace Truss
 {
 #ifdef TRUSS_DOUBLE_PRECISION
-	using NumericType = double;
+	using Numeric = double;
 #else
-	using NumericType = float;
+	using Numeric = float;
 #endif
 
-	constexpr int INVALID_ID = -1;
+    using ID = int;
+
+	constexpr ID INVALID_ID = -1;
 
 	constexpr float PI_f = 3.14159265358979323846f;
 

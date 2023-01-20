@@ -29,20 +29,20 @@ namespace Truss
 
         static TrussDocument Parse(std::string_view input);
 
-        ValueType GetValueType() const noexcept;
+        [[nodiscard]] ValueType GetValueType() const noexcept;
 
         TrussDocument& at(int index);
-        const TrussDocument& at(int index) const;
+        [[nodiscard]] const TrussDocument& at(int index) const;
         TrussDocument& at(std::string_view key);
-        const TrussDocument& at(std::string_view key) const;
+        [[nodiscard]] const TrussDocument& at(std::string_view key) const;
         TrussDocument& operator[](int index);
         const TrussDocument& operator[](int index) const;
         TrussDocument& operator[](std::string_view key);
         const TrussDocument& operator[](std::string_view key) const;
 
-        bool is_object() const noexcept;
-        bool is_array() const noexcept;
-        size_t size() const noexcept;
+        [[nodiscard]] bool is_object() const noexcept;
+        [[nodiscard]] bool is_array() const noexcept;
+        [[nodiscard]] size_t size() const noexcept;
 
         template<typename T>
         T get() const
@@ -51,7 +51,7 @@ namespace Truss
         }
 
         template<>
-        float get<float>() const
+        [[nodiscard]] float get<float>() const
         {
             if (GetValueType() == ValueType::Float)
             {
@@ -65,7 +65,7 @@ namespace Truss
         }
 
         template<>
-        double get<double>() const
+        [[nodiscard]] double get<double>() const
         {
             if (GetValueType() == ValueType::Float)
             {
