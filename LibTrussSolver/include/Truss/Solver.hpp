@@ -1,4 +1,5 @@
 #pragma once
+
 #include <map>
 #include <string>
 #include <vector>
@@ -6,10 +7,11 @@
 #include "Truss/Common/Constants.hpp"
 #include "Truss/Common/PlaneNode.hpp"
 #include "Truss/Material/Elastic.hpp"
-#include "Truss/Element/Bar.hpp"
+#include "Truss/Element/PlaneBar.hpp"
 #include "Truss/Constraint/PlaneNodeDisplacement.hpp"
 #include "Truss/Load/PlaneNodeForce.hpp"
 #include "TrussDocument/TrussDocument.hpp"
+#include "Truss/Common/Resources.hpp"
 
 
 namespace Truss
@@ -31,24 +33,24 @@ namespace Truss
 
         std::vector<int> GetSimplifiedIndex();
 
-        private:
-        std::map<int, PlaneNode> m_NodeList;
-        std::map<int, Material::Elastic> m_MaterialList;
-        std::map<int, Element::Bar> m_ElementList;
-        std::map<int, Constraint::PlaneNodeDisplacement> m_ConstraintList;
-        std::map<int, Load::PlaneNodeForce> m_LoadList;
+    private:
+        Resources m_Resources;
 
         [[nodiscard]] int GetNumberOfNode() const noexcept;
 
-        void GetPlaneNodes(const TrussDocument &doc);
+        void GetPlaneNodes(const TrussDocument& doc);
 
-        void GetMaterials(const TrussDocument &doc);
+        void GetMaterials(const TrussDocument& doc);
 
-        void GetElements(const TrussDocument &doc);
+        void GetElements(const TrussDocument& doc);
 
-        void GetConstrains(const TrussDocument &doc);
+        void GetConstrains(const TrussDocument& doc);
 
-        void GetLoads(const TrussDocument &doc);
+        void GetLoads(const TrussDocument& doc);
+
+        void GetSections(const TrussDocument& doc);
+
+        void BuildAllComponents();
 
     };
 

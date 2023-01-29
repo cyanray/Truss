@@ -10,11 +10,14 @@ using namespace Truss;
 using namespace Eigen;
 
 
+#include <TrussDocument/TrussDocument.hpp>
+
 int main(int argc, char* argv[])
 {
 #ifdef _WIN32
     system("chcp 65001");
 #endif
+
 
     if (argc < 2)
     {

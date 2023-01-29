@@ -1,13 +1,14 @@
 #pragma once
+
 #include "Constants.hpp"
+#include "IComponent.hpp"
 
 namespace Truss
 {
-    struct Node
+    struct Node : public IComponent
     {
-        ID Id = INVALID_ID;
-        Numeric X = 0;
-        Numeric Y = 0;
-        Numeric Z = 0;
+        Numeric X{};
+        Numeric Y{};
+        Numeric Z{};
     };
 }

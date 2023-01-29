@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include <cctype>
 #include <vector>
 #include <string_view>
 #include <memory>
@@ -50,14 +49,15 @@ namespace Truss
         const char* m_InputPtr;
 
 		string GetNextWord();
-
+        string GetNextNumber();
 		char GetNextSymbol();
-
         string GetNextString();
-
 		void SkipComment();
+        void SkipSpaceComma();
 
-        void SkipOneSymbol();
+        void ScanWord(std::vector<Token>& result);
+        void ScanNumber(std::vector<Token>& result);
+        void ScanSymbol(std::vector<Token>& result);
 
 	};
 

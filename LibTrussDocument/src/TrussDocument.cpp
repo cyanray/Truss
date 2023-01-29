@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-no-recursion"
 #include <string>
 #include <algorithm>
 #include <cctype>
@@ -28,57 +30,12 @@ namespace
 }
 
 
-ValueType TrussDocument::GetValueType() const noexcept
-{
-    return m_type;
-}
-
-TrussDocument &TrussDocument::at(int index)
-{
-    return m_array.at(index);
-}
-
-TrussDocument &TrussDocument::at(std::string_view key)
-{
-    return m_object.at(lowercase(key));
-}
-
-TrussDocument &TrussDocument::operator[](int index)
-{
-    return this->at(index);
-}
-
-TrussDocument &TrussDocument::operator[](std::string_view key)
-{
-    return this->at(key);
-}
-
-const TrussDocument &TrussDocument::at(int index) const
-{
-    return const_cast<TrussDocument *>(this)->at(index);
-}
-
-const TrussDocument &TrussDocument::at(std::string_view key) const
-{
-    return const_cast<TrussDocument *>(this)->at(key);
-}
-
-const TrussDocument &TrussDocument::operator[](int index) const
-{
-    return const_cast<TrussDocument *>(this)->at(index);
-}
-
-const TrussDocument &TrussDocument::operator[](std::string_view key) const
-{
-    return const_cast<TrussDocument *>(this)->at(key);
-}
-
 namespace Truss
 {
-    class __ParserImpl;
+    class ParserImpl;
 }
 
-class Truss::__ParserImpl
+class Truss::ParserImpl
 {
 public:
     static TrussDocument Parse_BooleanValue(const vector<Token>& tokens, int& current_index)
@@ -124,7 +81,7 @@ public:
         }
         auto number_result = ParseNumberImpl(raw_number);
         int index = number_result.index;
-        if (!number_result.flag_decimal) [[unlikely]]
+        if (!number_result.flag_decimal)
         {
             TrussDocument result;
             int value = 0;
@@ -196,7 +153,7 @@ public:
         int index = current_index;
         if (!ignore_symbol_start)
         {
-            ConsumeToken(tokens, index, TokenType::Symbol_Object_Start);
+            CheckToken(tokens, index, TokenType::Symbol_Object_Start);
         }
         TrussDocument result;
         result.m_type = ValueType::Object;
@@ -212,8 +169,8 @@ public:
             {
                 case TokenType::Data_Key:
                 {
-                    ConsumeToken(tokens, ++index, TokenType::Symbol_Assignment);
-                    auto value = ParseLiteralValue(tokens, index);
+                    CheckToken(tokens, ++index, TokenType::Symbol_Assignment);
+                    auto value = Parse_Value(tokens, index);
                     result.m_object.insert({ lowercase<char>(*token_curr.Data), value });
                     break;
                 }
@@ -231,10 +188,9 @@ public:
     static TrussDocument Parse_Array(const vector<Token>& tokens, int& current_index)
     {
         int index = current_index;
-        ConsumeToken(tokens, index, TokenType::Symbol_Array_Start);
+        CheckToken(tokens, index, TokenType::Symbol_Array_Start);
         TrussDocument result;
         result.m_type = ValueType::Array;
-        int count = 0;
         while (true)
         {
             if (index >= tokens.size()) goto ERROR_HANDLING;
@@ -244,8 +200,8 @@ public:
             case TokenType::Symbol_Array_End: goto END;
             default:
             {
-                auto value = ParseLiteralValue(tokens, index);
-                result.m_array.insert({ count++, value });
+                auto value = Parse_Value(tokens, index);
+                result.m_array.emplace_back(std::move(value));
                 break;
             }
             }
@@ -257,7 +213,7 @@ public:
         return result;
     }
 
-    static TrussDocument ParseLiteralValue(const vector<Token>& tokens, int& current_index)
+    static TrussDocument Parse_Value(const vector<Token>& tokens, int& current_index)
     {
         int& index = current_index;
         auto& token_curr = tokens[index];
@@ -303,7 +259,7 @@ public:
 
 private:
 
-    static void ConsumeToken(const vector<Token>& tokens, int& current_index, TokenType type)
+    static void CheckToken(const vector<Token>& tokens, int& current_index, TokenType type)
     {
         if (tokens[current_index].Type == type)
         {
@@ -350,10 +306,11 @@ private:
         for (int i = index; i < raw_number.size(); ++i)
         {
             char suffix = raw_number_ptr[i];
-            result.flag_float = (suffix == 'f');
-            result.flag_double = (suffix == 'd');
-            result.flag_complex_imaginary = (suffix == 'i');
+//            result.flag_float = (suffix == 'f');
+            result.flag_double = (result.flag_double || suffix == 'd');
+            result.flag_complex_imaginary = (result.flag_complex_imaginary || suffix == 'i');
         }
+        result.flag_float = (!result.flag_double && flag_decimal);
         return result;
     }
 };
@@ -364,22 +321,114 @@ TrussDocument TrussDocument::Parse(std::string_view input)
     Tokenizer tokenizer(input);
     const vector<Token> tokens = tokenizer.Scan();
     int token_index = 0;
-    TrussDocument result = __ParserImpl::Parse_Object(tokens, token_index, true);
+    TrussDocument result = ParserImpl::Parse_Object(tokens, token_index, true);
     return result;
 }
 
-bool TrussDocument::is_array() const noexcept
+ValueType TrussDocument::GetValueType() const noexcept
+{
+    return m_type;
+}
+
+TrussDocument &TrussDocument::At(int index)
+{
+    return m_array.at(index);
+}
+
+TrussDocument &TrussDocument::At(std::string_view key)
+{
+    return m_object.at(lowercase(key));
+}
+
+TrussDocument &TrussDocument::operator[](int index)
+{
+    return this->At(index);
+}
+
+TrussDocument &TrussDocument::operator[](std::string_view key)
+{
+    return this->At(key);
+}
+
+const TrussDocument &TrussDocument::At(int index) const
+{
+    return const_cast<TrussDocument *>(this)->At(index);
+}
+
+const TrussDocument &TrussDocument::At(std::string_view key) const
+{
+    return const_cast<TrussDocument *>(this)->At(key);
+}
+
+const TrussDocument &TrussDocument::operator[](int index) const
+{
+    return const_cast<TrussDocument *>(this)->At(index);
+}
+
+const TrussDocument &TrussDocument::operator[](std::string_view key) const
+{
+    return const_cast<TrussDocument *>(this)->At(key);
+}
+
+bool TrussDocument::IsArray() const noexcept
 {
     return (GetValueType() == ValueType::Array);
 }
 
-bool TrussDocument::is_object() const noexcept
+bool TrussDocument::IsObject() const noexcept
 {
     return (GetValueType() == ValueType::Object);
 }
 
-size_t TrussDocument::size() const noexcept
+bool TrussDocument::IsValue() const noexcept
 {
-    return m_array.size();
+    return !(IsArray() && IsObject());
 }
 
+size_t TrussDocument::Size() const noexcept
+{
+    return m_array.size() + m_object.size();
+}
+
+bool TrussDocument::Exists(const string &key) const
+{
+    return m_object.contains(key);
+}
+
+bool TrussDocument::IsNull() const noexcept
+{
+    return (GetValueType() == ValueType::Null);
+}
+
+bool TrussDocument::IsBoolean() const noexcept
+{
+    return (GetValueType() == ValueType::Boolean);
+}
+
+bool TrussDocument::IsFloat() const noexcept
+{
+    return (GetValueType() == ValueType::Float);
+}
+
+bool TrussDocument::IsInteger() const noexcept
+{
+    return (GetValueType() == ValueType::Integer);
+}
+
+bool TrussDocument::IsDouble() const noexcept
+{
+    return (GetValueType() == ValueType::Double);
+}
+
+bool TrussDocument::IsString() const noexcept
+{
+    return (GetValueType() == ValueType::String);
+}
+
+bool TrussDocument::IsComplex() const noexcept
+{
+    return (GetValueType() == ValueType::Complex);
+}
+
+
+#pragma clang diagnostic pop

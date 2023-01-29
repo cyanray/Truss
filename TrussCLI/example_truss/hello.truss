@@ -20,12 +20,17 @@ Material:
     # 线弹性，低碳钢
     { key:0, type:"Elastic", name:"Steel", rho:7850.0, E:2.10E11, pr:0.3 }
 ]
+# Section
+Section:
+[
+    { key:0, type:"Section_PlaneBar", mat_key:0, area:3.1415926E-4 }
+]
 # 单元
 Element:
 [
-    { key:0, type:"Bar", node1_key:0, node2_key:1, mat_key:0, area:3.1415926E-4 }
-    { key:1, type:"Bar", node1_key:1, node2_key:2, mat_key:0, area:3.1415926E-4 }
-    { key:2, type:"Bar", node1_key:2, node2_key:0, mat_key:0, area:3.1415926E-4 }
+    { key:0, type:"PlaneBar", node1_key:0, node2_key:1, section_key:0 }
+    { key:1, type:"PlaneBar", node1_key:1, node2_key:2, section_key:0 }
+    { key:2, type:"PlaneBar", node1_key:2, node2_key:0, section_key:0 }
 ]
 # 约束
 Constraint:

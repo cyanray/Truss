@@ -40,4 +40,6 @@ namespace Truss
 		return result;
 	}
 
+    class Resources;
+
 }

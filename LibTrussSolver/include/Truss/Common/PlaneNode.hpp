@@ -1,12 +1,13 @@
 #pragma once
+
 #include "Constants.hpp"
+#include "IComponent.hpp"
 
 namespace Truss
 {
-	struct PlaneNode
-	{
-        ID Id = INVALID_ID;
-		Numeric X = 0;
-		Numeric Y = 0;
-	};
+    struct PlaneNode : public IComponent
+    {
+        Numeric X{};
+        Numeric Y{};
+    };
 }

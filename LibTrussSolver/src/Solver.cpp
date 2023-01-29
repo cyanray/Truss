@@ -1,43 +1,90 @@
 #include "Truss/Solver.hpp"
-using namespace Truss;
+#include "Truss/Serializer/Serializers.hpp"
+#include "Truss/Utils/SimpleReflection.hpp"
+#include "Truss/Material/MaterialBase.hpp"
 
-void TrussSolver::LoadTrussDocument(const TrussDocument &doc) {
+using namespace Truss;
+using namespace std;
+namespace
+{
+
+    template<typename TBase, typename T> requires std::derived_from<T, TBase>
+    std::shared_ptr<TBase> Creator(const TrussDocument& doc)
+    {
+        auto value = make_shared<T>();
+        from_truss(doc, *value);
+        return std::static_pointer_cast<TBase>(value);
+    }
+
+    SimpleReflection& GetReflection()
+    {
+        static SimpleReflection refl;
+        if (refl.IsEmpty()) [[unlikely]]
+        {
+            refl.Register("Elastic", Creator<Material::MaterialBase, Material::Elastic>);
+            refl.Register("PlaneNodeDisplacement", Creator<Constraint::ConstraintBase, Constraint::PlaneNodeDisplacement>);
+            refl.Register("PlaneBar", Creator<Element::ElementBase, Element::PlaneBar>);
+            refl.Register("PlaneNodeForce", Creator<Load::LoadBase, Load::PlaneNodeForce>);
+            refl.Register("Section_PlaneBar", Creator<Section::SectionBase, Section::Section_PlaneBar>);
+        }
+        return refl;
+    }
+}
+
+
+void TrussSolver::LoadTrussDocument(const TrussDocument &doc)
+{
     GetPlaneNodes(doc);
     GetMaterials(doc);
+    GetSections(doc);
     GetElements(doc);
     GetConstrains(doc);
     GetLoads(doc);
+    BuildAllComponents();
 }
 
-VectorX<Numeric> TrussSolver::GetF() {
+VectorX<Numeric> TrussSolver::GetF()
+{
     int K_size = GetKSize();
     VectorX<Numeric> F(K_size);
     F.setZero();
-    for (int i = 0; i < m_LoadList.size(); ++i)
+    for (int i = 0; i < m_Resources.Loads.size(); ++i)
     {
-        int id = m_LoadList[i].PlaneNode->Id;
-        F(id * 2) = m_LoadList[i].XForce;
-        F(id * 2 + 1) = m_LoadList[i].YForce;
+        auto ids = m_Resources.Loads[i]->GetNodeIds();
+        auto load = m_Resources.Loads [i]->GetLoad();
+        for (auto id : ids)
+        {
+            for (int t = 0; t < load.size(); ++t)
+            {
+                F[id * 2 + t] = load[t];   // TODO: magic number 2
+            }
+        }
+//        int id = m_LoadList[i].PlaneNode->Id;
+//        F(id * 2) = m_LoadList[i].XForce;
+//        F(id * 2 + 1) = m_LoadList[i].YForce;
     }
     return F;
 }
 
-VectorX<Numeric> TrussSolver::GetSimplifiedF() {
+VectorX<Numeric> TrussSolver::GetSimplifiedF()
+{
     auto index = GetSimplifiedIndex();
     auto F = GetF();
     return F(index);
 }
 
-MatrixX<Numeric> TrussSolver::GetK() {
-    int element_number = (int)m_ElementList.size();
+MatrixX<Numeric> TrussSolver::GetK()
+{
+    int element_number = (int) m_Resources.Elements.size();
     int K_size = GetKSize();
     MatrixX<Numeric> K(K_size, K_size);
     K.setZero();
     for (int i = 0; i < element_number; i++)
     {
-        int p = 2 * m_ElementList[i].LeftNode->Id;
-        int q = 2 * m_ElementList[i].RightNode->Id;
-        auto ke = m_ElementList[i].GetStiffnessGlobal();
+        auto ids = m_Resources.Elements[i]->GetNodeIds();
+        int p = 2 * ids[0]; // TODO: correct
+        int q = 2 * ids[1];
+        auto ke = m_Resources.Elements[i]->GetStiffnessGlobal();
         K.block(p, p, 2, 2) += ke.block(0, 0, 2, 2);
         K.block(p, q, 2, 2) += ke.block(0, 2, 2, 2);
         K.block(q, p, 2, 2) += ke.block(2, 0, 2, 2);
@@ -46,24 +93,35 @@ MatrixX<Numeric> TrussSolver::GetK() {
     return K;
 }
 
-MatrixX<Numeric> TrussSolver::GetSimplifiedK() {
+MatrixX<Numeric> TrussSolver::GetSimplifiedK()
+{
     auto index = GetSimplifiedIndex();
     auto K = GetK();
     return K(index, index);
 }
 
-int TrussSolver::GetKSize() const noexcept {
+int TrussSolver::GetKSize() const noexcept
+{
     return GetNumberOfNode() * 2;
 }
 
-std::vector<int> TrussSolver::GetSimplifiedIndex() {
+std::vector<int> TrussSolver::GetSimplifiedIndex()
+{
     int K_size = GetKSize();
     std::vector<bool> flag(K_size, true);
-    for (int i = 0; i < m_ConstraintList.size(); ++i)
+    for (int i = 0; i < m_Resources.Constraints.size(); ++i)
     {
-        int id = m_ConstraintList[i].PlaneNode->Id;
-        flag[id * 2] = !m_ConstraintList[i].XConstraint;
-        flag[id * 2 + 1] = !m_ConstraintList[i].YConstraint;
+        auto ids = m_Resources.Constraints[i]->GetNodeIds();
+        auto constraint = m_Resources.Constraints[i]->GetConstraint();
+        for (auto id : ids)
+        {
+            for (int t = 0; t < constraint.size(); ++t)
+            {
+                flag[id * 2 + t] = !constraint[t];   // TODO: magic number 2
+            }
+        }
+//        flag[id * 2] = !m_ConstraintList[i].XConstraint;
+//        flag[id * 2 + 1] = !m_ConstraintList[i].YConstraint;
     }
     std::vector<int> result;
     for (int i = 0; i < K_size; ++i)
@@ -73,104 +131,101 @@ std::vector<int> TrussSolver::GetSimplifiedIndex() {
     return result;
 }
 
-int TrussSolver::GetNumberOfNode() const noexcept {
-    return static_cast<int>(m_NodeList.size());
+int TrussSolver::GetNumberOfNode() const noexcept
+{
+    return static_cast<int>(m_Resources.PlaneNodes.size());
 }
 
-void TrussSolver::GetPlaneNodes(const TrussDocument &doc) {
-    auto& planeNodeArray = doc["PlaneNode"];
-    int len = (int)planeNodeArray.size();
+void TrussSolver::GetPlaneNodes(const TrussDocument& doc)
+{
+    auto& array = doc["PlaneNode"];
+    int len = (int) array.Size();
     for (int i = 0; i < len; ++i)
     {
-        int key = planeNodeArray[i]["key"].get<int>();
-        Numeric x = planeNodeArray[i]["x"].get<Numeric>();
-        Numeric y = planeNodeArray[i]["y"].get<Numeric>();
-        m_NodeList.insert({key, PlaneNode{ .Id = i, .X = x, .Y = y  } });
+        auto node = array[i].Get<PlaneNode>();
+        node.Id = i;
+        m_Resources.PlaneNodes.insert({node.Key, node});
     }
 }
 
-void TrussSolver::GetMaterials(const TrussDocument &doc) {
-    auto& materialArray = doc["Material"];
-    int len = (int)materialArray.size();
+void TrussSolver::GetMaterials(const TrussDocument &doc)
+{
+    auto &array = doc["Material"];
+    int len = (int) array.Size();
     for (int i = 0; i < len; ++i)
     {
-        int key = materialArray[i]["key"].get<int>();
-        auto type = materialArray[i]["type"].get<string>();
-        auto name = materialArray[i]["name"].get<string>();
-        Numeric rho = materialArray[i]["rho"].get<Numeric>();
-        Numeric E = materialArray[i]["E"].get<Numeric>();
-        Numeric pr = materialArray[i]["pr"].get<Numeric>();
-        m_MaterialList.insert({key, Material::Elastic
-                {
-                        .Id = i,
-                        .Density = rho,
-                        .YoungsModules = E,
-                        .PoissonRation = pr
-                } });
+        auto type = array[i]["type"].Get<string>();
+//        auto obj = GetReflection()
+//                .Invoke<shared_ptr<Material::MaterialBase>, const TrussDocument&>(type, array[i]);
+        auto obj = array[i].Get<Material::Elastic>();
+        obj.Id = i;
+        m_Resources.Materials.insert({ obj.Key, obj });
     }
 }
 
-void TrussSolver::GetElements(const TrussDocument &doc) {
-    auto& elementArray = doc["Element"];
-    int len = (int)elementArray.size();
+void TrussSolver::GetElements(const TrussDocument &doc)
+{
+    auto &array = doc["Element"];
+    int len = (int) array.Size();
     for (int i = 0; i < len; ++i)
     {
-        int key = elementArray[i]["key"].get<int>();
-        auto type = elementArray[i]["type"].get<string>();
-        // auto name = elementArray[i]["name"].get<string>();
-        int node1_key = elementArray[i]["node1_key"].get<int>();
-        int node2_key = elementArray[i]["node2_key"].get<int>();
-        int mat_key = elementArray[i]["mat_key"].get<int>();
-        Numeric area = elementArray[i]["area"].get<Numeric>();
-        m_ElementList.insert({ key, Element::Bar
-                {
-                        .Id = i,
-                        .Area = area,
-                        .Mat = &m_MaterialList[mat_key],
-                        .LeftNode = &m_NodeList[node1_key],
-                        .RightNode = &m_NodeList[node2_key]
-                } });
+        auto type = array[i]["type"].Get<string>();
+        auto obj = GetReflection()
+        .Invoke<shared_ptr<Element::ElementBase>, const TrussDocument&>(type, array[i]);
+        obj->Id = i;
+        m_Resources.Elements.insert({ obj->Key, obj });
     }
 }
 
-void TrussSolver::GetConstrains(const TrussDocument &doc) {
-    auto& constraintArray = doc["Constraint"];
-    int len = (int)constraintArray.size();
+void TrussSolver::GetConstrains(const TrussDocument &doc)
+{
+    auto &array = doc["Constraint"];
+    int len = (int) array.Size();
     for (int i = 0; i < len; ++i)
     {
-        int key = constraintArray[i]["key"].get<int>();
-        auto type = constraintArray[i]["type"].get<string>();
-        // auto name = constraintArray[i]["name"].get<string>();
-        int node_key = constraintArray[i]["node_key"].get<int>();
-        bool x = constraintArray[i]["x"].get<bool>();
-        bool y = constraintArray[i]["y"].get<bool>();
-        m_ConstraintList.insert({ key, Constraint::PlaneNodeDisplacement
-                {
-                        .Id = i,
-                        .XConstraint = x,
-                        .YConstraint = y,
-                        .PlaneNode = &m_NodeList[node_key]
-                } });
+        auto type = array[i]["type"].Get<string>();
+        auto obj = GetReflection()
+                .Invoke<shared_ptr<Constraint::ConstraintBase>, const TrussDocument&>(type, array[i]);
+        obj->Id = i;
+        m_Resources.Constraints.insert({ obj->Key, obj });
     }
 }
 
-void TrussSolver::GetLoads(const TrussDocument &doc) {
-    auto& loadArray = doc["Load"];
-    int len = (int)loadArray.size();
+void TrussSolver::GetLoads(const TrussDocument &doc)
+{
+    auto &array = doc["Load"];
+    int len = (int) array.Size();
     for (int i = 0; i < len; ++i)
     {
-        int key = loadArray[i]["key"].get<int>();
-        auto type = loadArray[i]["type"].get<string>();
-        // auto name = loadArray[i]["name"].get<string>();
-        int node_key = loadArray[i]["node_key"].get<int>();
-        Numeric xForce = loadArray[i]["XForce"].get<Numeric>();
-        Numeric yForce = loadArray[i]["YForce"].get<Numeric>();
-        m_LoadList.insert({ key, Load::PlaneNodeForce
-                {
-                        .Id = i,
-                        .XForce = xForce,
-                        .YForce = yForce,
-                        .PlaneNode = &m_NodeList[node_key]
-                } });
+        auto type = array[i]["type"].Get<string>();
+        auto obj = GetReflection()
+                .Invoke<shared_ptr<Load::LoadBase>, const TrussDocument&>(type, array[i]);
+        obj->Id = i;
+        m_Resources.Loads.insert({ obj->Key, obj });
     }
+}
+
+void TrussSolver::GetSections(const TrussDocument& doc)
+{
+    auto &array = doc["Section"];
+    int len = (int) array.Size();
+    for (int i = 0; i < len; ++i)
+    {
+        auto type = array[i]["type"].Get<string>();
+//        auto obj = GetReflection()
+//                .Invoke<shared_ptr<Section::SectionBase>, const TrussDocument&>(type, array[i]);
+        auto obj = array[i].Get<Section::Section_PlaneBar>();
+        obj.Id = i;
+        m_Resources.Sections.insert({ obj.Key, obj });
+    }
+}
+
+
+void TrussSolver::BuildAllComponents()
+{
+    // order is important!!
+    for(auto&& [_, entity] : m_Resources.Sections) entity.Build(m_Resources);
+    for(auto&& [_, entity] : m_Resources.Elements) entity->Build(m_Resources);
+    for(auto&& [_, entity] : m_Resources.Constraints) entity->Build(m_Resources);
+    for(auto&& [_, entity] : m_Resources.Loads) entity->Build(m_Resources);
 }
