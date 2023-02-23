@@ -8,7 +8,7 @@
 # 0        1
 #############################
 # 平面点
-PlaneNode:
+Node:
 [
     { key:0, x:0.000, y:0.000 }
     { key:1, x:1.000, y:0.000 }
@@ -23,24 +23,24 @@ Material:
 # Section
 Section:
 [
-    { key:0, type:"Section_PlaneBar", mat_key:0, area:3.1415926E-4 }
+    { key:0, type:"Section_Bar", mat_key:0, area:3.1415926E-4 }
 ]
 # 单元
 Element:
 [
-    { key:0, type:"PlaneBar", node1_key:0, node2_key:1, section_key:0 }
-    { key:1, type:"PlaneBar", node1_key:1, node2_key:2, section_key:0 }
-    { key:2, type:"PlaneBar", node1_key:2, node2_key:0, section_key:0 }
+    { key:0, type:"Bar", node1_key:0, node2_key:1, section_key:0 }
+    { key:1, type:"Bar", node1_key:1, node2_key:2, section_key:0 }
+    { key:2, type:"Bar", node1_key:2, node2_key:0, section_key:0 }
 ]
 # 约束
 Constraint:
 [
-    { key:0, type:"PlaneNodeDisplacement", node_key:0, x:true, y:true }
-    { key:1, type:"PlaneNodeDisplacement", node_key:1, x:false, y:true }
+    { key:0, type:"NodeDisplacement", node_key:0, x:true, y:true, z:true }
+    { key:1, type:"NodeDisplacement", node_key:1, x:false, y:true, z:true }
 ]
 # 荷载
 Load:
 [
     # 作用于2节点，Y方向的荷载为：-30kN
-    { key:0, type:"PlaneNodeForce", node_key:2, XForce:0.000, YForce:-30E3 }
+    { key:0, type:"NodeForce", node_key:2, XForce:0.000, YForce:-30E3 }
 ]

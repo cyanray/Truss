@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Truss/Common/IComponent.hpp"
+#include "Truss/Common/DegreeOfFreedom.hpp"
 #include <bit>
 
 namespace Truss::Element

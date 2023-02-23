@@ -12,6 +12,8 @@ using namespace Truss;
 
 namespace
 {
+    static TrussDocument EmptyTrussDocument;
+
     template <typename T>
     std::basic_string<T> lowercase(std::basic_string_view<T> s)
     {
@@ -337,7 +339,9 @@ TrussDocument &TrussDocument::At(int index)
 
 TrussDocument &TrussDocument::At(std::string_view key)
 {
-    return m_object.at(lowercase(key));
+    auto lkey = lowercase(key);
+    auto it = m_object.find(lkey);
+    return (it != m_object.end() ? it->second : EmptyTrussDocument);
 }
 
 TrussDocument &TrussDocument::operator[](int index)

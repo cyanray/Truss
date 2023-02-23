@@ -6,7 +6,7 @@
 
 namespace Truss::Section
 {
-    struct Section_PlaneBar : public SectionBase
+    struct Section_Bar : public SectionBase
     {
         Numeric Area{};
         ID MaterialKey{INVALID_ID};

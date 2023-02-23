@@ -20,14 +20,15 @@ find_package(Eigen3 CONFIG REQUIRED)
 
 add_library(${PROJECT_NAME} ${LIBRARY_TYPE}
             src/Solver.cpp
-            src/PlaneBar.cpp
+            src/Bar.cpp
             src/Serializers.cpp
             src/SimpleReflection.cpp
             src/MaterialBase.cpp
             src/ConstraintBase.cpp
             src/LoadBase.cpp
             src/SectionBase.cpp
-            src/ElementBase.cpp src/Section_PlaneBar.cpp)
+            src/ElementBase.cpp 
+            src/Section_Bar.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

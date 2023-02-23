@@ -2,7 +2,7 @@
 
 #include <map>
 #include <memory>
-#include "PlaneNode.hpp"
+#include "Node.hpp"
 #include "Node.hpp"
 #include "Truss/Material/Elastic.hpp"
 #include "Truss/Element/ElementBase.hpp"
@@ -15,7 +15,6 @@ namespace Truss
     class Resources
     {
     public:
-        std::map<ID, PlaneNode> PlaneNodes;
         std::map<ID, Node> Nodes;
         std::map<ID, Material::Elastic> Materials;
         std::map<ID, std::shared_ptr<Element::ElementBase>> Elements;

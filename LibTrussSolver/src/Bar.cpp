@@ -1,14 +1,13 @@
-#include "Truss/Element/PlaneBar.hpp"
+#include "Truss/Element/Bar.hpp"
 #include "Truss/Common/Resources.hpp"
 using namespace Truss;
 
-Numeric Element::PlaneBar::GetBarLength() const
+Numeric Element::Bar::GetBarLength() const
 {
     return static_cast<Numeric>(sqrt(pow(RightNode->X - LeftNode->X, 2) + pow(RightNode->Y - LeftNode->Y, 2)));
 }
 
-
-MatrixX<Numeric> Element::PlaneBar::GetStiffnessLocal() const
+MatrixX<Numeric> Element::Bar::GetStiffnessLocal() const
 {
     auto E = Section->Mat->YoungsModules;
     Numeric bar_length = GetBarLength();
@@ -23,14 +22,14 @@ MatrixX<Numeric> Element::PlaneBar::GetStiffnessLocal() const
     return (E * A / bar_length) * result;
 }
 
-void Element::PlaneBar::Build(Resources& resources)
+void Element::Bar::Build(Resources& resources)
 {
-    this->LeftNode = &resources.PlaneNodes.at(LeftNodeKey);
-    this->RightNode = &resources.PlaneNodes.at(RightNodeKey);
-    this->Section = std::static_pointer_cast<Section::Section_PlaneBar>(resources.Sections.at(SectionKey)).get();
+    this->LeftNode = &resources.Nodes.at(LeftNodeKey);
+    this->RightNode = &resources.Nodes.at(RightNodeKey);
+    this->Section = std::static_pointer_cast<Section::Section_Bar>(resources.Sections.at(SectionKey)).get();
 }
 
-MatrixX<Numeric> Element::PlaneBar::GetStiffnessGlobal() const
+MatrixX<Numeric> Element::Bar::GetStiffnessGlobal() const
 {
     Vector3<Numeric> x_asix{ LeftNode->X - RightNode->X, LeftNode->Y - RightNode->Y, 0 };
     auto lambda_matrix = GetTransformationMatrix<Numeric>(x_asix);
@@ -38,7 +37,7 @@ MatrixX<Numeric> Element::PlaneBar::GetStiffnessGlobal() const
     return trans_matrix.transpose() * GetStiffnessLocal() * trans_matrix;   // 12x12 Matrix
 }
 
-std::vector<ID> Element::PlaneBar::GetNodeIds() const
+std::vector<ID> Element::Bar::GetNodeIds() const
 {
     return { this->LeftNode->Id, this->RightNode->Id };
 }

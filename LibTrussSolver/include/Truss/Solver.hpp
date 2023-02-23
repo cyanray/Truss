@@ -5,11 +5,11 @@
 #include <vector>
 #include <Eigen/Dense>
 #include "Truss/Common/Constants.hpp"
-#include "Truss/Common/PlaneNode.hpp"
+#include "Truss/Common/Node.hpp"
 #include "Truss/Material/Elastic.hpp"
-#include "Truss/Element/PlaneBar.hpp"
-#include "Truss/Constraint/PlaneNodeDisplacement.hpp"
-#include "Truss/Load/PlaneNodeForce.hpp"
+#include "Truss/Element/Bar.hpp"
+#include "Truss/Constraint/NodeDisplacement.hpp"
+#include "Truss/Load/NodeForce.hpp"
 #include "TrussDocument/TrussDocument.hpp"
 #include "Truss/Common/Resources.hpp"
 
@@ -38,7 +38,7 @@ namespace Truss
 
         [[nodiscard]] int GetNumberOfNode() const noexcept;
 
-        void GetPlaneNodes(const TrussDocument& doc);
+        void GetNodes(const TrussDocument& doc);
 
         void GetMaterials(const TrussDocument& doc);
 

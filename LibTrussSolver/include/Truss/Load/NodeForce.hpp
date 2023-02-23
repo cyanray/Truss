@@ -14,6 +14,9 @@ namespace Truss::Load
         Numeric XForce{};
         Numeric YForce{};
         Numeric ZForce{};
+        Numeric XMoment{};
+        Numeric YMoment{};
+        Numeric ZMoment{};
         ID NodeKey{INVALID_ID};
         Node* Node{};
 
@@ -27,9 +30,9 @@ namespace Truss::Load
             return { Node->Id };
         }
 
-        [[nodiscard]] Eigen::Vector<Numeric, MAX_DOF> GetLoad() const override
+        [[nodiscard]] Eigen::Vector<Numeric,6> GetLoad() const override
         {
-            return { XForce, YForce, ZForce };
+            return { XForce, YForce, ZForce, XMoment, YMoment, ZMoment };
         }
     };
 }

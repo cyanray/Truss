@@ -41,38 +41,25 @@ namespace Truss
     template<typename T>
     using Matrix12x12 = Eigen::Matrix<T, 12, 12>;
 
-	template<typename T, int NodeNumber>
-	Eigen::Matrix<T, NodeNumber * 2, NodeNumber * 2> GetCoordinateTransformationMatrix(T angle_rad)
+	template<typename T>
+	Matrix4x4<T> GetCoordinateTransformationMatrix(T angle_rad)
 	{
-		Matrix6x6<T> result
+		Matrix4x4<T> result
 		{
 			{  cos(angle_rad), sin(angle_rad), 0, 0 },
 			{ -sin(angle_rad), cos(angle_rad), 0, 0 },
 			{ 0, 0,  cos(angle_rad), sin(angle_rad) },
 			{ 0, 0, -sin(angle_rad), cos(angle_rad) }
 		};
-		return Eigen::Matrix<T, NodeNumber * 2, NodeNumber * 2>::Zero();
+		return result;
 	}
 
-    template<typename T>
-    Matrix3x3<T> GetTransformationMatrix(const Vector3<T>& XAsix)
-    {
-        Matrix3x3<T> result = Matrix3x3<T>::Zero();
-        result.row(0) = XAsix.normalized();
-        return result;
-    }
 
     template<typename T>
-    Matrix3x3<T> GetTransformationMatrix(const Vector3<T>& XAsix, const Vector3<T>& YAsix)
-    {
-        Matrix3x3<T> result = Matrix3x3<T>::Zero();
-        result.row(0) = XAsix.normalized();
-        result.row(1) = YAsix.normalized();
-        return result;
-    }
-
-    template<typename T>
-    Matrix3x3<T> GetTransformationMatrix(const Vector3<T>& XAsix, const Vector3<T>& YAsix, const Vector3<T>& ZAsix)
+    Matrix3x3<T> GetTransformationMatrix(
+        const Vector3<T>& XAsix, 
+        const Vector3<T>& YAsix = {}, 
+        const Vector3<T>& ZAsix = {})
     {
         Matrix3x3<T> result = Matrix3x3<T>::Zero();
         result.row(0) = XAsix.normalized();
@@ -91,33 +78,6 @@ namespace Truss
         }
 
         return result;
-    }
-
-    enum class DegreeOfFreedom : char
-    {
-        Fixed = 0,
-        X = 1,
-        Y = 2,
-        Z = 4,
-        RX = 8,
-        RY = 16,
-        RZ = 32
-    };
-
-    constexpr DegreeOfFreedom operator|(DegreeOfFreedom lhs, DegreeOfFreedom rhs)
-    {
-        return static_cast<DegreeOfFreedom>(static_cast<char>(lhs) | static_cast<char>(rhs));
-    }
-
-    constexpr DegreeOfFreedom operator|=(DegreeOfFreedom& lhs, DegreeOfFreedom rhs)
-    {
-        lhs = (lhs | rhs);
-        return lhs;
-    }
-
-    constexpr DegreeOfFreedom operator&(DegreeOfFreedom lhs, DegreeOfFreedom rhs)
-    {
-        return static_cast<DegreeOfFreedom>(static_cast<char>(lhs) & static_cast<char>(rhs));
     }
 
     class Resources;

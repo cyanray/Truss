@@ -2,6 +2,7 @@
 #include "Truss/Serializer/Serializers.hpp"
 #include "Truss/Utils/SimpleReflection.hpp"
 #include "Truss/Material/MaterialBase.hpp"
+#include "Truss/Common/DegreeOfFreedom.hpp"
 
 using namespace Truss;
 using namespace std;
@@ -22,19 +23,18 @@ namespace
         if (refl.IsEmpty()) [[unlikely]]
         {
             refl.Register("Elastic", Creator<Material::MaterialBase, Material::Elastic>);
-            refl.Register("PlaneNodeDisplacement", Creator<Constraint::ConstraintBase, Constraint::PlaneNodeDisplacement>);
-            refl.Register("PlaneBar", Creator<Element::ElementBase, Element::PlaneBar>);
-            refl.Register("PlaneNodeForce", Creator<Load::LoadBase, Load::PlaneNodeForce>);
-            refl.Register("Section_PlaneBar", Creator<Section::SectionBase, Section::Section_PlaneBar>);
+            refl.Register("NodeDisplacement", Creator<Constraint::ConstraintBase, Constraint::NodeDisplacement>);
+            refl.Register("Bar", Creator<Element::ElementBase, Element::Bar>);
+            refl.Register("NodeForce", Creator<Load::LoadBase, Load::NodeForce>);
+            refl.Register("Section_Bar", Creator<Section::SectionBase, Section::Section_Bar>);
         }
         return refl;
     }
 }
 
-
 void TrussSolver::LoadTrussDocument(const TrussDocument &doc)
 {
-    GetPlaneNodes(doc);
+    GetNodes(doc);
     GetMaterials(doc);
     GetSections(doc);
     GetElements(doc);
@@ -103,8 +103,10 @@ int TrussSolver::GetKSize() const noexcept
 
 std::vector<int> TrussSolver::GetSimplifiedIndex()
 {
+    // 初始化：所有节点都拥有 6 个自由度
     int K_size = GetKSize();
     std::vector<bool> flag(K_size, true);
+    // 根据 Constraint 限制自由度
     for (int i = 0; i < m_Resources.Constraints.size(); ++i)
     {
         auto ids = m_Resources.Constraints[i]->GetNodeIds();
@@ -117,7 +119,7 @@ std::vector<int> TrussSolver::GetSimplifiedIndex()
             }
         }
     }
-
+    // 根据 Element 获取各个节点的自由度
     vector<DegreeOfFreedom> Dof(GetNumberOfNode());
     for (int i = 0; i < m_Resources.Elements.size(); i++)
     {
@@ -128,17 +130,17 @@ std::vector<int> TrussSolver::GetSimplifiedIndex()
             Dof[id] |= element->GetNodeDegreeOfFreedom();
         }
     }
-
+    // 限制不存在的自由度
     for (int i = 0; i < Dof.size(); ++i)
     {
-        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::X))  flag[i * MAX_DOF + 0] = false;
-        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::Y))  flag[i * MAX_DOF + 1] = false;
-        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::Z))  flag[i * MAX_DOF + 2] = false;
-        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::RX)) flag[i * MAX_DOF + 3] = false;
-        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::RY)) flag[i * MAX_DOF + 4] = false;
-        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::RZ)) flag[i * MAX_DOF + 5] = false;
+        flag[i * MAX_DOF + 0] = flag[i * MAX_DOF + 0] && static_cast<bool>(Dof[i] & DegreeOfFreedom::X);
+        flag[i * MAX_DOF + 1] = flag[i * MAX_DOF + 1] && static_cast<bool>(Dof[i] & DegreeOfFreedom::Y);
+        flag[i * MAX_DOF + 2] = flag[i * MAX_DOF + 2] && static_cast<bool>(Dof[i] & DegreeOfFreedom::Z);
+        flag[i * MAX_DOF + 3] = flag[i * MAX_DOF + 3] && static_cast<bool>(Dof[i] & DegreeOfFreedom::RX);
+        flag[i * MAX_DOF + 4] = flag[i * MAX_DOF + 4] && static_cast<bool>(Dof[i] & DegreeOfFreedom::RY);
+        flag[i * MAX_DOF + 5] = flag[i * MAX_DOF + 5] && static_cast<bool>(Dof[i] & DegreeOfFreedom::RZ);
     }
-
+    // 转换为 index
     std::vector<int> result;
     for (int i = 0; i < K_size; ++i)
     {
@@ -149,18 +151,18 @@ std::vector<int> TrussSolver::GetSimplifiedIndex()
 
 int TrussSolver::GetNumberOfNode() const noexcept
 {
-    return static_cast<int>(m_Resources.PlaneNodes.size());
+    return static_cast<int>(m_Resources.Nodes.size());
 }
 
-void TrussSolver::GetPlaneNodes(const TrussDocument& doc)
+void TrussSolver::GetNodes(const TrussDocument& doc)
 {
-    auto& array = doc["PlaneNode"];
+    auto& array = doc["Node"];
     int len = (int) array.Size();
     for (int i = 0; i < len; ++i)
     {
-        auto node = array[i].Get<PlaneNode>();
+        auto node = array[i].Get<Node>();
         node.Id = i;
-        m_Resources.PlaneNodes.insert({node.Key, node});
+        m_Resources.Nodes.insert({node.Key, node});
     }
 }
 
@@ -234,7 +236,6 @@ void TrussSolver::GetSections(const TrussDocument& doc)
         m_Resources.Sections.insert({ obj->Key, obj });
     }
 }
-
 
 void TrussSolver::BuildAllComponents()
 {
