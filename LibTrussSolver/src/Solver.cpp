@@ -46,22 +46,15 @@ void TrussSolver::LoadTrussDocument(const TrussDocument &doc)
 VectorX<Numeric> TrussSolver::GetF()
 {
     int K_size = GetKSize();
-    VectorX<Numeric> F(K_size);
-    F.setZero();
+    VectorX<Numeric> F = VectorX<Numeric>::Zero(K_size);
     for (int i = 0; i < m_Resources.Loads.size(); ++i)
     {
         auto ids = m_Resources.Loads[i]->GetNodeIds();
-        auto load = m_Resources.Loads [i]->GetLoad();
+        auto load = m_Resources.Loads[i]->GetLoad();
         for (auto id : ids)
         {
-            for (int t = 0; t < load.size(); ++t)
-            {
-                F[id * 2 + t] = load[t];   // TODO: magic number 2
-            }
+            F.block<6,1>(id * MAX_DOF, 0) += load;
         }
-//        int id = m_LoadList[i].PlaneNode->Id;
-//        F(id * 2) = m_LoadList[i].XForce;
-//        F(id * 2 + 1) = m_LoadList[i].YForce;
     }
     return F;
 }
@@ -77,18 +70,21 @@ MatrixX<Numeric> TrussSolver::GetK()
 {
     int element_number = (int) m_Resources.Elements.size();
     int K_size = GetKSize();
-    MatrixX<Numeric> K(K_size, K_size);
-    K.setZero();
-    for (int i = 0; i < element_number; i++)
+    MatrixX<Numeric> K = MatrixX<Numeric>::Zero(K_size, K_size);
+    for (int i = 0; i < element_number; ++i)
     {
         auto ids = m_Resources.Elements[i]->GetNodeIds();
-        int p = 2 * ids[0]; // TODO: correct
-        int q = 2 * ids[1];
         auto ke = m_Resources.Elements[i]->GetStiffnessGlobal();
-        K.block(p, p, 2, 2) += ke.block(0, 0, 2, 2);
-        K.block(p, q, 2, 2) += ke.block(0, 2, 2, 2);
-        K.block(q, p, 2, 2) += ke.block(2, 0, 2, 2);
-        K.block(q, q, 2, 2) += ke.block(2, 2, 2, 2);
+        VectorX<Numeric> index = VectorX<Numeric>::Zero(ids.size() * MAX_DOF);
+        int m = 0;
+        for (int id : ids)
+        {
+            for (size_t t = 0; t < MAX_DOF; ++t)
+            {
+                index(m++) = id * MAX_DOF + t;
+            }
+        }
+        K(index, index) += ke;
     }
     return K;
 }
@@ -102,7 +98,7 @@ MatrixX<Numeric> TrussSolver::GetSimplifiedK()
 
 int TrussSolver::GetKSize() const noexcept
 {
-    return GetNumberOfNode() * 2;
+    return GetNumberOfNode() * MAX_DOF;
 }
 
 std::vector<int> TrussSolver::GetSimplifiedIndex()
@@ -117,12 +113,32 @@ std::vector<int> TrussSolver::GetSimplifiedIndex()
         {
             for (int t = 0; t < constraint.size(); ++t)
             {
-                flag[id * 2 + t] = !constraint[t];   // TODO: magic number 2
+                flag[id * MAX_DOF + t] = !constraint[t];
             }
         }
-//        flag[id * 2] = !m_ConstraintList[i].XConstraint;
-//        flag[id * 2 + 1] = !m_ConstraintList[i].YConstraint;
     }
+
+    vector<DegreeOfFreedom> Dof(GetNumberOfNode());
+    for (int i = 0; i < m_Resources.Elements.size(); i++)
+    {
+        auto element = m_Resources.Elements[i];
+        auto ids = element->GetNodeIds();
+        for (int id : ids)
+        {
+            Dof[id] |= element->GetNodeDegreeOfFreedom();
+        }
+    }
+
+    for (int i = 0; i < Dof.size(); ++i)
+    {
+        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::X))  flag[i * MAX_DOF + 0] = false;
+        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::Y))  flag[i * MAX_DOF + 1] = false;
+        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::Z))  flag[i * MAX_DOF + 2] = false;
+        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::RX)) flag[i * MAX_DOF + 3] = false;
+        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::RY)) flag[i * MAX_DOF + 4] = false;
+        if (!static_cast<bool>(Dof[i] & DegreeOfFreedom::RZ)) flag[i * MAX_DOF + 5] = false;
+    }
+
     std::vector<int> result;
     for (int i = 0; i < K_size; ++i)
     {
@@ -212,11 +228,10 @@ void TrussSolver::GetSections(const TrussDocument& doc)
     for (int i = 0; i < len; ++i)
     {
         auto type = array[i]["type"].Get<string>();
-//        auto obj = GetReflection()
-//                .Invoke<shared_ptr<Section::SectionBase>, const TrussDocument&>(type, array[i]);
-        auto obj = array[i].Get<Section::Section_PlaneBar>();
-        obj.Id = i;
-        m_Resources.Sections.insert({ obj.Key, obj });
+        auto obj = GetReflection()
+                 .Invoke<shared_ptr<Section::SectionBase>, const TrussDocument&>(type, array[i]);
+        obj->Id = i;
+        m_Resources.Sections.insert({ obj->Key, obj });
     }
 }
 
@@ -224,7 +239,7 @@ void TrussSolver::GetSections(const TrussDocument& doc)
 void TrussSolver::BuildAllComponents()
 {
     // order is important!!
-    for(auto&& [_, entity] : m_Resources.Sections) entity.Build(m_Resources);
+    for(auto&& [_, entity] : m_Resources.Sections) entity->Build(m_Resources);
     for(auto&& [_, entity] : m_Resources.Elements) entity->Build(m_Resources);
     for(auto&& [_, entity] : m_Resources.Constraints) entity->Build(m_Resources);
     for(auto&& [_, entity] : m_Resources.Loads) entity->Build(m_Resources);

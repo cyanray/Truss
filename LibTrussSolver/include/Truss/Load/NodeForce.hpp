@@ -1,34 +1,35 @@
 #pragma once
 
 #include "Truss/Common/Constants.hpp"
-#include "Truss/Common/PlaneNode.hpp"
+#include "Truss/Common/Node.hpp"
 #include "Truss/Common/Resources.hpp"
 #include "LoadBase.hpp"
 
 
 namespace Truss::Load
 {
-    class PlaneNodeForce : public LoadBase
+    class NodeForce : public LoadBase
     {
     public:
         Numeric XForce{};
         Numeric YForce{};
-        ID PlaneNodeKey{INVALID_ID};
-        PlaneNode* PlaneNode{};
+        Numeric ZForce{};
+        ID NodeKey{INVALID_ID};
+        Node* Node{};
 
         void Build(Resources& resources) override
         {
-            PlaneNode =  &resources.PlaneNodes.at(PlaneNodeKey);
+            Node =  &resources.Nodes.at(NodeKey);
         }
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override
         {
-            return { PlaneNode->Id };
+            return { Node->Id };
         }
 
-        [[nodiscard]] Eigen::Vector<Numeric,6> GetLoad() const override
+        [[nodiscard]] Eigen::Vector<Numeric, MAX_DOF> GetLoad() const override
         {
-            return { XForce, YForce, 0, 0, 0, 0 };
+            return { XForce, YForce, ZForce };
         }
     };
 }

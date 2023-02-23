@@ -31,6 +31,8 @@ int main(int argc, char* argv[])
     TrussSolver solver;
     TrussDocument doc = TrussDocument::Parse(input);
     solver.LoadTrussDocument(doc);
+    auto K_raw = solver.GetK();
+    // cout << K_raw << endl;
     auto K = solver.GetSimplifiedK();
     auto F = solver.GetSimplifiedF();
     VectorXf D = K.colPivHouseholderQr().solve(F);

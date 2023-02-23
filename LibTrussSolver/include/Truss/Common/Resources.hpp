@@ -3,11 +3,12 @@
 #include <map>
 #include <memory>
 #include "PlaneNode.hpp"
+#include "Node.hpp"
 #include "Truss/Material/Elastic.hpp"
-#include "Truss/Section/Section_PlaneBar.hpp"
 #include "Truss/Element/ElementBase.hpp"
 #include "Truss/Load/LoadBase.hpp"
 #include "Truss/Constraint/ConstraintBase.hpp"
+#include "Truss/Section/SectionBase.hpp"
 
 namespace Truss
 {
@@ -15,10 +16,11 @@ namespace Truss
     {
     public:
         std::map<ID, PlaneNode> PlaneNodes;
+        std::map<ID, Node> Nodes;
         std::map<ID, Material::Elastic> Materials;
         std::map<ID, std::shared_ptr<Element::ElementBase>> Elements;
         std::map<ID, std::shared_ptr<Load::LoadBase>> Loads;
         std::map<ID, std::shared_ptr<Constraint::ConstraintBase>> Constraints;
-        std::map<ID, Section::Section_PlaneBar> Sections;
+        std::map<ID, std::shared_ptr<Section::SectionBase>> Sections;
     };
 }

@@ -18,19 +18,40 @@ namespace Truss::Element
         PlaneNode* RightNode{};
         Section::Section_PlaneBar* Section{};
 
+        [[nodiscard]] constexpr virtual int GetNodeCount() const noexcept override
+        {
+            return 2;
+        }
+
+        [[nodiscard]] constexpr virtual int GetElementDofCount() const noexcept override
+        {
+            return 4;
+        }
+
+        [[nodiscard]] constexpr virtual int GetNodeDofCount() const noexcept override
+        {
+            return 2;
+        }
+
+        [[nodiscard]] constexpr virtual DegreeOfFreedom GetNodeDegreeOfFreedom() const noexcept override
+        {
+            return DegreeOfFreedom::X | DegreeOfFreedom::Y;
+        }
+
+        [[nodiscard]] constexpr virtual int GetStiffnessSize() const noexcept override
+        {
+            return 6;
+        }
+
         [[nodiscard]] Numeric GetBarLength() const;
 
-        [[nodiscard]] constexpr int GetStiffnessSize() const noexcept;
-
-        [[nodiscard]] Matrix4x4<Numeric> GetStiffnessLocal() const;
-
-        [[nodiscard]] Matrix4x4<Numeric> _GetStiffnessGlobal() const;
+        [[nodiscard]] MatrixX<Numeric> GetStiffnessLocal() const;
 
         void Build(Resources& resources) override;
 
         [[nodiscard]] MatrixX<Numeric> GetStiffnessGlobal() const override;
 
-        std::vector<ID> GetNodeIds() const override;
+        [[nodiscard]] std::vector<ID> GetNodeIds() const override;
 
     };
 }

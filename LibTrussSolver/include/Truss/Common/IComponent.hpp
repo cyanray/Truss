@@ -11,6 +11,7 @@ namespace Truss
     public:
         ID Key{INVALID_ID};
         ID Id{INVALID_ID};
+        virtual ~IComponent() = default;
     };
 
 }

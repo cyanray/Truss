@@ -2,7 +2,7 @@
 
 #include "Truss/Common/Constants.hpp"
 #include "Truss/Common/IComponent.hpp"
-#include <vector>
+#include <Eigen/Dense>
 namespace Truss::Load
 {
 
@@ -11,7 +11,7 @@ namespace Truss::Load
     public:
         virtual void Build(Resources&) = 0;
         [[nodiscard]] virtual std::vector<ID> GetNodeIds() const = 0;
-        [[nodiscard]] virtual std::vector<Numeric> GetLoad() const = 0;
+        [[nodiscard]] virtual Eigen::Vector<Numeric, MAX_DOF> GetLoad() const = 0;
     };
 
 }
