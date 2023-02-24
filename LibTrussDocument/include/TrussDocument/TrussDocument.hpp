@@ -121,8 +121,8 @@ namespace Truss
             return get_detail<T, ValueContainer>::Get(*this);
         }
 
-        template<>
-        [[nodiscard]] float Get<float>() const
+        template<typename T> requires std::same_as<T, float>
+        [[nodiscard]] float Get() const
         {
             if (GetValueType() == ValueType::Double) [[unlikely]]
             {
@@ -131,8 +131,8 @@ namespace Truss
             return std::get<float>(m_value);
         }
 
-        template<>
-        [[nodiscard]] double Get<double>() const
+        template<typename T> requires std::same_as<T, double>
+        [[nodiscard]] double Get() const
         {
             if (GetValueType() == ValueType::Float) [[unlikely]]
             {

@@ -18,7 +18,7 @@ namespace Truss
 
     constexpr float PI_f = static_cast<float>(PI_d);
 
-    constexpr int MAX_DOF = 6;
+    constexpr int ALL_DOF = 6;
 
 	template<typename T>
 	using MatrixX = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
@@ -32,27 +32,11 @@ namespace Truss
     template<typename T>
     using Matrix3x3 = Eigen::Matrix<T, 3, 3>;
 
-	template<typename T>
-	using Matrix4x4 = Eigen::Matrix<T, 4, 4>;
-
     template<typename T>
     using Matrix6x6 = Eigen::Matrix<T, 6, 6>;
 
     template<typename T>
     using Matrix12x12 = Eigen::Matrix<T, 12, 12>;
-
-	template<typename T>
-	Matrix4x4<T> GetCoordinateTransformationMatrix(T angle_rad)
-	{
-		Matrix4x4<T> result
-		{
-			{  cos(angle_rad), sin(angle_rad), 0, 0 },
-			{ -sin(angle_rad), cos(angle_rad), 0, 0 },
-			{ 0, 0,  cos(angle_rad), sin(angle_rad) },
-			{ 0, 0, -sin(angle_rad), cos(angle_rad) }
-		};
-		return result;
-	}
 
 
     template<typename T>

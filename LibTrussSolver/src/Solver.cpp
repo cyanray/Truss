@@ -4,6 +4,8 @@
 #include "Truss/Material/MaterialBase.hpp"
 #include "Truss/Common/DegreeOfFreedom.hpp"
 
+#include <vector>
+
 using namespace Truss;
 using namespace std;
 namespace
@@ -53,7 +55,7 @@ VectorX<Numeric> TrussSolver::GetF()
         auto load = m_Resources.Loads[i]->GetLoad();
         for (auto id : ids)
         {
-            F.block<6,1>(id * MAX_DOF, 0) += load;
+            F.block<6,1>(id * ALL_DOF, 0) += load;
         }
     }
     return F;
@@ -68,21 +70,21 @@ VectorX<Numeric> TrussSolver::GetSimplifiedF()
 
 MatrixX<Numeric> TrussSolver::GetK()
 {
-    int element_number = (int) m_Resources.Elements.size();
+    const static Eigen::Array<int, 6, 1> index_dof{0, 1, 2, 3, 4, 5};
+    int element_count = (int) m_Resources.Elements.size();
     int K_size = GetKSize();
     MatrixX<Numeric> K = MatrixX<Numeric>::Zero(K_size, K_size);
-    for (int i = 0; i < element_number; ++i)
+    for (int i = 0; i < element_count; ++i)
     {
         auto ids = m_Resources.Elements[i]->GetNodeIds();
         auto ke = m_Resources.Elements[i]->GetStiffnessGlobal();
-        VectorX<Numeric> index = VectorX<Numeric>::Zero(ids.size() * MAX_DOF);
-        int m = 0;
+        // Get index of element node in K
+        std::vector<int> index;
+        index.reserve(ids.size() * ALL_DOF);
         for (int id : ids)
         {
-            for (size_t t = 0; t < MAX_DOF; ++t)
-            {
-                index(m++) = id * MAX_DOF + t;
-            }
+            auto tmp = index_dof + id * ALL_DOF;
+            index.insert(index.end(), tmp.begin(), tmp.end());
         }
         K(index, index) += ke;
     }
@@ -98,15 +100,15 @@ MatrixX<Numeric> TrussSolver::GetSimplifiedK()
 
 int TrussSolver::GetKSize() const noexcept
 {
-    return GetNumberOfNode() * MAX_DOF;
+    return GetNumberOfNode() * ALL_DOF;
 }
 
 std::vector<int> TrussSolver::GetSimplifiedIndex()
 {
-    // ³õÊ¼»¯£ºËùÓĞ½Úµã¶¼ÓµÓĞ 6 ¸ö×ÔÓÉ¶È
+    // åˆå§‹åŒ–ï¼šæ‰€æœ‰èŠ‚ç‚¹éƒ½æ‹¥æœ‰ 6 ä¸ªè‡ªç”±åº¦
     int K_size = GetKSize();
     std::vector<bool> flag(K_size, true);
-    // ¸ù¾İ Constraint ÏŞÖÆ×ÔÓÉ¶È
+    // æ ¹æ® Constraint é™åˆ¶è‡ªç”±åº¦
     for (int i = 0; i < m_Resources.Constraints.size(); ++i)
     {
         auto ids = m_Resources.Constraints[i]->GetNodeIds();
@@ -115,11 +117,11 @@ std::vector<int> TrussSolver::GetSimplifiedIndex()
         {
             for (int t = 0; t < constraint.size(); ++t)
             {
-                flag[id * MAX_DOF + t] = !constraint[t];
+                flag[id * ALL_DOF + t] = !constraint[t];
             }
         }
     }
-    // ¸ù¾İ Element »ñÈ¡¸÷¸ö½ÚµãµÄ×ÔÓÉ¶È
+    // æ ¹æ® Element è·å–å„ä¸ªèŠ‚ç‚¹çš„è‡ªç”±åº¦
     vector<DegreeOfFreedom> Dof(GetNumberOfNode());
     for (int i = 0; i < m_Resources.Elements.size(); i++)
     {
@@ -130,17 +132,17 @@ std::vector<int> TrussSolver::GetSimplifiedIndex()
             Dof[id] |= element->GetNodeDegreeOfFreedom();
         }
     }
-    // ÏŞÖÆ²»´æÔÚµÄ×ÔÓÉ¶È
+    // é™åˆ¶ä¸å­˜åœ¨çš„è‡ªç”±åº¦
     for (int i = 0; i < Dof.size(); ++i)
     {
-        flag[i * MAX_DOF + 0] = flag[i * MAX_DOF + 0] && static_cast<bool>(Dof[i] & DegreeOfFreedom::X);
-        flag[i * MAX_DOF + 1] = flag[i * MAX_DOF + 1] && static_cast<bool>(Dof[i] & DegreeOfFreedom::Y);
-        flag[i * MAX_DOF + 2] = flag[i * MAX_DOF + 2] && static_cast<bool>(Dof[i] & DegreeOfFreedom::Z);
-        flag[i * MAX_DOF + 3] = flag[i * MAX_DOF + 3] && static_cast<bool>(Dof[i] & DegreeOfFreedom::RX);
-        flag[i * MAX_DOF + 4] = flag[i * MAX_DOF + 4] && static_cast<bool>(Dof[i] & DegreeOfFreedom::RY);
-        flag[i * MAX_DOF + 5] = flag[i * MAX_DOF + 5] && static_cast<bool>(Dof[i] & DegreeOfFreedom::RZ);
+        flag[i * ALL_DOF + 0] = flag[i * ALL_DOF + 0] && static_cast<bool>(Dof[i] & DegreeOfFreedom::X);
+        flag[i * ALL_DOF + 1] = flag[i * ALL_DOF + 1] && static_cast<bool>(Dof[i] & DegreeOfFreedom::Y);
+        flag[i * ALL_DOF + 2] = flag[i * ALL_DOF + 2] && static_cast<bool>(Dof[i] & DegreeOfFreedom::Z);
+        flag[i * ALL_DOF + 3] = flag[i * ALL_DOF + 3] && static_cast<bool>(Dof[i] & DegreeOfFreedom::RX);
+        flag[i * ALL_DOF + 4] = flag[i * ALL_DOF + 4] && static_cast<bool>(Dof[i] & DegreeOfFreedom::RY);
+        flag[i * ALL_DOF + 5] = flag[i * ALL_DOF + 5] && static_cast<bool>(Dof[i] & DegreeOfFreedom::RZ);
     }
-    // ×ª»»Îª index
+    // è½¬æ¢ä¸º index
     std::vector<int> result;
     for (int i = 0; i < K_size; ++i)
     {
@@ -161,7 +163,7 @@ void TrussSolver::GetNodes(const TrussDocument& doc)
     for (int i = 0; i < len; ++i)
     {
         auto node = array[i].Get<Node>();
-        node.Id = i;
+        node.Id = i;    // TODO: Re-indexing
         m_Resources.Nodes.insert({node.Key, node});
     }
 }

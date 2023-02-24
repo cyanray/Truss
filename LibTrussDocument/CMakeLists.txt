@@ -19,7 +19,8 @@ endif()
 add_library(
         ${PROJECT_NAME}
         ${LIBRARY_TYPE}
-        src/Tokenizer.cpp src/TrussDocument.cpp)
+        include/TrussDocument/Tokenizer.hpp src/Tokenizer.cpp
+        include/TrussDocument/TrussDocument.hpp src/TrussDocument.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

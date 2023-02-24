@@ -361,5 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-cmake-build-debug/
+
+# Custom
 /.idea
+/cmake-build-*

@@ -18,7 +18,7 @@ namespace Truss::Load
         Numeric YMoment{};
         Numeric ZMoment{};
         ID NodeKey{INVALID_ID};
-        Node* Node{};
+        Truss::Node* Node{};
 
         void Build(Resources& resources) override
         {

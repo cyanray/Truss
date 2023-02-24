@@ -1,6 +1,5 @@
 ﻿#include <iostream>
 #include <vector>
-#include <magic_enum.hpp>
 #include <fstream>
 #include <Eigen/Dense>
 #include <Truss/Solver.hpp>

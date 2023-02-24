@@ -18,7 +18,7 @@ namespace
     std::basic_string<T> lowercase(std::basic_string_view<T> s)
     {
         std::basic_string<T> s2(s);
-        std::transform(s2.begin(), s2.end(), s2.begin(), tolower);
+        std::transform(s2.begin(), s2.end(), s2.begin(), ::tolower);
         return s2;
     }
 
@@ -26,7 +26,7 @@ namespace
     std::basic_string<T> uppercase(std::basic_string_view<T> s)
     {
         std::basic_string<T> s2 = s;
-        std::transform(s2.begin(), s2.end(), s2.begin(), toupper);
+        std::transform(s2.begin(), s2.end(), s2.begin(), ::toupper);
         return s2;
     }
 }

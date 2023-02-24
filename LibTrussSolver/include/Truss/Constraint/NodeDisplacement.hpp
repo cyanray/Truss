@@ -13,7 +13,7 @@ namespace Truss::Constraint
         bool YConstraint{false};
         bool ZConstraint{false};
         ID NodeKey{INVALID_ID};
-        Node* Node{};
+        Truss::Node* Node{};
 
         void Build(Resources& resources) override
         {

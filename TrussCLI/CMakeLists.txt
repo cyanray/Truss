@@ -14,7 +14,6 @@ target_include_directories(TrussCLI PRIVATE "include")
 
 # target_compile_definitions(TrussCLI PRIVATE TRUSS_DOUBLE_PRECISION)
 target_link_libraries(TrussCLI PRIVATE LibTrussSolver)
-target_link_libraries(TrussCLI PRIVATE magic_enum::magic_enum)
 
 add_custom_command(
         TARGET TrussCLI POST_BUILD
