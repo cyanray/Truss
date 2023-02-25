@@ -1,22 +1,25 @@
-﻿#include <iostream>
+﻿#include <fstream>
+#include <iostream>
 #include <vector>
-#include <fstream>
+
 #include <Eigen/Dense>
 #include <Truss/Solver.hpp>
+#include <TrussDocument/TrussDocument.hpp>
+
+#ifdef _WIN32
+#include "UTF8CodePage.hpp"
+#endif
 
 using namespace std;
 using namespace Truss;
 using namespace Eigen;
 
 
-#include <TrussDocument/TrussDocument.hpp>
-
 int main(int argc, char* argv[])
 {
 #ifdef _WIN32
-    system("chcp 65001");
+    UTF8CodePage _use_utf8_codepage;
 #endif
-
 
     if (argc < 2)
     {
@@ -27,21 +30,27 @@ int main(int argc, char* argv[])
     ifstream input_file(input_file_path);
     std::string input((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 
-    TrussSolver solver;
-    TrussDocument doc = TrussDocument::Parse(input);
-    solver.LoadTrussDocument(doc);
-    auto K_raw = solver.GetK();
-    // cout << K_raw << endl;
-    auto K = solver.GetSimplifiedK();
-    auto F = solver.GetSimplifiedF();
-    VectorXf D = K.colPivHouseholderQr().solve(F);
 
-    cout << "[K] = " << endl;
-    cout << K << endl;
-    cout << "{F} = " << endl;
-    cout << F << endl;
-    cout << "{D} = " << endl;
-    cout << D << endl;
+    try
+    {
+        TrussDocument doc = TrussDocument::Parse(input);
+        TrussSolver solver;
+        solver.LoadTrussDocument(doc);
+        auto K = solver.GetSimplifiedK();
+        auto F = solver.GetSimplifiedF();
+        VectorXf D = K.colPivHouseholderQr().solve(F);
+
+        cout << "[K] = " << endl;
+        cout << K << endl;
+        cout << "{F} = " << endl;
+        cout << F << endl;
+        cout << "{D} = " << endl;
+        cout << D << endl;
+    }
+    catch (const exception& exception)
+    {
+        cout << "Error: " << exception.what() << endl;
+    }
 
     return 0;
 }

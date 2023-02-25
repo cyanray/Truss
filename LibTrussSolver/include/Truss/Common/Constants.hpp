@@ -42,8 +42,8 @@ namespace Truss
     template<typename T>
     Matrix3x3<T> GetTransformationMatrix(
         const Vector3<T>& XAsix, 
-        const Vector3<T>& YAsix = {}, 
-        const Vector3<T>& ZAsix = {})
+        const Vector3<T>& YAsix = Vector3<T>::Zero(),
+        const Vector3<T>& ZAsix = Vector3<T>::Zero())
     {
         Matrix3x3<T> result = Matrix3x3<T>::Zero();
         result.row(0) = XAsix.normalized();

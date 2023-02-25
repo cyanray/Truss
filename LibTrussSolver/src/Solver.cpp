@@ -163,7 +163,7 @@ void TrussSolver::GetNodes(const TrussDocument& doc)
     for (int i = 0; i < len; ++i)
     {
         auto node = array[i].Get<Node>();
-        node.Id = i;    // TODO: Re-indexing
+        node.Id = i;    // OR: Re-indexing
         m_Resources.Nodes.insert({node.Key, node});
     }
 }

@@ -1,4 +1,5 @@
 #pragma clang diagnostic push
+#pragma ide diagnostic ignored "UnusedParameter"
 #pragma ide diagnostic ignored "misc-no-recursion"
 #include <string>
 #include <algorithm>
@@ -7,13 +8,12 @@
 #include <complex>
 #include "TrussDocument/TrussDocument.hpp"
 #include "TrussDocument/Tokenizer.hpp"
+#include "TrussDocument/ParserErrorException.hpp"
 using namespace std;
 using namespace Truss;
 
 namespace
 {
-    static TrussDocument EmptyTrussDocument;
-
     template <typename T>
     std::basic_string<T> lowercase(std::basic_string_view<T> s)
     {
@@ -111,43 +111,44 @@ public:
         return result;
     }
 
-    static TrussDocument Parse_Complex(const vector<Token>& tokens, int& current_index) // TODO: 重构
+    static TrussDocument Parse_Complex(const vector<Token>& tokens, int& current_index)
     {
-        int index = current_index;
-        if (index + 4 >= tokens.size()) ;// TODO: Error handling
-        if (tokens[index].Type != TokenType::Symbol_Complex_Start) ;// TODO: Error handling
-        if (tokens[index + 1].Type != TokenType::Data_Number) ;// TODO: Error handling
-        string_view number1_str = *tokens[index + 1].Data;
-        auto number1_result = ParseNumberImpl(number1_str);
-        if (tokens[index + 2].Type != TokenType::Symbol_Add && tokens[index + 2].Type != TokenType::Symbol_Minus) ;// TODO: Error handling
-        if (tokens[index + 3].Type != TokenType::Data_Number) ;// TODO: Error handling
-        string_view number2_str = *tokens[index + 3].Data;
-        auto number2_result = ParseNumberImpl(number2_str);
-        if (tokens[index + 4].Type != TokenType::Symbol_Complex_End) ;// TODO: Error handling
-        if (number1_result.flag_double || number2_result.flag_double)
-        {
-            double number1, number2;
-            from_chars_wrapper(number1_str.data(), number1_str.data() + number1_result.index, number1);
-            from_chars_wrapper(number2_str.data(), number2_str.data() + number2_result.index, number2);
-            complex<double> value(number1, number2);
-            TrussDocument result;
-            result.m_type = ValueType::Complex;
-            result.m_value = value;
-            current_index += 5;
-            return result;
-        }
-        else
-        {
-            float number1, number2;
-            from_chars_wrapper(number1_str.data(), number1_str.data() + number1_result.index, number1);
-            from_chars_wrapper(number2_str.data(), number2_str.data() + number2_result.index, number2);
-            complex<float> value(number1, number2);
-            TrussDocument result;
-            result.m_type = ValueType::Complex;
-            result.m_value = value;
-            current_index += 5;
-            return result;
-        }
+        throw std::runtime_error("Not yet implemented");
+//        int index = current_index;
+//        if (index + 4 >= tokens.size()) ;
+//        if (tokens[index].Type != TokenType::Symbol_Complex_Start) ;
+//        if (tokens[index + 1].Type != TokenType::Data_Number) ;
+//        string_view number1_str = *tokens[index + 1].Data;
+//        auto number1_result = ParseNumberImpl(number1_str);
+//        if (tokens[index + 2].Type != TokenType::Symbol_Add && tokens[index + 2].Type != TokenType::Symbol_Minus) ;
+//        if (tokens[index + 3].Type != TokenType::Data_Number) ;
+//        string_view number2_str = *tokens[index + 3].Data;
+//        auto number2_result = ParseNumberImpl(number2_str);
+//        if (tokens[index + 4].Type != TokenType::Symbol_Complex_End) ;
+//        if (number1_result.flag_double || number2_result.flag_double)
+//        {
+//            double number1, number2;
+//            from_chars_wrapper(number1_str.data(), number1_str.data() + number1_result.index, number1);
+//            from_chars_wrapper(number2_str.data(), number2_str.data() + number2_result.index, number2);
+//            complex<double> value(number1, number2);
+//            TrussDocument result;
+//            result.m_type = ValueType::Complex;
+//            result.m_value = value;
+//            current_index += 5;
+//            return result;
+//        }
+//        else
+//        {
+//            float number1, number2;
+//            from_chars_wrapper(number1_str.data(), number1_str.data() + number1_result.index, number1);
+//            from_chars_wrapper(number2_str.data(), number2_str.data() + number2_result.index, number2);
+//            complex<float> value(number1, number2);
+//            TrussDocument result;
+//            result.m_type = ValueType::Complex;
+//            result.m_value = value;
+//            current_index += 5;
+//            return result;
+//        }
     }
 
     static TrussDocument Parse_Object(const vector<Token>& tokens, int& current_index, bool ignore_symbol_start = false)
@@ -181,7 +182,7 @@ public:
             }
         }
         ERROR_HANDLING:
-        // TODO: Error handling
+        throw UnexpectedTokenException(TokenType::Symbol_Object_End);
         END:
         current_index = index + 1;
         return result;
@@ -209,7 +210,7 @@ public:
             }
         }
     ERROR_HANDLING:
-        // TODO: Error handling
+        throw UnexpectedTokenException(TokenType::Symbol_Array_End);
     END:
         current_index = index + 1;
         return result;
@@ -254,7 +255,8 @@ public:
             }
             default:
             {
-                return Parse_Null(tokens, index);    // TODO: error handling
+                // return Parse_Null(tokens, index);
+                throw UnexpectedTokenException();
             }
         }
     }
@@ -263,12 +265,13 @@ private:
 
     static void CheckToken(const vector<Token>& tokens, int& current_index, TokenType type)
     {
-        if (tokens[current_index].Type == type)
+        auto current_token = tokens[current_index].Type;
+        if (current_token == type)
         {
             ++current_index;
             return;
         }
-        // TODO: error handling
+        throw Truss::UnexpectedTokenException(type, current_token);
     }
 
     template<typename T>
@@ -277,7 +280,7 @@ private:
         auto r = std::from_chars(begin, end, value);
         if (r.ec != std::errc{})
         {
-            // TODO: Error handling
+            throw ParseNumberException(std::string_view(begin, end));
         }
     }
 
@@ -339,24 +342,22 @@ TrussDocument &TrussDocument::At(int index)
 
 TrussDocument &TrussDocument::At(std::string_view key)
 {
-    auto lkey = lowercase(key);
-    auto it = m_object.find(lkey);
-    return (it != m_object.end() ? it->second : EmptyTrussDocument);
+    return m_object.at(lowercase(key));
 }
 
 TrussDocument &TrussDocument::operator[](int index)
 {
-    return this->At(index);
+    return m_array[index];
 }
 
 TrussDocument &TrussDocument::operator[](std::string_view key)
 {
-    return this->At(key);
+    return m_object[lowercase(key)];
 }
 
 const TrussDocument &TrussDocument::At(int index) const
 {
-    return const_cast<TrussDocument *>(this)->At(index);
+    return const_cast<TrussDocument *>(this)->operator[](index);
 }
 
 const TrussDocument &TrussDocument::At(std::string_view key) const
@@ -371,7 +372,7 @@ const TrussDocument &TrussDocument::operator[](int index) const
 
 const TrussDocument &TrussDocument::operator[](std::string_view key) const
 {
-    return const_cast<TrussDocument *>(this)->At(key);
+    return const_cast<TrussDocument *>(this)->operator[](key);
 }
 
 bool TrussDocument::IsArray() const noexcept

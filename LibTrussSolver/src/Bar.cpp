@@ -1,10 +1,13 @@
 #include "Truss/Element/Bar.hpp"
 #include "Truss/Common/Resources.hpp"
 using namespace Truss;
+#include <iostream>
 
 Numeric Element::Bar::GetBarLength() const
 {
-    return static_cast<Numeric>(sqrt(pow(RightNode->X - LeftNode->X, 2) + pow(RightNode->Y - LeftNode->Y, 2)));
+    return static_cast<Numeric>(sqrt(pow(RightNode->X - LeftNode->X, 2) +
+                                     pow(RightNode->Y - LeftNode->Y, 2) +
+                                     pow(RightNode->Z - LeftNode->Z, 2)));
 }
 
 MatrixX<Numeric> Element::Bar::GetStiffnessLocal() const
@@ -31,9 +34,10 @@ void Element::Bar::Build(Resources& resources)
 
 MatrixX<Numeric> Element::Bar::GetStiffnessGlobal() const
 {
-    Vector3<Numeric> x_asix{ LeftNode->X - RightNode->X, LeftNode->Y - RightNode->Y, 0 };
+    Vector3<Numeric> x_asix{ RightNode->X - LeftNode->X, RightNode->Y - LeftNode->Y, RightNode->Z - LeftNode->Z };
     auto lambda_matrix = GetTransformationMatrix<Numeric>(x_asix);
     auto trans_matrix = BlockDiagonal<Numeric>(lambda_matrix, 2 * GetNodeCount());
+    std::cout << lambda_matrix <<  std::endl <<  std::endl;
     return trans_matrix.transpose() * GetStiffnessLocal() * trans_matrix;   // 12x12 Matrix
 }
 

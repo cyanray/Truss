@@ -28,6 +28,8 @@ namespace Truss
         Symbol_Minus            // symbol -
 	};
 
+    std::string_view GetTokenTypeName(TokenType type);
+
 	struct Token
 	{
 		TokenType Type;

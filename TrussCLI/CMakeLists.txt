@@ -9,7 +9,7 @@ endif(MSVC)
 
 find_package(magic_enum CONFIG REQUIRED)
 
-add_executable(TrussCLI "src/TrussCLI.cpp")
+add_executable(TrussCLI "src/TrussCLI.cpp" include/UTF8CodePage.hpp)
 target_include_directories(TrussCLI PRIVATE "include")
 
 # target_compile_definitions(TrussCLI PRIVATE TRUSS_DOUBLE_PRECISION)

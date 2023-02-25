@@ -1,5 +1,6 @@
 #include <cctype>
 #include "TrussDocument/Tokenizer.hpp"
+#include "magic_enum.hpp"
 
 using namespace Truss;
 using namespace std;
@@ -161,3 +162,7 @@ void Tokenizer::SkipSpaceComma()
 }
 
 
+std::string_view Truss::GetTokenTypeName(TokenType type)
+{
+    return magic_enum::enum_name(type);
+}

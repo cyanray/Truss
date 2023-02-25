@@ -1,0 +1,41 @@
+# 平面点
+Node:
+[
+    { key:0, x:1.8,  y:0.0,     z:0.0     }
+    { key:1, x:0.0,     y:0.9,   z:0.0     }
+    { key:2, x:0.0,     y:0.9,   z:1.8    }
+    { key:3, x:0.0,     y:0.0,     z:-1.2 }
+]
+# 材料
+Material:
+[
+    # 线弹性，低碳钢
+    { key:0, type:"Elastic", name:"Steel", rho:7850.0, E:8E9, pr:0.3 }
+]
+# Section
+Section:
+[
+    { key:0, type:"Section_Bar", mat_key:0, area:200e-6 }
+    { key:1, type:"Section_Bar", mat_key:0, area:500e-6 }
+    { key:2, type:"Section_Bar", mat_key:0, area:125e-6 }
+]
+# 单元
+Element:
+[
+    { key:0, type:"Bar", node1_key:0, node2_key:1, section_key:0 }
+    { key:1, type:"Bar", node1_key:0, node2_key:2, section_key:1 }
+    { key:2, type:"Bar", node1_key:0, node2_key:3, section_key:2 }
+]
+# 约束
+Constraint:
+[
+    { key:0, type:"NodeDisplacement", node_key:0, x:false, y:true, z:false }
+    { key:1, type:"NodeDisplacement", node_key:1, x:true, y:true, z:true }
+    { key:2, type:"NodeDisplacement", node_key:2, x:true, y:true, z:true }
+    { key:3, type:"NodeDisplacement", node_key:3, x:true, y:true, z:true }
+]
+# 荷载
+Load:
+[
+    { key:0, type:"NodeForce", node_key:0, ZForce:-5E3 }
+]

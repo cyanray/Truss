@@ -9,8 +9,8 @@ if(MSVC)
     message(STATUS "cl.exe optional: /utf-8")   
 endif(MSVC)
 
-option(BUILD_SHARED_LIBS "Build ${PROJECT_NAME} as a shared library." OFF)
-if(BUILD_SHARED_LIBS)
+option(LIB_TRUSS_SOLVER_BUILD_SHARED_LIBS "Build LibTrussSolver as a shared library." OFF)
+if(LIB_TRUSS_SOLVER_BUILD_SHARED_LIBS)
   set(LIBRARY_TYPE SHARED)
 else()
   set(LIBRARY_TYPE STATIC)
@@ -18,7 +18,7 @@ endif()
 
 find_package(Eigen3 CONFIG REQUIRED)
 
-add_library(${PROJECT_NAME} ${LIBRARY_TYPE}
+add_library(LibTrussSolver ${LIBRARY_TYPE}
             include/Truss/Solver.hpp
             include/Truss/Common/Constants.hpp
             include/Truss/Common/DegreeOfFreedom.hpp
@@ -47,12 +47,12 @@ add_library(${PROJECT_NAME} ${LIBRARY_TYPE}
             src/LoadBase.cpp
             src/SectionBase.cpp
             src/ElementBase.cpp 
-            src/Section_Bar.cpp)
+            src/Section_Bar.cpp src/Beam.cpp include/Truss/Element/Beam.hpp src/Section_Beam.cpp include/Truss/Section/Section_Beam.hpp)
 
-target_include_directories(${PROJECT_NAME} PUBLIC 
+target_include_directories(LibTrussSolver PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
-target_link_libraries(${PROJECT_NAME} PUBLIC LibTrussDocument)
+target_link_libraries(LibTrussSolver PUBLIC Eigen3::Eigen)
+target_link_libraries(LibTrussSolver PUBLIC LibTrussDocument)

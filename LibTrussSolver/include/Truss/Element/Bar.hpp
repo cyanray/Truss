@@ -19,27 +19,27 @@ namespace Truss::Element
         Node* RightNode{};
         Section::Section_Bar* Section{};
 
-        [[nodiscard]] constexpr virtual int GetNodeCount() const noexcept override
+        [[nodiscard]] constexpr int GetNodeCount() const noexcept override
         {
             return 2;
         }
 
-        [[nodiscard]] constexpr virtual int GetElementDofCount() const noexcept override
+        [[nodiscard]] constexpr int GetElementDofCount() const noexcept override
         {
             return 6;
         }
 
-        [[nodiscard]] constexpr virtual int GetNodeDofCount() const noexcept override
+        [[nodiscard]] constexpr int GetNodeDofCount() const noexcept override
         {
             return 3;
         }
 
-        [[nodiscard]] constexpr virtual DegreeOfFreedom GetNodeDegreeOfFreedom() const noexcept override
+        [[nodiscard]] constexpr DegreeOfFreedom GetNodeDegreeOfFreedom() const noexcept override
         {
-            return DegreeOfFreedom::X | DegreeOfFreedom::Y | DegreeOfFreedom::Z;
+            return DegreeOfFreedom::XYZ;
         }
 
-        [[nodiscard]] constexpr virtual int GetStiffnessSize() const noexcept override
+        [[nodiscard]] constexpr int GetStiffnessSize() const noexcept override
         {
             return 12;
         }

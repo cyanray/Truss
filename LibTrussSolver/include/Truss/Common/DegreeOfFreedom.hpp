@@ -9,7 +9,10 @@ namespace Truss
         Z = 4,
         RX = 8,
         RY = 16,
-        RZ = 32
+        RZ = 32,
+        XYZ = X | Y | Z,
+        RXRYRZ = RX | RY | RZ,
+        ALL = XYZ | RXRYRZ
     };
 
     constexpr DegreeOfFreedom operator|(DegreeOfFreedom lhs, DegreeOfFreedom rhs)
@@ -17,10 +20,9 @@ namespace Truss
         return static_cast<DegreeOfFreedom>(static_cast<char>(lhs) | static_cast<char>(rhs));
     }
 
-    constexpr DegreeOfFreedom operator|=(DegreeOfFreedom& lhs, DegreeOfFreedom rhs)
+    constexpr void operator|=(DegreeOfFreedom& lhs, DegreeOfFreedom rhs)
     {
         lhs = (lhs | rhs);
-        return lhs;
     }
 
     constexpr DegreeOfFreedom operator&(DegreeOfFreedom lhs, DegreeOfFreedom rhs)
