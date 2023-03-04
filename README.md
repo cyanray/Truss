@@ -18,7 +18,7 @@ A toy FEM solver written in C++20.
 Truss
 ├──LibTrussDocument: Parser for parsing truss documents.
 ├──LibTrussSolver: The implementation of the solver.
-└──TrussCLI: An executable program for loading truss documents and solving their problems.
+└──TrussCLI: An executable program for loading truss document files and solving for the result.
 ```
 
 
