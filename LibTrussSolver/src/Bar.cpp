@@ -1,13 +1,10 @@
 #include "Truss/Element/Bar.hpp"
 #include "Truss/Common/Resources.hpp"
 using namespace Truss;
-#include <iostream>
 
 Numeric Element::Bar::GetBarLength() const
 {
-    return static_cast<Numeric>(sqrt(pow(RightNode->X - LeftNode->X, 2) +
-                                     pow(RightNode->Y - LeftNode->Y, 2) +
-                                     pow(RightNode->Z - LeftNode->Z, 2)));
+    return GetLength(*LeftNode, *RightNode);
 }
 
 MatrixX<Numeric> Element::Bar::GetStiffnessLocal() const
@@ -29,15 +26,15 @@ void Element::Bar::Build(Resources& resources)
 {
     this->LeftNode = &resources.Nodes.at(LeftNodeKey);
     this->RightNode = &resources.Nodes.at(RightNodeKey);
-    this->Section = std::static_pointer_cast<Section::Section_Bar>(resources.Sections.at(SectionKey)).get();
+    auto& section = resources.Sections.at(SectionKey);
+    this->Section = std::static_pointer_cast<Section::Section_Bar>(section).get();
 }
 
 MatrixX<Numeric> Element::Bar::GetStiffnessGlobal() const
 {
-    Vector3<Numeric> x_asix{ RightNode->X - LeftNode->X, RightNode->Y - LeftNode->Y, RightNode->Z - LeftNode->Z };
-    auto lambda_matrix = GetTransformationMatrix<Numeric>(x_asix);
+    Vector3<Numeric> x_axis = MakeVector<Numeric>(*LeftNode, *RightNode);
+    auto lambda_matrix = GetTransformationMatrix<Numeric>(x_axis);
     auto trans_matrix = BlockDiagonal<Numeric>(lambda_matrix, 2 * GetNodeCount());
-    std::cout << lambda_matrix <<  std::endl <<  std::endl;
     return trans_matrix.transpose() * GetStiffnessLocal() * trans_matrix;   // 12x12 Matrix
 }
 

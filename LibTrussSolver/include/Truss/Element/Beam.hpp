@@ -12,13 +12,16 @@ namespace Truss::Element
         ID LeftNodeKey{INVALID_ID};
         ID RightNodeKey{INVALID_ID};
         ID SectionKey{INVALID_ID};
+        ID YNodeKey{INVALID_ID};
         Node* LeftNode{};
         Node* RightNode{};
+        /**
+         * @brief YNode is the node that is used to indicate the direction of the Y axis.
+         */
+        Node* YNode{};
         Section::Section_Beam* Section{};
 
-        void Build(Resources& resources) override
-        {
-        }
+        void Build(Resources& resources) override;
 
         [[nodiscard]] constexpr int GetNodeCount() const noexcept override
         {
@@ -35,12 +38,16 @@ namespace Truss::Element
             return 12;
         }
 
+        [[nodiscard]] Numeric GetBeamLength() const;
+
         [[nodiscard]] std::vector<ID> GetNodeIds() const override;
 
-        [[nodiscard]] MatrixX<Numeric> GetStiffnessGlobal() const override
-        {
-            return Truss::MatrixX<Numeric>();
-        }
+        [[nodiscard]] MatrixX<Numeric> GetStiffnessLocal() const;
+
+        [[nodiscard]] MatrixX<Numeric> GetStiffnessGlobal() const override;
+
+        ~Beam() override = default;
+
     };
 
 }

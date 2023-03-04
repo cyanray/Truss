@@ -1,19 +1,17 @@
-
-project(LibTrussDocument)
+cmake_minimum_required(VERSION 3.20)
+project(LibTrussDocument VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 
-if(MSVC)
-    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-    message(STATUS "cl.exe optional: /utf-8")
-endif(MSVC)
 
-option(LIB_TRUSS_DOCUMENT_BUILD_SHARED_LIBS "Build LibTrussDocument as a shared library." OFF)
-if(LIB_TRUSS_DOCUMENT_BUILD_SHARED_LIBS)
-    set(LIBRARY_TYPE SHARED)
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
+option(LibTrussDocument_BUILD_SHARED_LIBS "Build LibTrussDocument as a shared library." OFF)
+if(LibTrussDocument_BUILD_SHARED_LIBS)
+    set(${LIBRARY_TYPE} SHARED)
 else()
-    set(LIBRARY_TYPE STATIC)
+    set(${LIBRARY_TYPE} STATIC)
 endif()
 
 add_library(
@@ -29,3 +27,38 @@ target_include_directories(LibTrussDocument PUBLIC
 
 find_package(magic_enum CONFIG REQUIRED)
 target_link_libraries(LibTrussDocument PRIVATE magic_enum::magic_enum)
+
+option(LibTrussDocument_INSTALL "INSTALL_LibTrussDocument" OFF)
+if (LibTrussDocument_INSTALL)
+
+    include(CMakePackageConfigHelpers)
+    write_basic_package_version_file(
+            LibTrussDocumentConfigVersion.cmake
+            VERSION ${PACKAGE_VERSION}
+            COMPATIBILITY AnyNewerVersion
+    )
+
+    install(DIRECTORY include
+            DESTINATION ${CMAKE_INSTALL_PREFIX}
+            )
+
+    install(TARGETS LibTrussDocument
+            EXPORT LibTrussDocumentTargets
+            RUNTIME DESTINATION bin
+            ARCHIVE DESTINATION lib
+            LIBRARY DESTINATION lib
+            )
+
+    install(EXPORT LibTrussDocumentTargets
+            FILE LibTrussDocumentTargets.cmake
+            NAMESPACE Truss::
+            DESTINATION lib/cmake/LibTrussDocument
+            )
+
+    configure_file(LibTrussDocumentConfig.cmake.in LibTrussDocumentConfig.cmake @ONLY)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/LibTrussDocumentConfig.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/LibTrussDocumentConfigVersion.cmake"
+            DESTINATION lib/cmake/LibTrussDocument
+            )
+
+endif (LibTrussDocument_INSTALL)

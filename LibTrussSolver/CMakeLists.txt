@@ -1,58 +1,101 @@
-
-project(LibTrussSolver)
+cmake_minimum_required(VERSION 3.20)
+project(LibTrussSolver VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 
-if(MSVC)
-    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-    message(STATUS "cl.exe optional: /utf-8")   
-endif(MSVC)
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
-option(LIB_TRUSS_SOLVER_BUILD_SHARED_LIBS "Build LibTrussSolver as a shared library." OFF)
-if(LIB_TRUSS_SOLVER_BUILD_SHARED_LIBS)
-  set(LIBRARY_TYPE SHARED)
-else()
-  set(LIBRARY_TYPE STATIC)
-endif()
+option(LibTrussSolver_BUILD_SHARED_LIBS "Build LibTrussSolver as a shared library." OFF)
+if (LibTrussSolver_BUILD_SHARED_LIBS)
+    set(${LIBRARY_TYPE} SHARED)
+else ()
+    set(${LIBRARY_TYPE} STATIC)
+endif ()
 
 find_package(Eigen3 CONFIG REQUIRED)
 
 add_library(LibTrussSolver ${LIBRARY_TYPE}
-            include/Truss/Solver.hpp
-            include/Truss/Common/Constants.hpp
-            include/Truss/Common/DegreeOfFreedom.hpp
-            include/Truss/Common/IComponent.hpp
-            include/Truss/Common/Node.hpp
-            include/Truss/Common/Resources.hpp
-            include/Truss/Constraint/ConstraintBase.hpp
-            include/Truss/Constraint/NodeDisplacement.hpp
-            include/Truss/Element/Bar.hpp
-            include/Truss/Element/ElementBase.hpp
-            include/Truss/Load/LoadBase.hpp
-            include/Truss/Load/NodeForce.hpp
-            include/Truss/Material/MaterialBase.hpp
-            include/Truss/Material/Elastic.hpp
-            include/Truss/Section/SectionBase.hpp
-            include/Truss/Section/Section_Bar.hpp
-            include/Truss/Serializer/Serializers.hpp
-            include/Truss/Utils/FunctionPointer.hpp
-            include/Truss/Utils/SimpleReflection.hpp
-            src/Solver.cpp
-            src/Bar.cpp
-            src/Serializers.cpp
-            src/SimpleReflection.cpp
-            src/MaterialBase.cpp
-            src/ConstraintBase.cpp
-            src/LoadBase.cpp
-            src/SectionBase.cpp
-            src/ElementBase.cpp 
-            src/Section_Bar.cpp src/Beam.cpp include/Truss/Element/Beam.hpp src/Section_Beam.cpp include/Truss/Section/Section_Beam.hpp)
+        include/Truss/Solver.hpp
+        include/Truss/Common/Constants.hpp
+        include/Truss/Common/DegreeOfFreedom.hpp
+        include/Truss/Common/IComponent.hpp
+        include/Truss/Common/Node.hpp
+        include/Truss/Common/Resources.hpp
+        include/Truss/Constraint/ConstraintBase.hpp
+        include/Truss/Constraint/NodeConstraint.hpp
+        include/Truss/Element/Bar.hpp
+        include/Truss/Element/ElementBase.hpp
+        include/Truss/Load/LoadBase.hpp
+        include/Truss/Load/NodeLoad.hpp
+        include/Truss/Material/MaterialBase.hpp
+        include/Truss/Material/Elastic.hpp
+        include/Truss/Section/SectionBase.hpp
+        include/Truss/Section/Section_Bar.hpp
+        include/Truss/Serializer/Serializers.hpp
+        include/Truss/Utils/FunctionPointer.hpp
+        include/Truss/Utils/SimpleReflection.hpp
+        include/Truss/Section/Section_Beam.hpp
+        include/Truss/Element/Beam.hpp
+        src/Solver.cpp
+        src/Bar.cpp
+        src/Serializers.cpp
+        src/SimpleReflection.cpp
+        src/MaterialBase.cpp
+        src/ConstraintBase.cpp
+        src/LoadBase.cpp
+        src/SectionBase.cpp
+        src/ElementBase.cpp
+        src/Section_Bar.cpp
+        src/Beam.cpp
+        src/Section_Beam.cpp src/Node.cpp)
+
+option(LibTrussSolver_DOUBLE_PRECISION "Build LibTrussSolver As Double Precision Version" OFF)
+if(LibTrussSolver_DOUBLE_PRECISION)
+    target_compile_definitions(LibTrussSolver PRIVATE TRUSS_DOUBLE_PRECISION)
+endif()
 
 target_include_directories(LibTrussSolver PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        )
 
 target_link_libraries(LibTrussSolver PUBLIC Eigen3::Eigen)
 target_link_libraries(LibTrussSolver PUBLIC LibTrussDocument)
+
+
+option(LibTrussSolver_INSTALL "INSTALL_LibTrussSolver" OFF)
+if (LibTrussSolver_INSTALL)
+
+    include(CMakePackageConfigHelpers)
+    write_basic_package_version_file(
+            LibTrussSolverConfigVersion.cmake
+            VERSION ${PACKAGE_VERSION}
+            COMPATIBILITY AnyNewerVersion
+            )
+
+    install(DIRECTORY include
+            DESTINATION ${CMAKE_INSTALL_PREFIX}
+            )
+
+    install(TARGETS LibTrussSolver LibTrussDocument
+            EXPORT LibTrussSolverTargets
+            RUNTIME DESTINATION bin
+            ARCHIVE DESTINATION lib
+            LIBRARY DESTINATION lib
+            )
+
+    install(EXPORT LibTrussSolverTargets
+            FILE LibTrussSolverTargets.cmake
+            NAMESPACE Truss::
+            DESTINATION lib/cmake/LibTrussSolver
+            )
+
+    configure_file(LibTrussSolverConfig.cmake.in LibTrussSolverConfig.cmake @ONLY)
+
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/LibTrussSolverConfig.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/LibTrussSolverConfigVersion.cmake"
+            DESTINATION lib/cmake/LibTrussSolver
+            )
+
+endif (LibTrussSolver_INSTALL)

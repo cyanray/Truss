@@ -1,17 +1,17 @@
 #pragma once
 
+#include "Truss/Common/Constants.hpp"
+#include "Truss/Common/Node.hpp"
+#include "Truss/Common/Resources.hpp"
+#include "Truss/Constraint/NodeConstraint.hpp"
+#include "Truss/Element/Bar.hpp"
+#include "Truss/Load/NodeLoad.hpp"
+#include "Truss/Material/Elastic.hpp"
+#include "TrussDocument/TrussDocument.hpp"
+#include <Eigen/Dense>
 #include <map>
 #include <string>
 #include <vector>
-#include <Eigen/Dense>
-#include "Truss/Common/Constants.hpp"
-#include "Truss/Common/Node.hpp"
-#include "Truss/Material/Elastic.hpp"
-#include "Truss/Element/Bar.hpp"
-#include "Truss/Constraint/NodeDisplacement.hpp"
-#include "Truss/Load/NodeForce.hpp"
-#include "TrussDocument/TrussDocument.hpp"
-#include "Truss/Common/Resources.hpp"
 
 
 namespace Truss

@@ -1,0 +1,5 @@
+include(CMakeFindDependencyMacro)
+
+find_dependency(magic_enum::magic_enum REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/LibTrussDocumentTargets.cmake")

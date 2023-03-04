@@ -35,12 +35,12 @@ Element:
 # 约束
 Constraint:
 [
-    { key:0, type:"NodeDisplacement", node_key:0, x:true, y:true, z:true }
-    { key:1, type:"NodeDisplacement", node_key:1, x:false, y:true, z:true }
+    { key:0, type:"NodeConstraint", node_key:0, XDisplacement:true,  YDisplacement:true, ZDisplacement:true }
+    { key:1, type:"NodeConstraint", node_key:1, XDisplacement:false, YDisplacement:true, ZDisplacement:true }
 ]
 # 荷载
 Load:
 [
     # 作用于2节点，Y方向的荷载为：-30kN
-    { key:0, type:"NodeForce", node_key:2, XForce:0.000, YForce:-30E3 }
+    { key:0, type:"NodeLoad", node_key:2, XForce:0.000, YForce:-30E3 }
 ]

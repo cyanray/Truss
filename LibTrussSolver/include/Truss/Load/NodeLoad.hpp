@@ -8,7 +8,7 @@
 
 namespace Truss::Load
 {
-    class NodeForce : public LoadBase
+    class NodeLoad : public LoadBase
     {
     public:
         Numeric XForce{};

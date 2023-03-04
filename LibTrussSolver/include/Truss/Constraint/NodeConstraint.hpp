@@ -7,11 +7,14 @@
 
 namespace Truss::Constraint
 {
-    struct NodeDisplacement : public ConstraintBase
+    struct NodeConstraint : public ConstraintBase
     {
-        bool XConstraint{false};
-        bool YConstraint{false};
-        bool ZConstraint{false};
+        bool XDisplacement{false};
+        bool YDisplacement{false};
+        bool ZDisplacement{false};
+        bool XRotation{false};
+        bool YRotation{false};
+        bool ZRotation{false};
         ID NodeKey{INVALID_ID};
         Truss::Node* Node{};
 
@@ -27,7 +30,7 @@ namespace Truss::Constraint
 
         [[nodiscard]] std::vector<bool> GetConstraint() const override
         {
-            return { XConstraint, YConstraint, ZConstraint };
+            return {XDisplacement, YDisplacement, ZDisplacement, XRotation, YRotation, ZRotation};
         }
     };
 }

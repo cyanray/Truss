@@ -25,9 +25,9 @@ namespace
         if (refl.IsEmpty()) [[unlikely]]
         {
             refl.Register("Elastic", Creator<Material::MaterialBase, Material::Elastic>);
-            refl.Register("NodeDisplacement", Creator<Constraint::ConstraintBase, Constraint::NodeDisplacement>);
+            refl.Register("NodeConstraint", Creator<Constraint::ConstraintBase, Constraint::NodeConstraint>);
             refl.Register("Bar", Creator<Element::ElementBase, Element::Bar>);
-            refl.Register("NodeForce", Creator<Load::LoadBase, Load::NodeForce>);
+            refl.Register("NodeLoad", Creator<Load::LoadBase, Load::NodeLoad>);
             refl.Register("Section_Bar", Creator<Section::SectionBase, Section::Section_Bar>);
         }
         return refl;

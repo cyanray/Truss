@@ -28,9 +28,6 @@ namespace Truss::Element
 
         [[nodiscard]] constexpr virtual int GetStiffnessSize() const noexcept = 0;
 
-        /**
-         *  must be sorted
-         */
         [[nodiscard]] virtual std::vector<ID> GetNodeIds() const = 0;
 
         [[nodiscard]] virtual MatrixX<Numeric> GetStiffnessGlobal() const = 0;

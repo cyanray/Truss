@@ -9,12 +9,15 @@ void Truss::from_truss(const TrussDocument& doc, Node& obj)
     obj.Z = doc["z"].GetOrDefault<Numeric>();
 }
 
-void Truss::from_truss(const TrussDocument& doc, Constraint::NodeDisplacement& obj)
+void Truss::from_truss(const TrussDocument& doc, Constraint::NodeConstraint& obj)
 {
     obj.Key = doc["key"].Get<ID>();
-    obj.XConstraint = doc["x"].GetOrDefault<bool>();
-    obj.YConstraint = doc["y"].GetOrDefault<bool>();
-    obj.ZConstraint = doc["z"].GetOrDefault<bool>();
+    obj.XDisplacement = doc["xdisplacement"].GetOrDefault<bool>();
+    obj.YDisplacement = doc["ydisplacement"].GetOrDefault<bool>();
+    obj.ZDisplacement = doc["zdisplacement"].GetOrDefault<bool>();
+    obj.XRotation = doc["xrotation"].GetOrDefault<bool>();
+    obj.YRotation = doc["yrotation"].GetOrDefault<bool>();
+    obj.ZRotation = doc["zrotation"].GetOrDefault<bool>();
     obj.NodeKey = doc["node_key"].Get<ID>();
 }
 
@@ -26,7 +29,7 @@ void Truss::from_truss(const TrussDocument& doc, Element::Bar& obj)
     obj.SectionKey = doc["section_key"].Get<ID>();
 }
 
-void Truss::from_truss(const TrussDocument& doc, Load::NodeForce& obj)
+void Truss::from_truss(const TrussDocument& doc, Load::NodeLoad& obj)
 {
     obj.Key = doc["key"].Get<ID>();
     obj.NodeKey = doc["node_key"].Get<ID>();

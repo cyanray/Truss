@@ -10,5 +10,10 @@ namespace Truss::Material
         Numeric Density{};
         Numeric YoungsModules{};
         Numeric PoissonRation{};
+
+        [[nodiscard]] Numeric CalculateShearModules() const
+        {
+            return YoungsModules / (2 * (1 + PoissonRation));
+        }
     };
 }

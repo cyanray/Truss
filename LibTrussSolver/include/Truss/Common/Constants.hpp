@@ -41,14 +41,27 @@ namespace Truss
 
     template<typename T>
     Matrix3x3<T> GetTransformationMatrix(
-        const Vector3<T>& XAsix, 
-        const Vector3<T>& YAsix = Vector3<T>::Zero(),
-        const Vector3<T>& ZAsix = Vector3<T>::Zero())
+        const Vector3<T>& XAxis,
+        const Vector3<T>& YAxis = Vector3<T>::Zero(),
+        const Vector3<T>& ZAxis = Vector3<T>::Zero())
     {
         Matrix3x3<T> result = Matrix3x3<T>::Zero();
-        result.row(0) = XAsix.normalized();
-        result.row(1) = YAsix.normalized();
-        result.row(2) = ZAsix.normalized();
+        result.row(0) = XAxis.normalized();
+        result.row(1) = YAxis.normalized();
+        result.row(2) = ZAxis.normalized();
+        return result;
+    }
+
+    template<typename T>
+    Matrix3x3<T> GetTransformationMatrixAuto(const Vector3<T>& XAxis)
+    {
+        Matrix3x3<T> result = Matrix3x3<T>::Zero();
+        Vector3<T> ZOrigin = Vector3<T>::UnitZ(),
+                   YAxis = ZOrigin.cross(XAxis).normalized(),
+                   ZAxis = XAxis.cross(YAxis).normalized();
+        result.row(0) = XAxis.normalized();
+        result.row(1) = YAxis;
+        result.row(2) = ZAxis;
         return result;
     }
 
@@ -60,10 +73,12 @@ namespace Truss
         {
             result.block(i * mat.rows(), i * mat.cols(), mat.rows(), mat.cols()) = mat;
         }
-
         return result;
     }
 
+    /**
+     * Forward declaration.
+     */
     class Resources;
 
 }
