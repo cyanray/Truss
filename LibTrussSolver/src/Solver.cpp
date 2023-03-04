@@ -8,40 +8,15 @@
 
 using namespace Truss;
 using namespace std;
-namespace
-{
-
-    template<typename TBase, typename T> requires std::derived_from<T, TBase>
-    std::shared_ptr<TBase> Creator(const TrussDocument& doc)
-    {
-        auto value = make_shared<T>();
-        from_truss(doc, *value);
-        return std::static_pointer_cast<TBase>(value);
-    }
-
-    SimpleReflection& GetReflection()
-    {
-        static SimpleReflection refl;
-        if (refl.IsEmpty()) [[unlikely]]
-        {
-            refl.Register("Elastic", Creator<Material::MaterialBase, Material::Elastic>);
-            refl.Register("NodeConstraint", Creator<Constraint::ConstraintBase, Constraint::NodeConstraint>);
-            refl.Register("Bar", Creator<Element::ElementBase, Element::Bar>);
-            refl.Register("NodeLoad", Creator<Load::LoadBase, Load::NodeLoad>);
-            refl.Register("Section_Bar", Creator<Section::SectionBase, Section::Section_Bar>);
-        }
-        return refl;
-    }
-}
 
 void TrussSolver::LoadTrussDocument(const TrussDocument &doc)
 {
-    GetNodes(doc);
-    GetMaterials(doc);
-    GetSections(doc);
-    GetElements(doc);
-    GetConstrains(doc);
-    GetLoads(doc);
+    LoadNodes(doc);
+    LoadMaterials(doc);
+    LoadSections(doc);
+    LoadElements(doc);
+    LoadConstrains(doc);
+    LoadLoads(doc);
     BuildAllComponents();
 }
 
@@ -156,7 +131,7 @@ int TrussSolver::GetNumberOfNode() const noexcept
     return static_cast<int>(m_Resources.Nodes.size());
 }
 
-void TrussSolver::GetNodes(const TrussDocument& doc)
+void TrussSolver::LoadNodes(const TrussDocument& doc)
 {
     auto& array = doc["Node"];
     int len = (int) array.Size();
@@ -168,14 +143,14 @@ void TrussSolver::GetNodes(const TrussDocument& doc)
     }
 }
 
-void TrussSolver::GetMaterials(const TrussDocument &doc)
+void TrussSolver::LoadMaterials(const TrussDocument &doc)
 {
     auto &array = doc["Material"];
     int len = (int) array.Size();
     for (int i = 0; i < len; ++i)
     {
         auto type = array[i]["type"].Get<string>();
-//        auto obj = GetReflection()
+//        auto obj = GetCompomentReflection()
 //                .Invoke<shared_ptr<Material::MaterialBase>, const TrussDocument&>(type, array[i]);
         auto obj = array[i].Get<Material::Elastic>();
         obj.Id = i;
@@ -183,56 +158,56 @@ void TrussSolver::GetMaterials(const TrussDocument &doc)
     }
 }
 
-void TrussSolver::GetElements(const TrussDocument &doc)
+void TrussSolver::LoadElements(const TrussDocument &doc)
 {
     auto &array = doc["Element"];
     int len = (int) array.Size();
     for (int i = 0; i < len; ++i)
     {
         auto type = array[i]["type"].Get<string>();
-        auto obj = GetReflection()
+        auto obj = GetCompomentReflection()
         .Invoke<shared_ptr<Element::ElementBase>, const TrussDocument&>(type, array[i]);
         obj->Id = i;
         m_Resources.Elements.insert({ obj->Key, obj });
     }
 }
 
-void TrussSolver::GetConstrains(const TrussDocument &doc)
+void TrussSolver::LoadConstrains(const TrussDocument &doc)
 {
     auto &array = doc["Constraint"];
     int len = (int) array.Size();
     for (int i = 0; i < len; ++i)
     {
         auto type = array[i]["type"].Get<string>();
-        auto obj = GetReflection()
+        auto obj = GetCompomentReflection()
                 .Invoke<shared_ptr<Constraint::ConstraintBase>, const TrussDocument&>(type, array[i]);
         obj->Id = i;
         m_Resources.Constraints.insert({ obj->Key, obj });
     }
 }
 
-void TrussSolver::GetLoads(const TrussDocument &doc)
+void TrussSolver::LoadLoads(const TrussDocument &doc)
 {
     auto &array = doc["Load"];
     int len = (int) array.Size();
     for (int i = 0; i < len; ++i)
     {
         auto type = array[i]["type"].Get<string>();
-        auto obj = GetReflection()
+        auto obj = GetCompomentReflection()
                 .Invoke<shared_ptr<Load::LoadBase>, const TrussDocument&>(type, array[i]);
         obj->Id = i;
         m_Resources.Loads.insert({ obj->Key, obj });
     }
 }
 
-void TrussSolver::GetSections(const TrussDocument& doc)
+void TrussSolver::LoadSections(const TrussDocument& doc)
 {
     auto &array = doc["Section"];
     int len = (int) array.Size();
     for (int i = 0; i < len; ++i)
     {
         auto type = array[i]["type"].Get<string>();
-        auto obj = GetReflection()
+        auto obj = GetCompomentReflection()
                  .Invoke<shared_ptr<Section::SectionBase>, const TrussDocument&>(type, array[i]);
         obj->Id = i;
         m_Resources.Sections.insert({ obj->Key, obj });

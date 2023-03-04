@@ -1,4 +1,5 @@
 #include "Truss/Serializer/Serializers.hpp"
+#include <memory>
 using namespace Truss;
 
 void Truss::from_truss(const TrussDocument& doc, Node& obj)
@@ -55,4 +56,51 @@ void Truss::from_truss(const TrussDocument& doc, Section::Section_Bar& obj)
     obj.Key = doc["key"].Get<ID>();
     obj.MaterialKey = doc["mat_key"].Get<ID>();
     obj.Area = doc["area"].Get<Numeric>();
+}
+
+void Truss::from_truss(const TrussDocument& doc, Element::Beam& obj)
+{
+    obj.Key = doc["key"].Get<ID>();
+    obj.LeftNodeKey = doc["node1_key"].Get<ID>();
+    obj.RightNodeKey = doc["node2_key"].Get<ID>();
+    obj.SectionKey = doc["section_key"].Get<ID>();
+    obj.YNodeKey = doc["y_node_key"].GetOrDefault<ID>(INVALID_ID);
+}
+
+void Truss::from_truss(const TrussDocument& doc, Section::Section_Beam& obj)
+{
+    obj.Key = doc["key"].Get<ID>();
+    obj.MaterialKey = doc["mat_key"].Get<ID>();
+    obj.Area = doc["area"].Get<Numeric>();
+    obj.Iy = doc["Iy"].Get<Numeric>();
+    obj.Iz = doc["Iz"].Get<Numeric>();
+    obj.J = doc["J"].Get<Numeric>();
+}
+
+
+namespace
+{
+    template<typename TBase, typename T> requires std::derived_from<T, TBase>
+    std::shared_ptr<TBase> Creator(const TrussDocument& doc)
+    {
+        auto value = std::make_shared<T>();
+        from_truss(doc, *value);
+        return std::static_pointer_cast<TBase>(value);
+    }
+}
+
+SimpleReflection& Truss::GetCompomentReflection()
+{
+    static SimpleReflection refl;
+    if (refl.IsEmpty()) [[unlikely]]
+    {
+        refl.Register("Elastic", Creator<Material::MaterialBase, Material::Elastic>);
+        refl.Register("NodeConstraint", Creator<Constraint::ConstraintBase, Constraint::NodeConstraint>);
+        refl.Register("Bar", Creator<Element::ElementBase, Element::Bar>);
+        refl.Register("Beam", Creator<Element::ElementBase, Element::Beam>);
+        refl.Register("NodeLoad", Creator<Load::LoadBase, Load::NodeLoad>);
+        refl.Register("Section_Bar", Creator<Section::SectionBase, Section::Section_Bar>);
+        refl.Register("Section_Beam", Creator<Section::SectionBase, Section::Section_Beam>);
+    }
+    return refl;
 }

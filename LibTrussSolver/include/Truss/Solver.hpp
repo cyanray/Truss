@@ -38,17 +38,17 @@ namespace Truss
 
         [[nodiscard]] int GetNumberOfNode() const noexcept;
 
-        void GetNodes(const TrussDocument& doc);
+        void LoadNodes(const TrussDocument& doc);
 
-        void GetMaterials(const TrussDocument& doc);
+        void LoadMaterials(const TrussDocument& doc);
 
-        void GetElements(const TrussDocument& doc);
+        void LoadElements(const TrussDocument& doc);
 
-        void GetConstrains(const TrussDocument& doc);
+        void LoadConstrains(const TrussDocument& doc);
 
-        void GetLoads(const TrussDocument& doc);
+        void LoadLoads(const TrussDocument& doc);
 
-        void GetSections(const TrussDocument& doc);
+        void LoadSections(const TrussDocument& doc);
 
         void BuildAllComponents();
 

@@ -7,9 +7,12 @@ namespace Truss::Element
     {
         this->LeftNode = &resources.Nodes.at(LeftNodeKey);
         this->RightNode = &resources.Nodes.at(RightNodeKey);
-        this->YNode = &resources.Nodes.at(YNodeKey);
         auto& section = resources.Sections.at(SectionKey);
         this->Section = std::static_pointer_cast<Section::Section_Beam>(section).get();
+        if (YNodeKey != INVALID_ID)
+        {
+            this->YNode = &resources.Nodes.at(YNodeKey);
+        }
     }
 
     std::vector<ID> Beam::GetNodeIds() const

@@ -82,7 +82,7 @@ namespace Truss
                 return std::get<T>(doc.m_value);
             }
 
-            static T GetOrDefault(const TrussDocument& doc, T&& default_value)
+            static T GetOrDefault(const TrussDocument& doc, const T& default_value)
             {
                 const T* value_ptr = std::get_if<T>(&doc.m_value);
                 if (value_ptr != nullptr) return *value_ptr;
@@ -142,9 +142,9 @@ namespace Truss
         }
 
         template<typename T>
-        T GetOrDefault(T&& default_value = T{}) const
+        T GetOrDefault(const T& default_value = {}) const
         {
-            return get_detail<T, ValueContainer>::GetOrDefault(*this, std::forward<T>(default_value));
+            return get_detail<T, ValueContainer>::GetOrDefault(*this, default_value);
         }
 
     private:
