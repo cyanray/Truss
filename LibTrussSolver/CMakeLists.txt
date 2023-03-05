@@ -92,14 +92,14 @@ if (LibTrussSolver_INSTALL)
     install(EXPORT LibTrussSolverTargets
             FILE LibTrussSolverTargets.cmake
             NAMESPACE Truss::
-            DESTINATION lib/cmake/LibTrussSolver
+            DESTINATION cmake/LibTrussSolver
             )
 
     configure_file(LibTrussSolverConfig.cmake.in LibTrussSolverConfig.cmake @ONLY)
 
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/LibTrussSolverConfig.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/LibTrussSolverConfigVersion.cmake"
-            DESTINATION lib/cmake/LibTrussSolver
+            DESTINATION cmake/LibTrussSolver
             )
 
 endif (LibTrussSolver_INSTALL)

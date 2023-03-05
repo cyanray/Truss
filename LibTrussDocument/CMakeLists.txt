@@ -54,13 +54,13 @@ if (LibTrussDocument_INSTALL)
     install(EXPORT LibTrussDocumentTargets
             FILE LibTrussDocumentTargets.cmake
             NAMESPACE Truss::
-            DESTINATION lib/cmake/LibTrussDocument
+            DESTINATION cmake/LibTrussDocument
             )
 
     configure_file(LibTrussDocumentConfig.cmake.in LibTrussDocumentConfig.cmake @ONLY)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/LibTrussDocumentConfig.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/LibTrussDocumentConfigVersion.cmake"
-            DESTINATION lib/cmake/LibTrussDocument
+            DESTINATION cmake/LibTrussDocument
             )
 
 endif (LibTrussDocument_INSTALL)

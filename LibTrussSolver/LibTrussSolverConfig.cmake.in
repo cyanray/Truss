@@ -1,5 +1,8 @@
 include(CMakeFindDependencyMacro)
 
-find_dependency(Eigen3::Eigen REQUIRED)
+find_dependency(magic_enum REQUIRED)
+find_dependency(Eigen3 REQUIRED)
 
-include("${CMAKE_CURRENT_LIST_DIR}/LibTrussSolverTargets.cmake")
+if(NOT TARGET LibTrussSolver)
+  include("${CMAKE_CURRENT_LIST_DIR}/LibTrussSolverTargets.cmake")
+endif()
