@@ -8,14 +8,15 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 option(LibTrussSolver_BUILD_SHARED_LIBS "Build LibTrussSolver as a shared library." OFF)
 if (LibTrussSolver_BUILD_SHARED_LIBS)
-    set(${LIBRARY_TYPE} SHARED)
+    set(LIBRARY_TYPE SHARED)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 else ()
-    set(${LIBRARY_TYPE} STATIC)
+    set(LIBRARY_TYPE STATIC)
 endif ()
 
 find_package(Eigen3 CONFIG REQUIRED)
 
-add_library(LibTrussSolver ${LIBRARY_TYPE}
+set(SOURCES
         include/Truss/Solver.hpp
         include/Truss/Common/Constants.hpp
         include/Truss/Common/DegreeOfFreedom.hpp
@@ -48,7 +49,10 @@ add_library(LibTrussSolver ${LIBRARY_TYPE}
         src/ElementBase.cpp
         src/Section_Bar.cpp
         src/Beam.cpp
-        src/Section_Beam.cpp src/Node.cpp)
+        src/Section_Beam.cpp
+        src/Node.cpp)
+
+add_library(LibTrussSolver ${LIBRARY_TYPE} ${SOURCES})
 
 option(LibTrussSolver_DOUBLE_PRECISION "Build LibTrussSolver As Double Precision Version" OFF)
 if(LibTrussSolver_DOUBLE_PRECISION)
@@ -64,7 +68,7 @@ target_link_libraries(LibTrussSolver PUBLIC Eigen3::Eigen)
 target_link_libraries(LibTrussSolver PUBLIC LibTrussDocument)
 
 
-option(LibTrussSolver_INSTALL "INSTALL_LibTrussSolver" OFF)
+option(LibTrussSolver_INSTALL "INSTALL_LibTrussSolver" ON)
 if (LibTrussSolver_INSTALL)
 
     include(CMakePackageConfigHelpers)

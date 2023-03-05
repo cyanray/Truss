@@ -9,17 +9,19 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 option(LibTrussDocument_BUILD_SHARED_LIBS "Build LibTrussDocument as a shared library." OFF)
 if(LibTrussDocument_BUILD_SHARED_LIBS)
-    set(${LIBRARY_TYPE} SHARED)
+    set(LIBRARY_TYPE SHARED)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 else()
-    set(${LIBRARY_TYPE} STATIC)
+    set(LIBRARY_TYPE STATIC)
 endif()
 
-add_library(
-        LibTrussDocument
-        ${LIBRARY_TYPE}
+set(SOURCES
         include/TrussDocument/Tokenizer.hpp src/Tokenizer.cpp
         include/TrussDocument/TrussDocument.hpp src/TrussDocument.cpp
-        include/TrussDocument/ParserErrorException.hpp src/ParserErrorException.cpp)
+        include/TrussDocument/ParserErrorException.hpp src/ParserErrorException.cpp
+        )
+
+add_library(LibTrussDocument ${LIBRARY_TYPE} ${SOURCES})
 
 target_include_directories(LibTrussDocument PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -28,7 +30,7 @@ target_include_directories(LibTrussDocument PUBLIC
 find_package(magic_enum CONFIG REQUIRED)
 target_link_libraries(LibTrussDocument PRIVATE magic_enum::magic_enum)
 
-option(LibTrussDocument_INSTALL "INSTALL_LibTrussDocument" OFF)
+option(LibTrussDocument_INSTALL "INSTALL_LibTrussDocument" ON)
 if (LibTrussDocument_INSTALL)
 
     include(CMakePackageConfigHelpers)
