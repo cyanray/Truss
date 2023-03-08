@@ -31,7 +31,7 @@ namespace Truss
 
         [[nodiscard]] int GetKSize() const noexcept;
 
-        std::vector<int> GetSimplifiedIndex();
+        std::vector<int> GetFreedomIndex();
 
     private:
         Resources m_Resources;

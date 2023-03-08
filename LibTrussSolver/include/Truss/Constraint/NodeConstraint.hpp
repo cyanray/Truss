@@ -25,12 +25,19 @@ namespace Truss::Constraint
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override
         {
-            return { Node->Id };
+            return {Node->Id};
         }
 
         [[nodiscard]] std::vector<bool> GetConstraint() const override
         {
             return {XDisplacement, YDisplacement, ZDisplacement, XRotation, YRotation, ZRotation};
         }
+
+        [[nodiscard]] DegreeOfFreedom GetDegreeOfFreedom() const override
+        {
+            DofBitField dof(!XDisplacement, !YDisplacement, !ZDisplacement, !XRotation, !YRotation, !ZRotation);
+            return *reinterpret_cast<DegreeOfFreedom*>(&dof);
+        }
+
     };
 }

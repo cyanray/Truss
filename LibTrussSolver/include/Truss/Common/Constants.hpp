@@ -20,6 +20,8 @@ namespace Truss
 
     constexpr int ALL_DOF = 6;
 
+    const static Eigen::Array<int, 6, 1> DOF_INDEX{0, 1, 2, 3, 4, 5};
+
 	template<typename T>
 	using MatrixX = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 

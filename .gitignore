@@ -365,3 +365,4 @@ FodyWeavers.xsd
 # Custom
 /.idea
 /cmake-build-*
+/CMakeUserPresets.json
