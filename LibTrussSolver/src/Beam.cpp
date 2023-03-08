@@ -17,7 +17,7 @@ namespace Truss::Element
 
     std::vector<ID> Beam::GetNodeIds() const
     {
-        return { this->LeftNode->Id, this->RightNode->Id };
+        return {this->LeftNode->Id, this->RightNode->Id};
     }
 
     MatrixX<Numeric> Beam::GetStiffnessLocal() const
@@ -61,7 +61,7 @@ namespace Truss::Element
         Vector3<Numeric> x_axis = MakeVector<Numeric>(*LeftNode, *RightNode);
         auto lambda_matrix = GetTransformationMatrixAuto<Numeric>(x_axis);
         auto trans_matrix = BlockDiagonal<Numeric>(lambda_matrix, 2 * GetNodeCount());
-        return trans_matrix.transpose() * GetStiffnessLocal() * trans_matrix;   // 12x12 Matrix
+        return trans_matrix.transpose() * GetStiffnessLocal() * trans_matrix;
     }
 
     Numeric Beam::GetBeamLength() const
@@ -69,4 +69,4 @@ namespace Truss::Element
         return GetLength(*LeftNode, *RightNode);
     }
 
-}
+}// namespace Truss::Element

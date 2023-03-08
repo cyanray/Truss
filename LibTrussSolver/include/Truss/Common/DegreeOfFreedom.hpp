@@ -36,10 +36,11 @@ namespace Truss
     }
 
 
-    struct DofBitField {
-        bool X  : 1 {false};
-        bool Y  : 1 {false};
-        bool Z  : 1 {false};
+    struct DofBitField
+    {
+        bool X : 1 {false};
+        bool Y : 1 {false};
+        bool Z : 1 {false};
         bool RX : 1 {false};
         bool RY : 1 {false};
         bool RZ : 1 {false};

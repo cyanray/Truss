@@ -1,8 +1,8 @@
 #pragma once
 
+#include "SectionBase.hpp"
 #include "Truss/Common/Constants.hpp"
 #include "Truss/Material/Elastic.hpp"
-#include "SectionBase.hpp"
 
 namespace Truss::Section
 {
@@ -14,4 +14,4 @@ namespace Truss::Section
 
         void Build(Resources& resources) override;
     };
-}
+}// namespace Truss::Section

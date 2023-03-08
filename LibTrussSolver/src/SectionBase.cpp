@@ -2,4 +2,4 @@
 
 namespace Truss::Section
 {
-}
+} // namespace Truss::Section

@@ -17,4 +17,4 @@ namespace Truss::Section
 
         void Build(Resources& resources) override;
     };
-}
+}// namespace Truss::Section

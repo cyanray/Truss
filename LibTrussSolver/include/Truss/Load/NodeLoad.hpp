@@ -1,9 +1,9 @@
 #pragma once
 
+#include "LoadBase.hpp"
 #include "Truss/Common/Constants.hpp"
 #include "Truss/Common/Node.hpp"
 #include "Truss/Common/Resources.hpp"
-#include "LoadBase.hpp"
 
 
 namespace Truss::Load
@@ -22,17 +22,17 @@ namespace Truss::Load
 
         void Build(Resources& resources) override
         {
-            Node =  &resources.Nodes.at(NodeKey);
+            Node = &resources.Nodes.at(NodeKey);
         }
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override
         {
-            return { Node->Id };
+            return {Node->Id};
         }
 
-        [[nodiscard]] Eigen::Vector<Numeric,6> GetLoad() const override
+        [[nodiscard]] Eigen::Vector<Numeric, 6> GetLoad() const override
         {
-            return { XForce, YForce, ZForce, XMoment, YMoment, ZMoment };
+            return {XForce, YForce, ZForce, XMoment, YMoment, ZMoment};
         }
     };
-}
+}// namespace Truss::Load

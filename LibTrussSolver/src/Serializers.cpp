@@ -80,14 +80,15 @@ void Truss::from_truss(const TrussDocument& doc, Section::Section_Beam& obj)
 
 namespace
 {
-    template<typename TBase, typename T> requires std::derived_from<T, TBase>
+    template<typename TBase, typename T>
+        requires std::derived_from<T, TBase>
     std::shared_ptr<TBase> Creator(const TrussDocument& doc)
     {
         auto value = std::make_shared<T>();
         from_truss(doc, *value);
         return std::static_pointer_cast<TBase>(value);
     }
-}
+}// namespace
 
 SimpleReflection& Truss::GetCompomentReflection()
 {

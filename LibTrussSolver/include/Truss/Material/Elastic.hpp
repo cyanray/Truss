@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Truss/Common/Constants.hpp"
 #include "MaterialBase.hpp"
+#include "Truss/Common/Constants.hpp"
 
 namespace Truss::Material
 {
@@ -16,4 +16,4 @@ namespace Truss::Material
             return YoungsModules / (2 * (1 + PoissonRation));
         }
     };
-}
+}// namespace Truss::Material

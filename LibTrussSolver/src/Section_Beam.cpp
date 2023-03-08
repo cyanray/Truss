@@ -8,4 +8,4 @@ namespace Truss::Section
     {
         Mat = &resources.Materials.at(MaterialKey);
     }
-}
+}// namespace Truss::Section

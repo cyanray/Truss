@@ -2,4 +2,4 @@
 
 namespace Truss::Load
 {
-}
+} // namespace Truss::Load

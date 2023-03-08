@@ -18,7 +18,7 @@ MatrixX<Numeric> Element::Bar::GetStiffnessLocal() const
         { -1,  1 }
     };
     Matrix12x12<Numeric> result = Matrix12x12<Numeric>::Zero();
-    result({ 0, 6 }, { 0, 6 }) = local;
+    result({0, 6}, {0, 6}) = local;
     return (E * A / bar_length) * result;
 }
 
@@ -35,11 +35,10 @@ MatrixX<Numeric> Element::Bar::GetStiffnessGlobal() const
     Vector3<Numeric> x_axis = MakeVector<Numeric>(*LeftNode, *RightNode);
     auto lambda_matrix = GetTransformationMatrix<Numeric>(x_axis);
     auto trans_matrix = BlockDiagonal<Numeric>(lambda_matrix, 2 * GetNodeCount());
-    return trans_matrix.transpose() * GetStiffnessLocal() * trans_matrix;   // 12x12 Matrix
+    return trans_matrix.transpose() * GetStiffnessLocal() * trans_matrix;
 }
 
 std::vector<ID> Element::Bar::GetNodeIds() const
 {
-    return { this->LeftNode->Id, this->RightNode->Id };
+    return {this->LeftNode->Id, this->RightNode->Id};
 }
-

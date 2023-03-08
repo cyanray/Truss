@@ -4,8 +4,8 @@
 #include "Truss/Serializer/Serializers.hpp"
 #include "Truss/Utils/SimpleReflection.hpp"
 
-#include <vector>
 #include <bitset>
+#include <vector>
 
 using namespace Truss;
 using namespace std;
@@ -84,14 +84,14 @@ std::vector<int> TrussSolver::GetFreedomIndex()
     int node_count = GetNumberOfNode();
     vector<DegreeOfFreedom> Dof(node_count);
     // 根据 element 赋予自由度
-    for (auto& [_, element] : m_Resources.Elements)
+    for (auto& [_, element]: m_Resources.Elements)
     {
         auto ids = element->GetNodeIds();
         auto dof = element->GetNodeDegreeOfFreedom();
         for (int id: ids) Dof[id] |= dof;
     }
     // 根据 constraint 限制自由度
-    for (auto& [_, constraint] : m_Resources.Constraints)
+    for (auto& [_, constraint]: m_Resources.Constraints)
     {
         auto ids = constraint->GetNodeIds();
         auto dof = constraint->GetDegreeOfFreedom();
@@ -101,7 +101,7 @@ std::vector<int> TrussSolver::GetFreedomIndex()
     vector<int> index;
     for (int i = 0; i < node_count; ++i)
     {
-        std::bitset<ALL_DOF> dof_bit = (char)Dof[i];
+        std::bitset<ALL_DOF> dof_bit = (char) Dof[i];
         if (dof_bit.none()) continue;
         if (dof_bit.all())
         {

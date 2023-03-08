@@ -2,4 +2,4 @@
 
 namespace Truss::Element
 {
-}
+} // namespace Truss::Element

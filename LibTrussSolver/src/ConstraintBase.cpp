@@ -2,4 +2,4 @@
 
 namespace Truss::Constraint
 {
-}
+} // namespace Truss::Constraint

@@ -11,4 +11,4 @@ namespace Truss::Section
         virtual void Build(Resources&) = 0;
     };
 
-}
+}// namespace Truss::Section

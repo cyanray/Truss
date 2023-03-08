@@ -1,8 +1,8 @@
 #pragma once
 
+#include "ConstraintBase.hpp"
 #include "Truss/Common/Constants.hpp"
 #include "Truss/Common/Node.hpp"
-#include "ConstraintBase.hpp"
 #include "Truss/Common/Resources.hpp"
 
 namespace Truss::Constraint
@@ -38,6 +38,5 @@ namespace Truss::Constraint
             DofBitField dof(!XDisplacement, !YDisplacement, !ZDisplacement, !XRotation, !YRotation, !ZRotation);
             return *reinterpret_cast<DegreeOfFreedom*>(&dof);
         }
-
     };
-}
+}// namespace Truss::Constraint

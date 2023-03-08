@@ -1,14 +1,13 @@
 #pragma once
 
-#include <map>
-#include <memory>
 #include "Node.hpp"
-#include "Node.hpp"
-#include "Truss/Material/Elastic.hpp"
+#include "Truss/Constraint/ConstraintBase.hpp"
 #include "Truss/Element/ElementBase.hpp"
 #include "Truss/Load/LoadBase.hpp"
-#include "Truss/Constraint/ConstraintBase.hpp"
+#include "Truss/Material/Elastic.hpp"
 #include "Truss/Section/SectionBase.hpp"
+#include <map>
+#include <memory>
 
 namespace Truss
 {
@@ -22,4 +21,4 @@ namespace Truss
         std::map<ID, std::shared_ptr<Constraint::ConstraintBase>> Constraints;
         std::map<ID, std::shared_ptr<Section::SectionBase>> Sections;
     };
-}
+}// namespace Truss

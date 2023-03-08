@@ -1,11 +1,11 @@
 #pragma once
 
+#include "ElementBase.hpp"
 #include "Truss/Common/Constants.hpp"
-#include "Truss/Common/Node.hpp"
 #include "Truss/Common/DegreeOfFreedom.hpp"
+#include "Truss/Common/Node.hpp"
 #include "Truss/Material/Elastic.hpp"
 #include "Truss/Section/Section_Bar.hpp"
-#include "ElementBase.hpp"
 
 namespace Truss::Element
 {
@@ -53,6 +53,5 @@ namespace Truss::Element
         [[nodiscard]] MatrixX<Numeric> GetStiffnessGlobal() const override;
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override;
-
     };
-}
+}// namespace Truss::Element

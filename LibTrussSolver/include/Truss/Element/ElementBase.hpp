@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Truss/Common/IComponent.hpp"
 #include "Truss/Common/DegreeOfFreedom.hpp"
+#include "Truss/Common/IComponent.hpp"
 #include <bit>
 
 namespace Truss::Element
@@ -31,7 +31,6 @@ namespace Truss::Element
         [[nodiscard]] virtual std::vector<ID> GetNodeIds() const = 0;
 
         [[nodiscard]] virtual MatrixX<Numeric> GetStiffnessGlobal() const = 0;
-
     };
 
-}
+}// namespace Truss::Element

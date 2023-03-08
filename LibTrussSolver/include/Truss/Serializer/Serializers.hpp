@@ -23,5 +23,4 @@ namespace Truss
 
 
     SimpleReflection& GetCompomentReflection();
-}
-
+}// namespace Truss

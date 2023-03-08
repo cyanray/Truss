@@ -14,4 +14,4 @@ namespace Truss
         virtual ~IComponent() = default;
     };
 
-}
+}// namespace Truss

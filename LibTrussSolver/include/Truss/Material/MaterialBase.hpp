@@ -9,8 +9,6 @@ namespace Truss::Material
     class MaterialBase : public IComponent
     {
     public:
-
     };
 
-}
-
+}// namespace Truss::Material

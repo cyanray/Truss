@@ -14,5 +14,4 @@ namespace Truss::Load
         [[nodiscard]] virtual Eigen::Vector<Numeric, ALL_DOF> GetLoad() const = 0;
     };
 
-}
-
+}// namespace Truss::Load

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Truss/Common/IComponent.hpp"
 #include "Truss/Common/DegreeOfFreedom.hpp"
+#include "Truss/Common/IComponent.hpp"
 #include <vector>
 namespace Truss::Constraint
 {
@@ -15,4 +15,4 @@ namespace Truss::Constraint
         [[nodiscard]] virtual DegreeOfFreedom GetDegreeOfFreedom() const = 0;
     };
 
-}
+}// namespace Truss::Constraint

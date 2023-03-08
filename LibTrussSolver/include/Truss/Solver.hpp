@@ -51,7 +51,6 @@ namespace Truss
         void LoadSections(const TrussDocument& doc);
 
         void BuildAllComponents();
-
     };
 
-}
+}// namespace Truss

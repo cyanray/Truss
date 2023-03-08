@@ -47,8 +47,6 @@ namespace Truss::Element
         [[nodiscard]] MatrixX<Numeric> GetStiffnessGlobal() const override;
 
         ~Beam() override = default;
-
     };
 
-}
-
+}// namespace Truss::Element

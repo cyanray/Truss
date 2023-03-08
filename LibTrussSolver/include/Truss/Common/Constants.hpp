@@ -5,16 +5,16 @@
 namespace Truss
 {
 #ifdef TRUSS_DOUBLE_PRECISION
-	using Numeric = double;
+    using Numeric = double;
 #else
-	using Numeric = float;
+    using Numeric = float;
 #endif
 
     using ID = int;
 
-	constexpr ID INVALID_ID = -1;
+    constexpr ID INVALID_ID = -1;
 
-	constexpr double PI_d = 3.1415926535897932384626;
+    constexpr double PI_d = 3.1415926535897932384626;
 
     constexpr float PI_f = static_cast<float>(PI_d);
 
@@ -22,11 +22,11 @@ namespace Truss
 
     const static Eigen::Array<int, 6, 1> DOF_INDEX{0, 1, 2, 3, 4, 5};
 
-	template<typename T>
-	using MatrixX = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+    template<typename T>
+    using MatrixX = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
-	template<typename T>
-	using VectorX = Eigen::Vector<T, Eigen::Dynamic>;
+    template<typename T>
+    using VectorX = Eigen::Vector<T, Eigen::Dynamic>;
 
     template<typename T>
     using Vector3 = Eigen::Vector<T, 3>;
@@ -43,9 +43,9 @@ namespace Truss
 
     template<typename T>
     Matrix3x3<T> GetTransformationMatrix(
-        const Vector3<T>& XAxis,
-        const Vector3<T>& YAxis = Vector3<T>::Zero(),
-        const Vector3<T>& ZAxis = Vector3<T>::Zero())
+            const Vector3<T>& XAxis,
+            const Vector3<T>& YAxis = Vector3<T>::Zero(),
+            const Vector3<T>& ZAxis = Vector3<T>::Zero())
     {
         Matrix3x3<T> result = Matrix3x3<T>::Zero();
         result.row(0) = XAxis.normalized();
@@ -67,7 +67,7 @@ namespace Truss
         return result;
     }
 
-    template <typename T, typename Derived>
+    template<typename T, typename Derived>
     MatrixX<T> BlockDiagonal(const Eigen::MatrixBase<Derived>& mat, int count)
     {
         MatrixX<T> result = MatrixX<T>::Zero(mat.rows() * count, mat.cols() * count);
@@ -83,4 +83,4 @@ namespace Truss
      */
     class Resources;
 
-}
+}// namespace Truss
