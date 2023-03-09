@@ -5,7 +5,6 @@
 #include "Truss/Utils/SimpleReflection.hpp"
 
 #include <bitset>
-#include <ranges>
 #include <vector>
 
 using namespace Truss;
