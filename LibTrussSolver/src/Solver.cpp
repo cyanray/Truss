@@ -5,43 +5,64 @@
 #include "Truss/Utils/SimpleReflection.hpp"
 
 #include <bitset>
+#include <ranges>
 #include <vector>
 
 using namespace Truss;
 using namespace std;
 
+
+namespace
+{
+    template<typename T, typename TContainer>
+    void LoadCompoments(std::string_view name, const TrussDocument& doc, TContainer&& container)
+    {
+        vector<T> result;
+        auto& array = doc[name];
+        int len = (int) array.Count();
+        for (int i = 0; i < len; ++i)
+        {
+            auto obj = array[i].Get<T>();
+            obj.Id = i;
+            container.emplace(obj.Key, obj);
+        }
+    }
+
+    template<typename T, typename TContainer>
+    void LoadCompomentsWeak(std::string_view name, const TrussDocument& doc, TContainer&& container)
+    {
+        auto& array = doc[name];
+        int len = (int) array.Count();
+        for (int i = 0; i < len; ++i)
+        {
+            auto type = array[i]["type"].Get<string>();
+            auto obj = GetCompomentReflection()
+                               .Invoke<shared_ptr<T>, const TrussDocument&>(type, array[i]);
+            obj->Id = i;
+            container.emplace(obj->Key, obj);
+        }
+    }
+}// namespace
+
 void TrussSolver::LoadTrussDocument(const TrussDocument& doc)
 {
-    LoadNodes(doc);
-    LoadMaterials(doc);
-    LoadSections(doc);
-    LoadElements(doc);
-    LoadConstrains(doc);
-    LoadLoads(doc);
+    LoadCompoments<Node>("Node", doc, m_Resources.Nodes);
+    LoadCompoments<Material::Elastic>("Material", doc, m_Resources.Materials);
+    LoadCompomentsWeak<Element::ElementBase>("Element", doc, m_Resources.Elements);
+    LoadCompomentsWeak<Constraint::ConstraintBase>("Constraint", doc, m_Resources.Constraints);
+    LoadCompomentsWeak<Load::LoadBase>("Load", doc, m_Resources.Loads);
+    LoadCompomentsWeak<Section::SectionBase>("Section", doc, m_Resources.Sections);
+
     BuildAllComponents();
 }
 
-VectorX<Numeric> TrussSolver::GetF()
+void TrussSolver::BuildAllComponents()
 {
-    int K_size = GetKSize();
-    VectorX<Numeric> F = VectorX<Numeric>::Zero(K_size);
-    for (auto&& [_, load_item] : m_Resources.Loads)
-    {
-        auto ids = load_item->GetNodeIds();
-        auto load = load_item->GetLoad();
-        for (auto id: ids)
-        {
-            F.block<6, 1>(id * ALL_DOF, 0) += load;
-        }
-    }
-    return F;
-}
-
-VectorX<Numeric> TrussSolver::GetSimplifiedF()
-{
-    auto index = GetFreedomIndex();
-    auto F = GetF();
-    return F(index);
+    // order is important!!
+    for (auto&& [_, entity]: m_Resources.Sections) entity->Build(m_Resources);
+    for (auto&& [_, entity]: m_Resources.Elements) entity->Build(m_Resources);
+    for (auto&& [_, entity]: m_Resources.Constraints) entity->Build(m_Resources);
+    for (auto&& [_, entity]: m_Resources.Loads) entity->Build(m_Resources);
 }
 
 MatrixX<Numeric> TrussSolver::GetK()
@@ -65,11 +86,35 @@ MatrixX<Numeric> TrussSolver::GetK()
     return K;
 }
 
+VectorX<Numeric> TrussSolver::GetF()
+{
+    int K_size = GetKSize();
+    VectorX<Numeric> F = VectorX<Numeric>::Zero(K_size);
+    for (auto&& [_, load_item]: m_Resources.Loads)
+    {
+        auto ids = load_item->GetNodeIds();
+        auto load = load_item->GetLoad();
+        for (auto id: ids)
+        {
+            F.block<6, 1>(id * ALL_DOF, 0) += load;
+        }
+    }
+    return F;
+}
+
+
 MatrixX<Numeric> TrussSolver::GetSimplifiedK()
 {
     auto index = GetFreedomIndex();
     auto K = GetK();
     return K(index, index);
+}
+
+VectorX<Numeric> TrussSolver::GetSimplifiedF()
+{
+    auto index = GetFreedomIndex();
+    auto F = GetF();
+    return F(index);
 }
 
 int TrussSolver::GetKSize() const noexcept
@@ -118,96 +163,4 @@ std::vector<int> TrussSolver::GetFreedomIndex()
 int TrussSolver::GetNumberOfNode() const noexcept
 {
     return static_cast<int>(m_Resources.Nodes.size());
-}
-
-void TrussSolver::LoadNodes(const TrussDocument& doc)
-{
-    auto& array = doc["Node"];
-    int len = (int) array.Count();
-    for (int i = 0; i < len; ++i)
-    {
-        auto node = array[i].Get<Node>();
-        node.Id = i;// OR: Re-indexing
-        m_Resources.Nodes.insert({node.Key, node});
-    }
-}
-
-void TrussSolver::LoadMaterials(const TrussDocument& doc)
-{
-    auto& array = doc["Material"];
-    int len = (int) array.Count();
-    for (int i = 0; i < len; ++i)
-    {
-        auto type = array[i]["type"].Get<string>();
-        //        auto obj = GetCompomentReflection()
-        //                .Invoke<shared_ptr<Material::MaterialBase>, const TrussDocument&>(type, array[i]);
-        auto obj = array[i].Get<Material::Elastic>();
-        obj.Id = i;
-        m_Resources.Materials.insert({obj.Key, obj});
-    }
-}
-
-void TrussSolver::LoadElements(const TrussDocument& doc)
-{
-    auto& array = doc["Element"];
-    int len = (int) array.Count();
-    for (int i = 0; i < len; ++i)
-    {
-        auto type = array[i]["type"].Get<string>();
-        auto obj = GetCompomentReflection()
-                           .Invoke<shared_ptr<Element::ElementBase>, const TrussDocument&>(type, array[i]);
-        obj->Id = i;
-        m_Resources.Elements.insert({obj->Key, obj});
-    }
-}
-
-void TrussSolver::LoadConstrains(const TrussDocument& doc)
-{
-    auto& array = doc["Constraint"];
-    int len = (int) array.Count();
-    for (int i = 0; i < len; ++i)
-    {
-        auto type = array[i]["type"].Get<string>();
-        auto obj = GetCompomentReflection()
-                           .Invoke<shared_ptr<Constraint::ConstraintBase>, const TrussDocument&>(type, array[i]);
-        obj->Id = i;
-        m_Resources.Constraints.insert({obj->Key, obj});
-    }
-}
-
-void TrussSolver::LoadLoads(const TrussDocument& doc)
-{
-    auto& array = doc["Load"];
-    int len = (int) array.Count();
-    for (int i = 0; i < len; ++i)
-    {
-        auto type = array[i]["type"].Get<string>();
-        auto obj = GetCompomentReflection()
-                           .Invoke<shared_ptr<Load::LoadBase>, const TrussDocument&>(type, array[i]);
-        obj->Id = i;
-        m_Resources.Loads.insert({obj->Key, obj});
-    }
-}
-
-void TrussSolver::LoadSections(const TrussDocument& doc)
-{
-    auto& array = doc["Section"];
-    int len = (int) array.Count();
-    for (int i = 0; i < len; ++i)
-    {
-        auto type = array[i]["type"].Get<string>();
-        auto obj = GetCompomentReflection()
-                           .Invoke<shared_ptr<Section::SectionBase>, const TrussDocument&>(type, array[i]);
-        obj->Id = i;
-        m_Resources.Sections.insert({obj->Key, obj});
-    }
-}
-
-void TrussSolver::BuildAllComponents()
-{
-    // order is important!!
-    for (auto&& [_, entity]: m_Resources.Sections) entity->Build(m_Resources);
-    for (auto&& [_, entity]: m_Resources.Elements) entity->Build(m_Resources);
-    for (auto&& [_, entity]: m_Resources.Constraints) entity->Build(m_Resources);
-    for (auto&& [_, entity]: m_Resources.Loads) entity->Build(m_Resources);
 }
