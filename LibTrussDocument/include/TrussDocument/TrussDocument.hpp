@@ -72,7 +72,7 @@ namespace Truss
 
         [[nodiscard]] bool IsArray() const noexcept;
 
-        [[nodiscard]] size_t Size() const noexcept;
+        [[nodiscard]] size_t Count() const noexcept;
 
         template<typename T, typename...All_T>
         struct get_detail

@@ -25,10 +25,10 @@ VectorX<Numeric> TrussSolver::GetF()
 {
     int K_size = GetKSize();
     VectorX<Numeric> F = VectorX<Numeric>::Zero(K_size);
-    for (int i = 0; i < m_Resources.Loads.size(); ++i)
+    for (auto&& [_, load_item] : m_Resources.Loads)
     {
-        auto ids = m_Resources.Loads[i]->GetNodeIds();
-        auto load = m_Resources.Loads[i]->GetLoad();
+        auto ids = load_item->GetNodeIds();
+        auto load = load_item->GetLoad();
         for (auto id: ids)
         {
             F.block<6, 1>(id * ALL_DOF, 0) += load;
@@ -46,13 +46,12 @@ VectorX<Numeric> TrussSolver::GetSimplifiedF()
 
 MatrixX<Numeric> TrussSolver::GetK()
 {
-    int element_count = (int) m_Resources.Elements.size();
     int K_size = GetKSize();
     MatrixX<Numeric> K = MatrixX<Numeric>::Zero(K_size, K_size);
-    for (int i = 0; i < element_count; ++i)
+    for (auto& [_, element]: m_Resources.Elements)
     {
-        auto ids = m_Resources.Elements[i]->GetNodeIds();
-        auto ke = m_Resources.Elements[i]->GetStiffnessGlobal();
+        auto ids = element->GetNodeIds();
+        auto ke = element->GetStiffnessGlobal();
         // Get index of element node in K
         std::vector<int> index;
         index.reserve(ids.size() * ALL_DOF);
@@ -124,7 +123,7 @@ int TrussSolver::GetNumberOfNode() const noexcept
 void TrussSolver::LoadNodes(const TrussDocument& doc)
 {
     auto& array = doc["Node"];
-    int len = (int) array.Size();
+    int len = (int) array.Count();
     for (int i = 0; i < len; ++i)
     {
         auto node = array[i].Get<Node>();
@@ -136,7 +135,7 @@ void TrussSolver::LoadNodes(const TrussDocument& doc)
 void TrussSolver::LoadMaterials(const TrussDocument& doc)
 {
     auto& array = doc["Material"];
-    int len = (int) array.Size();
+    int len = (int) array.Count();
     for (int i = 0; i < len; ++i)
     {
         auto type = array[i]["type"].Get<string>();
@@ -151,7 +150,7 @@ void TrussSolver::LoadMaterials(const TrussDocument& doc)
 void TrussSolver::LoadElements(const TrussDocument& doc)
 {
     auto& array = doc["Element"];
-    int len = (int) array.Size();
+    int len = (int) array.Count();
     for (int i = 0; i < len; ++i)
     {
         auto type = array[i]["type"].Get<string>();
@@ -165,7 +164,7 @@ void TrussSolver::LoadElements(const TrussDocument& doc)
 void TrussSolver::LoadConstrains(const TrussDocument& doc)
 {
     auto& array = doc["Constraint"];
-    int len = (int) array.Size();
+    int len = (int) array.Count();
     for (int i = 0; i < len; ++i)
     {
         auto type = array[i]["type"].Get<string>();
@@ -179,7 +178,7 @@ void TrussSolver::LoadConstrains(const TrussDocument& doc)
 void TrussSolver::LoadLoads(const TrussDocument& doc)
 {
     auto& array = doc["Load"];
-    int len = (int) array.Size();
+    int len = (int) array.Count();
     for (int i = 0; i < len; ++i)
     {
         auto type = array[i]["type"].Get<string>();
@@ -193,7 +192,7 @@ void TrussSolver::LoadLoads(const TrussDocument& doc)
 void TrussSolver::LoadSections(const TrussDocument& doc)
 {
     auto& array = doc["Section"];
-    int len = (int) array.Size();
+    int len = (int) array.Count();
     for (int i = 0; i < len; ++i)
     {
         auto type = array[i]["type"].Get<string>();

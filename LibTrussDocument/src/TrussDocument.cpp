@@ -390,7 +390,7 @@ bool TrussDocument::IsValue() const noexcept
     return !(IsArray() && IsObject());
 }
 
-size_t TrussDocument::Size() const noexcept
+size_t TrussDocument::Count() const noexcept
 {
     return m_array.size() + m_object.size();
 }
