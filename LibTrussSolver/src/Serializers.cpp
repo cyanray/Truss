@@ -64,7 +64,7 @@ void Truss::from_truss(const TrussDocument& doc, Element::Beam& obj)
     obj.LeftNodeKey = doc["node1_key"].Get<ID>();
     obj.RightNodeKey = doc["node2_key"].Get<ID>();
     obj.SectionKey = doc["section_key"].Get<ID>();
-    obj.YNodeKey = doc["y_node_key"].GetOrDefault<ID>(INVALID_ID);
+    obj.YDirectionNodeKey = doc["y_node_key"].GetOrDefault<ID>(INVALID_ID);
 }
 
 void Truss::from_truss(const TrussDocument& doc, Section::Section_Beam& obj)

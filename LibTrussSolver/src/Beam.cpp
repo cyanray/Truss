@@ -9,9 +9,9 @@ namespace Truss::Element
         this->RightNode = &resources.Nodes.at(RightNodeKey);
         auto& section = resources.Sections.at(SectionKey);
         this->Section = std::static_pointer_cast<Section::Section_Beam>(section).get();
-        if (YNodeKey != INVALID_ID)
+        if (YDirectionNodeKey != INVALID_ID)
         {
-            this->YNode = &resources.Nodes.at(YNodeKey);
+            this->YDirectionNode = &resources.Nodes.at(YDirectionNodeKey);
         }
     }
 

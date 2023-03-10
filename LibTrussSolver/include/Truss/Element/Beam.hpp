@@ -12,13 +12,13 @@ namespace Truss::Element
         ID LeftNodeKey{INVALID_ID};
         ID RightNodeKey{INVALID_ID};
         ID SectionKey{INVALID_ID};
-        ID YNodeKey{INVALID_ID};
+        ID YDirectionNodeKey{INVALID_ID};
         Node* LeftNode{};
         Node* RightNode{};
         /**
-         * @brief YNode is the node that is used to indicate the direction of the Y axis.
+         * @brief YDirectionNode is the node that is used to indicate the direction of the Y axis.
          */
-        Node* YNode{};
+        Node* YDirectionNode{};
         Section::Section_Beam* Section{};
 
         void Build(Resources& resources) override;
