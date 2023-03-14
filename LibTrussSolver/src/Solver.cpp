@@ -73,13 +73,7 @@ MatrixX<Numeric> TrussSolver::GetK()
         auto ids = element->GetNodeIds();
         auto ke = element->GetStiffnessGlobal();
         // Get index of element node in K
-        std::vector<int> index;
-        index.reserve(ids.size() * ALL_DOF);
-        for (int id: ids)
-        {
-            auto tmp = DOF_INDEX + id * ALL_DOF;
-            index.insert(index.end(), tmp.begin(), tmp.end());
-        }
+        std::vector<int> index = GenerateAllDOFIndex(ids);
         K(index, index) += ke;
     }
     return K;

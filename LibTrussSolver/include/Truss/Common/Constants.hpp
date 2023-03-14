@@ -79,6 +79,19 @@ namespace Truss
         return result;
     }
 
+    template<typename TContainer>
+    std::vector<int> GenerateAllDOFIndex(const TContainer& id_list)
+    {
+        std::vector<int> index;
+        index.reserve(id_list.size() * ALL_DOF);
+        for (int id: id_list)
+        {
+            auto tmp = DOF_INDEX + id * ALL_DOF;
+            index.insert(index.end(), tmp.begin(), tmp.end());
+        }
+        return index;
+    }
+
     /**
      * Forward declaration.
      */
