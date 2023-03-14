@@ -77,6 +77,13 @@ void Truss::from_truss(const TrussDocument& doc, Section::Section_Beam& obj)
     obj.J = doc["J"].Get<Numeric>();
 }
 
+void Truss::from_truss(const TrussDocument& doc, Load::BeamUniformLoad& obj)
+{
+    obj.Key = doc["key"].Get<ID>();
+    obj.BeamKey = doc["beam_key"].Get<ID>();
+    obj.YForce = doc["yforce"].GetOrDefault<Numeric>();
+    obj.ZForce = doc["zforce"].GetOrDefault<Numeric>();
+}
 
 namespace
 {

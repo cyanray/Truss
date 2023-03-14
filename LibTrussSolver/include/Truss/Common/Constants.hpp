@@ -40,6 +40,7 @@ namespace Truss
     template<typename T>
     using Matrix12x12 = Eigen::Matrix<T, 12, 12>;
 
+    using LoadVector = Eigen::Vector<Numeric, ALL_DOF>;
 
     template<typename T>
     Matrix3x3<T> GetTransformationMatrix(

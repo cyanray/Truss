@@ -30,9 +30,10 @@ namespace Truss::Load
             return {Node->Id};
         }
 
-        [[nodiscard]] Eigen::Vector<Numeric, 6> GetLoad() const override
+        [[nodiscard]] std::vector<std::pair<ID, LoadVector>> GetLoads() const override
         {
-            return {XForce, YForce, ZForce, XMoment, YMoment, ZMoment};
+            LoadVector load = {XForce, YForce, ZForce, XMoment, YMoment, ZMoment};
+            return { std::make_pair(Node->Id, load) };
         }
     };
 }// namespace Truss::Load

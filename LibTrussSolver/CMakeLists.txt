@@ -50,7 +50,7 @@ set(SOURCES
         src/Section_Bar.cpp
         src/Beam.cpp
         src/Section_Beam.cpp
-        src/Node.cpp)
+        src/Node.cpp include/Truss/Load/BeamUniformLoad.hpp src/BeamUniformLoad.cpp)
 
 add_library(LibTrussSolver ${LIBRARY_TYPE} ${SOURCES})
 

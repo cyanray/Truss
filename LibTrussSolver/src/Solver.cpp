@@ -91,9 +91,7 @@ VectorX<Numeric> TrussSolver::GetF()
     VectorX<Numeric> F = VectorX<Numeric>::Zero(K_size);
     for (auto&& [_, load_item]: m_Resources.Loads)
     {
-        auto ids = load_item->GetNodeIds();
-        auto load = load_item->GetLoad();
-        for (auto id: ids)
+        for (auto&& [id, load]: load_item->GetLoads())
         {
             F.block<6, 1>(id * ALL_DOF, 0) += load;
         }
