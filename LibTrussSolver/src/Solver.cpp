@@ -142,6 +142,7 @@ std::vector<int> TrussSolver::GetFreedomIndex()
         {
             auto tmp = DOF_INDEX + i * ALL_DOF;
             index.insert(index.end(), tmp.begin(), tmp.end());
+            continue;
         }
         for (int j = 0; j < ALL_DOF; ++j)
         {
