@@ -1,20 +1,20 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "UnusedParameter"
 #pragma ide diagnostic ignored "misc-no-recursion"
-#include <string>
+#include "TrussDocument/TrussDocument.hpp"
+#include "TrussDocument/ParserErrorException.hpp"
+#include "TrussDocument/Tokenizer.hpp"
 #include <algorithm>
 #include <cctype>
 #include <charconv>
 #include <complex>
-#include "TrussDocument/TrussDocument.hpp"
-#include "TrussDocument/Tokenizer.hpp"
-#include "TrussDocument/ParserErrorException.hpp"
+#include <string>
 using namespace std;
 using namespace Truss;
 
 namespace
 {
-    template <typename T>
+    template<typename T>
     std::basic_string<T> lowercase(std::basic_string_view<T> s)
     {
         std::basic_string<T> s2(s);
@@ -22,14 +22,14 @@ namespace
         return s2;
     }
 
-    template <typename T>
+    template<typename T>
     std::basic_string<T> uppercase(std::basic_string_view<T> s)
     {
         std::basic_string<T> s2 = s;
         std::transform(s2.begin(), s2.end(), s2.begin(), ::toupper);
         return s2;
     }
-}
+}// namespace
 
 
 namespace Truss
@@ -83,30 +83,23 @@ public:
         }
         auto number_result = ParseNumberImpl(raw_number);
         int index = number_result.index;
-        if (!number_result.flag_decimal)
-        {
-            TrussDocument result;
-            int value = 0;
-            from_chars_wrapper(raw_number.data(), raw_number.data() + index, value);
-            result.m_type = ValueType::Integer;
-            result.m_value = (minus ? -value : value);
-            return result;
-        }
-
         TrussDocument result;
-        if (number_result.flag_double) [[unlikely]]
-        {
-            double value = 0;
+
+        auto lambda_convert = [raw_number, index, minus]<typename T>() {
+            T value{};
             from_chars_wrapper(raw_number.data(), raw_number.data() + index, value);
-            result.m_type = ValueType::Double;
-            result.m_value = (minus ? -value : value);
+            return (minus ? -value : value);
+        };
+
+        if (!number_result.is_double)
+        {
+            result.m_type = ValueType::Integer;
+            result.m_value = lambda_convert.operator()<int>();
         }
-        else [[likely]]
+        else
         {
-            float value = 0;
-            from_chars_wrapper(raw_number.data(), raw_number.data() + index, value);
-            result.m_type = ValueType::Float;
-            result.m_value = (minus ? -value : value);
+            result.m_type = ValueType::Double;
+            result.m_value = lambda_convert.operator()<double>();
         }
         return result;
     }
@@ -114,41 +107,6 @@ public:
     static TrussDocument Parse_Complex(const vector<Token>& tokens, int& current_index)
     {
         throw std::runtime_error("Not yet implemented");
-//        int index = current_index;
-//        if (index + 4 >= tokens.size()) ;
-//        if (tokens[index].Type != TokenType::Symbol_Complex_Start) ;
-//        if (tokens[index + 1].Type != TokenType::Data_Number) ;
-//        string_view number1_str = *tokens[index + 1].Data;
-//        auto number1_result = ParseNumberImpl(number1_str);
-//        if (tokens[index + 2].Type != TokenType::Symbol_Add && tokens[index + 2].Type != TokenType::Symbol_Minus) ;
-//        if (tokens[index + 3].Type != TokenType::Data_Number) ;
-//        string_view number2_str = *tokens[index + 3].Data;
-//        auto number2_result = ParseNumberImpl(number2_str);
-//        if (tokens[index + 4].Type != TokenType::Symbol_Complex_End) ;
-//        if (number1_result.flag_double || number2_result.flag_double)
-//        {
-//            double number1, number2;
-//            from_chars_wrapper(number1_str.data(), number1_str.data() + number1_result.index, number1);
-//            from_chars_wrapper(number2_str.data(), number2_str.data() + number2_result.index, number2);
-//            complex<double> value(number1, number2);
-//            TrussDocument result;
-//            result.m_type = ValueType::Complex;
-//            result.m_value = value;
-//            current_index += 5;
-//            return result;
-//        }
-//        else
-//        {
-//            float number1, number2;
-//            from_chars_wrapper(number1_str.data(), number1_str.data() + number1_result.index, number1);
-//            from_chars_wrapper(number2_str.data(), number2_str.data() + number2_result.index, number2);
-//            complex<float> value(number1, number2);
-//            TrussDocument result;
-//            result.m_type = ValueType::Complex;
-//            result.m_value = value;
-//            current_index += 5;
-//            return result;
-//        }
     }
 
     static TrussDocument Parse_Object(const vector<Token>& tokens, int& current_index, bool ignore_symbol_start = false)
@@ -165,7 +123,8 @@ public:
             if (index >= tokens.size())
             {
                 if (!ignore_symbol_start) goto ERROR_HANDLING;
-                else goto END;
+                else
+                    goto END;
             }
             auto& token_curr = tokens[index];
             switch (token_curr.Type)
@@ -174,16 +133,18 @@ public:
                 {
                     CheckToken(tokens, ++index, TokenType::Symbol_Assignment);
                     auto value = Parse_Value(tokens, index);
-                    result.m_object.insert({ lowercase<char>(*token_curr.Data), value });
+                    result.m_object.insert({lowercase<char>(*token_curr.Data), value});
                     break;
                 }
-                case TokenType::Symbol_Object_End: goto END;
-                default: goto ERROR_HANDLING;
+                case TokenType::Symbol_Object_End:
+                    goto END;
+                default:
+                    goto ERROR_HANDLING;
             }
         }
-        ERROR_HANDLING:
+    ERROR_HANDLING:
         throw UnexpectedTokenException(TokenType::Symbol_Object_End);
-        END:
+    END:
         current_index = index + 1;
         return result;
     }
@@ -200,13 +161,14 @@ public:
             auto& token_curr = tokens[index];
             switch (token_curr.Type)
             {
-            case TokenType::Symbol_Array_End: goto END;
-            default:
-            {
-                auto value = Parse_Value(tokens, index);
-                result.m_array.emplace_back(std::move(value));
-                break;
-            }
+                case TokenType::Symbol_Array_End:
+                    goto END;
+                default:
+                {
+                    auto value = Parse_Value(tokens, index);
+                    result.m_array.emplace_back(std::move(value));
+                    break;
+                }
             }
         }
     ERROR_HANDLING:
@@ -262,7 +224,6 @@ public:
     }
 
 private:
-
     static void CheckToken(const vector<Token>& tokens, int& current_index, TokenType type)
     {
         auto current_token = tokens[current_index].Type;
@@ -275,7 +236,7 @@ private:
     }
 
     template<typename T>
-    static void from_chars_wrapper(const char *begin, const char *end, T &value)
+    static void from_chars_wrapper(const char* begin, const char* end, T& value)
     {
         auto r = std::from_chars(begin, end, value);
         if (r.ec != std::errc{})
@@ -286,11 +247,8 @@ private:
 
     struct ParseNumberResult
     {
-        int index = 0;
-        bool flag_decimal = false;
-        bool flag_float = false;
-        bool flag_double = false;
-        bool flag_complex_imaginary = false;
+        int index{0};
+        bool is_double{false};
     };
 
     static ParseNumberResult ParseNumberImpl(std::string_view raw_number)
@@ -307,15 +265,7 @@ private:
             flag_decimal = (flag_decimal || cond_decimal);
         } while (std::isdigit(ch) || cond_decimal || ch == '+' || ch == '-');
         result.index = index;
-        result.flag_decimal = flag_decimal;
-        for (int i = index; i < raw_number.size(); ++i)
-        {
-            char suffix = raw_number_ptr[i];
-//            result.flag_float = (suffix == 'f');
-            result.flag_double = (result.flag_double || suffix == 'd');
-            result.flag_complex_imaginary = (result.flag_complex_imaginary || suffix == 'i');
-        }
-        result.flag_float = (!result.flag_double && flag_decimal);
+        result.is_double = flag_decimal;
         return result;
     }
 };
@@ -335,44 +285,44 @@ ValueType TrussDocument::GetValueType() const noexcept
     return m_type;
 }
 
-TrussDocument &TrussDocument::At(int index)
+TrussDocument& TrussDocument::At(int index)
 {
     return m_array.at(index);
 }
 
-TrussDocument &TrussDocument::At(std::string_view key)
+TrussDocument& TrussDocument::At(std::string_view key)
 {
     return m_object.at(lowercase(key));
 }
 
-TrussDocument &TrussDocument::operator[](int index)
+TrussDocument& TrussDocument::operator[](int index)
 {
     return m_array[index];
 }
 
-TrussDocument &TrussDocument::operator[](std::string_view key)
+TrussDocument& TrussDocument::operator[](std::string_view key)
 {
     return m_object[lowercase(key)];
 }
 
-const TrussDocument &TrussDocument::At(int index) const
+const TrussDocument& TrussDocument::At(int index) const
 {
-    return const_cast<TrussDocument *>(this)->operator[](index);
+    return const_cast<TrussDocument*>(this)->operator[](index);
 }
 
-const TrussDocument &TrussDocument::At(std::string_view key) const
+const TrussDocument& TrussDocument::At(std::string_view key) const
 {
-    return const_cast<TrussDocument *>(this)->At(key);
+    return const_cast<TrussDocument*>(this)->At(key);
 }
 
-const TrussDocument &TrussDocument::operator[](int index) const
+const TrussDocument& TrussDocument::operator[](int index) const
 {
-    return const_cast<TrussDocument *>(this)->At(index);
+    return const_cast<TrussDocument*>(this)->At(index);
 }
 
-const TrussDocument &TrussDocument::operator[](std::string_view key) const
+const TrussDocument& TrussDocument::operator[](std::string_view key) const
 {
-    return const_cast<TrussDocument *>(this)->operator[](key);
+    return const_cast<TrussDocument*>(this)->operator[](key);
 }
 
 bool TrussDocument::IsArray() const noexcept
@@ -395,7 +345,7 @@ size_t TrussDocument::Count() const noexcept
     return m_array.size() + m_object.size();
 }
 
-bool TrussDocument::Exists(const string &key) const
+bool TrussDocument::Exists(const string& key) const
 {
     return m_object.contains(key);
 }
@@ -408,11 +358,6 @@ bool TrussDocument::IsNull() const noexcept
 bool TrussDocument::IsBoolean() const noexcept
 {
     return (GetValueType() == ValueType::Boolean);
-}
-
-bool TrussDocument::IsFloat() const noexcept
-{
-    return (GetValueType() == ValueType::Float);
 }
 
 bool TrussDocument::IsInteger() const noexcept
@@ -430,10 +375,6 @@ bool TrussDocument::IsString() const noexcept
     return (GetValueType() == ValueType::String);
 }
 
-bool TrussDocument::IsComplex() const noexcept
-{
-    return (GetValueType() == ValueType::Complex);
-}
-
 
 #pragma clang diagnostic pop
+

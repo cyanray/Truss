@@ -23,11 +23,11 @@ namespace Truss
 
         VectorX<Numeric> GetF();
 
-        VectorX<Numeric> GetSimplifiedF();
+        VectorX<Numeric> GetF(const std::vector<int>& index);
 
         MatrixX<Numeric> GetK();
 
-        MatrixX<Numeric> GetSimplifiedK();
+        MatrixX<Numeric> GetK(const std::vector<int>& index);
 
         [[nodiscard]] int GetKSize() const noexcept;
 

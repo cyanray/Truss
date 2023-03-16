@@ -1,14 +1,15 @@
 #pragma once
 
-#include <string>
+#include <complex>
 #include <map>
-#include <vector>
 #include <memory>
+#include <string>
 #include <string_view>
 #include <variant>
-#include <complex>
+#include <vector>
 
 using std::string;
+
 
 namespace Truss
 {
@@ -16,11 +17,9 @@ namespace Truss
     {
         Null,
         Boolean,
-        Float,
         Double,
         Integer,
         String,
-        Complex,
         Object,
         Array
     };
@@ -56,15 +55,11 @@ namespace Truss
 
         [[nodiscard]] bool IsBoolean() const noexcept;
 
-        [[nodiscard]] bool IsFloat() const noexcept;
-
         [[nodiscard]] bool IsDouble() const noexcept;
 
         [[nodiscard]] bool IsInteger() const noexcept;
 
         [[nodiscard]] bool IsString() const noexcept;
-
-        [[nodiscard]] bool IsComplex() const noexcept;
 
         [[nodiscard]] bool IsValue() const noexcept;
 
@@ -74,7 +69,7 @@ namespace Truss
 
         [[nodiscard]] size_t Count() const noexcept;
 
-        template<typename T, typename...All_T>
+        template<typename T, typename... All_T>
         struct get_detail
         {
             static T Get(const TrussDocument& doc)
@@ -88,10 +83,10 @@ namespace Truss
                 if (value_ptr != nullptr) return *value_ptr;
                 return default_value;
             }
-
         };
 
-        template<typename T, typename...All_T> requires (!std::same_as<T, All_T> && ...)
+        template<typename T, typename... All_T>
+            requires(!std::same_as<T, All_T> && ...)
         struct get_detail<T, std::variant<All_T...>>
         {
             static T Get(const TrussDocument& doc)
@@ -101,7 +96,7 @@ namespace Truss
                 return result;
             }
 
-            static T GetOrDefault(const TrussDocument& doc, T&& default_value)
+            static T GetOrDefault(const TrussDocument& doc, const T& default_value)
             {
                 try
                 {
@@ -112,49 +107,42 @@ namespace Truss
                     return default_value;
                 }
             }
-
         };
 
         template<typename T>
-        T Get() const
+        [[nodiscard]] T Get() const
         {
             return get_detail<T, ValueContainer>::Get(*this);
         }
 
-        template<typename T> requires std::same_as<T, float>
+        template<typename T>
+            requires std::same_as<T, float>
         [[nodiscard]] float Get() const
         {
-            if (GetValueType() == ValueType::Double) [[unlikely]]
-            {
-                return static_cast<float>(std::get<double>(m_value));
-            }
-            return std::get<float>(m_value);
-        }
-
-        template<typename T> requires std::same_as<T, double>
-        [[nodiscard]] double Get() const
-        {
-            if (GetValueType() == ValueType::Float) [[unlikely]]
-            {
-                return static_cast<double>(std::get<float>(m_value));
-            }
-            return std::get<float>(m_value);
+            return static_cast<float>(Get<double>());
         }
 
         template<typename T>
-        T GetOrDefault(const T& default_value = {}) const
+        [[nodiscard]] T GetOrDefault(const T& default_value = {}) const
         {
             return get_detail<T, ValueContainer>::GetOrDefault(*this, default_value);
+        }
+
+        template<typename T>
+            requires std::same_as<T, float>
+        [[nodiscard]] float GetOrDefault(const float& default_value = {}) const
+        {
+            return static_cast<float>(GetOrDefault<double>(default_value));
         }
 
     private:
         friend class ParserImpl;
 
-        using ValueContainer = std::variant<bool, int, float, double, std::string, std::complex<double>, std::complex<float>>;
+        using ValueContainer = std::variant<bool, int, double, std::string>;
         ValueType m_type;
         ValueContainer m_value;
         std::vector<TrussDocument> m_array;
         std::map<std::string, TrussDocument> m_object;
     };
 
-}
+}// namespace Truss

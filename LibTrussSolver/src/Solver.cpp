@@ -94,16 +94,14 @@ VectorX<Numeric> TrussSolver::GetF()
 }
 
 
-MatrixX<Numeric> TrussSolver::GetSimplifiedK()
+MatrixX<Numeric> TrussSolver::GetK(const std::vector<int>& index)
 {
-    auto index = GetFreedomIndex();
     auto K = GetK();
     return K(index, index);
 }
 
-VectorX<Numeric> TrussSolver::GetSimplifiedF()
+VectorX<Numeric> TrussSolver::GetF(const std::vector<int>& index)
 {
-    auto index = GetFreedomIndex();
     auto F = GetF();
     return F(index);
 }
