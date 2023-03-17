@@ -1,4 +1,5 @@
 #pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-dcl21-cpp"
 #pragma ide diagnostic ignored "UnusedParameter"
 #pragma ide diagnostic ignored "misc-no-recursion"
 #include "TrussDocument/TrussDocument.hpp"
@@ -382,41 +383,48 @@ bool TrussDocument::IsString() const noexcept
 {
     return (GetValueType() == Type::String);
 }
+
 TrussDocument& TrussDocument::operator=(const string& value)
 {
     m_type = Type::String;
     m_value = value;
     return *this;
 }
+
 TrussDocument& TrussDocument::operator=(string&& value)
 {
     m_type = Type::String;
     m_value = std::move(value);
     return *this;
 }
+
 TrussDocument& TrussDocument::operator=(int value)
 {
     m_type = Type::Integer;
     m_value = value;
     return *this;
 }
+
 TrussDocument& TrussDocument::operator=(double value)
 {
     m_type = Type::Double;
     m_value = value;
     return *this;
 }
+
 TrussDocument& TrussDocument::AssignVaue(bool value)
 {
     m_type = Type::Boolean;
     m_value = value;
     return *this;
 }
+
 TrussDocument& TrussDocument::operator=(std::nullptr_t)
 {
     m_type = Type::Null;
     return *this;
 }
+
 TrussDocument TrussDocument::Object()
 {
     TrussDocument doc;
@@ -424,6 +432,7 @@ TrussDocument TrussDocument::Object()
     doc.m_value = TObject{};
     return doc;
 }
+
 TrussDocument TrussDocument::Array()
 {
     TrussDocument doc;
