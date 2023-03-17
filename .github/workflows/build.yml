@@ -16,13 +16,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install GCC11
-      shell: bash
-      run:  |
-            sudo apt update
-            sudo apt install gcc-11 g++-11
-            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 110 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-11
-
     # Install latest CMake.
     - uses: lukka/get-cmake@latest
 
@@ -30,8 +23,6 @@ jobs:
       uses: lukka/run-vcpkg@v10
       id: runvcpkg
       with:
-        vcpkgArguments: 'eigen3 catch2 magic-enum'
-        vcpkgTriplet: 'x64-linux'
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
         vcpkgGitCommitId: 'b51f391cd8f1f5a406b3baf9b014acff61702dc3'
     
