@@ -1,0 +1,44 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # Install latest CMake.
+    - uses: lukka/get-cmake@latest
+
+    - name: Restore artifacts, or setup vcpkg (do not install any package)
+      uses: lukka/run-vcpkg@v10
+      id: runvcpkg
+      with:
+        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+        vcpkgGitCommitId: 'b51f391cd8f1f5a406b3baf9b014acff61702dc3'
+    
+    - name: Prints output of run-vcpkg's task
+      run: echo "root='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}', triplet='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}' "
+
+    - name: Run CMake
+      uses: lukka/run-cmake@v10
+      with:
+        configurePreset: 'linux-debug'
+        
+    - name: Build
+      working-directory: ${{github.workspace}}/out/build/linux-debug
+      run: cmake --build
+
+    - name: Test
+      working-directory: ${{github.workspace}}/out/build/linux-debug
+      run: ctest -C ${{env.BUILD_TYPE}}
+
