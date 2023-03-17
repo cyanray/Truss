@@ -33,7 +33,6 @@ jobs:
       uses: lukka/run-cmake@v10
       with:
         configurePreset: 'linux-debug'
-        buildPreset: 'linux-debug'
 
 
     - name: Test
