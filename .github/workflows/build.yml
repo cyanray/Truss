@@ -33,12 +33,6 @@ jobs:
       uses: lukka/run-cmake@v10
       with:
         configurePreset: 'linux-debug'
-        
-    - name: Build
-      working-directory: ${{github.workspace}}/out/build/linux-debug
-      run: cmake --build
-
-    - name: Test
-      working-directory: ${{github.workspace}}/out/build/linux-debug
-      run: ctest -C ${{env.BUILD_TYPE}}
+        buildPreset: 'linux-debug'
+        testPreset: 'linux-test'
 
