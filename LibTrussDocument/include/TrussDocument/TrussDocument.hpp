@@ -13,25 +13,41 @@ using std::string;
 
 namespace Truss
 {
-    enum class ValueType
-    {
-        Null,
-        Boolean,
-        Double,
-        Integer,
-        String,
-        Object,
-        Array
-    };
-
     class TrussDocument
     {
     public:
-        TrussDocument() : m_type(ValueType::Null) {}
+        enum class Type
+        {
+            Null,
+            Boolean,
+            Double,
+            Integer,
+            String,
+            Object,
+            Array
+        };
+
+        TrussDocument() : m_type(Type::Null) {}
+
+        explicit TrussDocument(std::nullptr_t) : m_type(Type::Null) {}
+
+        explicit TrussDocument(bool value) : m_type(Type::Boolean), m_value(value) {}
+
+        explicit TrussDocument(int value) : m_type(Type::Integer), m_value(value) {}
+
+        explicit TrussDocument(double value) : m_type(Type::Double), m_value(value) {}
+
+        explicit TrussDocument(std::string_view value) : m_type(Type::String), m_value(string(value)) {}
+
+        explicit TrussDocument(std::string&& value) : m_type(Type::String), m_value(std::move(value)) {}
+
+        static TrussDocument Object();
+
+        static TrussDocument Array();
 
         static TrussDocument Parse(std::string_view input);
 
-        [[nodiscard]] ValueType GetValueType() const noexcept;
+        [[nodiscard]] Type GetValueType() const noexcept;
 
         TrussDocument& At(int index);
 
@@ -48,6 +64,43 @@ namespace Truss
         TrussDocument& operator[](std::string_view key);
 
         const TrussDocument& operator[](std::string_view key) const;
+
+
+        TrussDocument& operator=(const string& value);
+
+        TrussDocument& operator=(string&& value);
+
+        TrussDocument& operator=(int value);
+
+        TrussDocument& operator=(double value);
+
+        template<typename T>
+            requires std::same_as<T, bool>
+        TrussDocument& operator=(T value)
+        {
+            this->AssignVaue(value);
+            return *this;
+        }
+
+        TrussDocument& operator=(std::nullptr_t);
+
+        TrussDocument& Add(const TrussDocument& value);
+
+        TrussDocument& Add(TrussDocument&& value);
+
+        template<typename T>
+            requires std::is_constructible_v<TrussDocument, T>
+        TrussDocument& Add(T&& value)
+        {
+            return Add(TrussDocument(std::forward<T>(value)));
+        }
+
+        template<typename T>
+            requires std::is_assignable_v<TrussDocument, T>
+        TrussDocument& Add(std::string_view key, T&& value)
+        {
+            return ((*this)[key] = std::forward<T>(value));
+        }
 
         [[nodiscard]] bool Exists(const string& key) const;
 
@@ -110,9 +163,10 @@ namespace Truss
         };
 
         template<typename T>
+            requires (!std::same_as<T, float>)
         [[nodiscard]] T Get() const
         {
-            return get_detail<T, ValueContainer>::Get(*this);
+            return get_detail<T, TValue>::Get(*this);
         }
 
         template<typename T>
@@ -123,9 +177,10 @@ namespace Truss
         }
 
         template<typename T>
+            requires (!std::same_as<T, float>)
         [[nodiscard]] T GetOrDefault(const T& default_value = {}) const
         {
-            return get_detail<T, ValueContainer>::GetOrDefault(*this, default_value);
+            return get_detail<T, TValue>::GetOrDefault(*this, default_value);
         }
 
         template<typename T>
@@ -138,11 +193,13 @@ namespace Truss
     private:
         friend class ParserImpl;
 
-        using ValueContainer = std::variant<bool, int, double, std::string>;
-        ValueType m_type;
-        ValueContainer m_value;
-        std::vector<TrussDocument> m_array;
-        std::map<std::string, TrussDocument> m_object;
+        using TArray = std::vector<TrussDocument>;
+        using TObject = std::map<std::string, TrussDocument>;
+        using TValue = std::variant<bool, int, double, std::string, TArray, TObject>;
+        Type m_type;
+        TValue m_value;
+
+        TrussDocument& AssignVaue(bool value);
     };
 
 }// namespace Truss

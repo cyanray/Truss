@@ -20,7 +20,7 @@ namespace Truss
     {
         message = "Expecting value token, but got nothing.";
     }
-    const char* UnexpectedTokenException::what() const
+    const char* UnexpectedTokenException::what() const noexcept
     {
         return message.data();
     }
@@ -31,7 +31,7 @@ namespace Truss
         message += value;
         message += " as a number.";
     }
-    const char* ParseNumberException::what() const
+    const char* ParseNumberException::what() const noexcept
     {
         return message.data();
     }

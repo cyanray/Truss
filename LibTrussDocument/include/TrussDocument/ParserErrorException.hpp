@@ -14,7 +14,7 @@ namespace Truss
         explicit UnexpectedTokenException(TokenType expectation);
         UnexpectedTokenException();
 
-        [[nodiscard]] const char* what() const override;
+        [[nodiscard]] const char* what() const noexcept override;
 
         ~UnexpectedTokenException() noexcept override = default;
     private:
@@ -26,7 +26,7 @@ namespace Truss
     public:
         explicit ParseNumberException(std::string_view value);
 
-        [[nodiscard]] const char* what() const override;
+        [[nodiscard]] const char* what() const noexcept override;
 
         ~ParseNumberException() noexcept override = default;
     private:

@@ -44,7 +44,7 @@ public:
     {
         auto& token_curr = tokens[current_index++];
         TrussDocument result;
-        result.m_type = ValueType::Boolean;
+        result.m_type = TrussDocument::Type::Boolean;
         result.m_value = (token_curr.Type == TokenType::Keyword_True);
         return result;
     }
@@ -53,14 +53,14 @@ public:
     {
         ++current_index;
         TrussDocument result;
-        result.m_type = ValueType::Null;
+        result.m_type = TrussDocument::Type::Null;
         return result;
     }
 
     static TrussDocument Parse_String(const vector<Token>& tokens, int& current_index)
     {
         TrussDocument result;
-        result.m_type = ValueType::String;
+        result.m_type = TrussDocument::Type::String;
         result.m_value = string(*tokens[current_index++].Data);
         return result;
     }
@@ -93,12 +93,12 @@ public:
 
         if (!number_result.is_double)
         {
-            result.m_type = ValueType::Integer;
+            result.m_type = TrussDocument::Type::Integer;
             result.m_value = lambda_convert.operator()<int>();
         }
         else
         {
-            result.m_type = ValueType::Double;
+            result.m_type = TrussDocument::Type::Double;
             result.m_value = lambda_convert.operator()<double>();
         }
         return result;
@@ -117,7 +117,8 @@ public:
             CheckToken(tokens, index, TokenType::Symbol_Object_Start);
         }
         TrussDocument result;
-        result.m_type = ValueType::Object;
+        result.m_type = TrussDocument::Type::Object;
+        result.m_value = TrussDocument::TObject{};
         while (true)
         {
             if (index >= tokens.size())
@@ -133,7 +134,7 @@ public:
                 {
                     CheckToken(tokens, ++index, TokenType::Symbol_Assignment);
                     auto value = Parse_Value(tokens, index);
-                    result.m_object.insert({lowercase<char>(*token_curr.Data), value});
+                    std::get<TrussDocument::TObject>(result.m_value).insert({lowercase<char>(*token_curr.Data), value});
                     break;
                 }
                 case TokenType::Symbol_Object_End:
@@ -154,7 +155,8 @@ public:
         int index = current_index;
         CheckToken(tokens, index, TokenType::Symbol_Array_Start);
         TrussDocument result;
-        result.m_type = ValueType::Array;
+        result.m_type = TrussDocument::Type::Array;
+        result.m_value = TrussDocument::TArray{};
         while (true)
         {
             if (index >= tokens.size()) goto ERROR_HANDLING;
@@ -166,7 +168,7 @@ public:
                 default:
                 {
                     auto value = Parse_Value(tokens, index);
-                    result.m_array.emplace_back(std::move(value));
+                    std::get<TrussDocument::TArray>(result.m_value).emplace_back(std::move(value));
                     break;
                 }
             }
@@ -280,29 +282,29 @@ TrussDocument TrussDocument::Parse(std::string_view input)
     return result;
 }
 
-ValueType TrussDocument::GetValueType() const noexcept
+TrussDocument::Type TrussDocument::GetValueType() const noexcept
 {
     return m_type;
 }
 
 TrussDocument& TrussDocument::At(int index)
 {
-    return m_array.at(index);
+    return std::get<TArray>(m_value).at(index);
 }
 
 TrussDocument& TrussDocument::At(std::string_view key)
 {
-    return m_object.at(lowercase(key));
+    return std::get<TObject>(m_value).at(lowercase(key));
 }
 
 TrussDocument& TrussDocument::operator[](int index)
 {
-    return m_array[index];
+    return std::get<TArray>(m_value)[index];
 }
 
 TrussDocument& TrussDocument::operator[](std::string_view key)
 {
-    return m_object[lowercase(key)];
+    return std::get<TObject>(m_value)[lowercase(key)];
 }
 
 const TrussDocument& TrussDocument::At(int index) const
@@ -327,12 +329,12 @@ const TrussDocument& TrussDocument::operator[](std::string_view key) const
 
 bool TrussDocument::IsArray() const noexcept
 {
-    return (GetValueType() == ValueType::Array);
+    return (GetValueType() == Type::Array);
 }
 
 bool TrussDocument::IsObject() const noexcept
 {
-    return (GetValueType() == ValueType::Object);
+    return (GetValueType() == Type::Object);
 }
 
 bool TrussDocument::IsValue() const noexcept
@@ -342,39 +344,107 @@ bool TrussDocument::IsValue() const noexcept
 
 size_t TrussDocument::Count() const noexcept
 {
-    return m_array.size() + m_object.size();
+    if (m_type == Type::Array)
+    {
+        return std::get<TArray>(m_value).size();
+    }
+    else if (m_type == Type::Object)
+    {
+        return std::get<TObject>(m_value).size();
+    }
+    return 0;
 }
 
 bool TrussDocument::Exists(const string& key) const
 {
-    return m_object.contains(key);
+    return std::get<TObject>(m_value).contains(key);
 }
 
 bool TrussDocument::IsNull() const noexcept
 {
-    return (GetValueType() == ValueType::Null);
+    return (GetValueType() == Type::Null);
 }
 
 bool TrussDocument::IsBoolean() const noexcept
 {
-    return (GetValueType() == ValueType::Boolean);
+    return (GetValueType() == Type::Boolean);
 }
 
 bool TrussDocument::IsInteger() const noexcept
 {
-    return (GetValueType() == ValueType::Integer);
+    return (GetValueType() == Type::Integer);
 }
 
 bool TrussDocument::IsDouble() const noexcept
 {
-    return (GetValueType() == ValueType::Double);
+    return (GetValueType() == Type::Double);
 }
 
 bool TrussDocument::IsString() const noexcept
 {
-    return (GetValueType() == ValueType::String);
+    return (GetValueType() == Type::String);
+}
+TrussDocument& TrussDocument::operator=(const string& value)
+{
+    m_type = Type::String;
+    m_value = value;
+    return *this;
+}
+TrussDocument& TrussDocument::operator=(string&& value)
+{
+    m_type = Type::String;
+    m_value = std::move(value);
+    return *this;
+}
+TrussDocument& TrussDocument::operator=(int value)
+{
+    m_type = Type::Integer;
+    m_value = value;
+    return *this;
+}
+TrussDocument& TrussDocument::operator=(double value)
+{
+    m_type = Type::Double;
+    m_value = value;
+    return *this;
+}
+TrussDocument& TrussDocument::AssignVaue(bool value)
+{
+    m_type = Type::Boolean;
+    m_value = value;
+    return *this;
+}
+TrussDocument& TrussDocument::operator=(std::nullptr_t)
+{
+    m_type = Type::Null;
+    return *this;
+}
+TrussDocument TrussDocument::Object()
+{
+    TrussDocument doc;
+    doc.m_type = Type::Object;
+    doc.m_value = TObject{};
+    return doc;
+}
+TrussDocument TrussDocument::Array()
+{
+    TrussDocument doc;
+    doc.m_type = Type::Array;
+    doc.m_value = TArray{};
+    return doc;
+}
+
+TrussDocument& TrussDocument::Add(const TrussDocument& value)
+{
+    std::get<TArray>(m_value).emplace_back(value);
+    return std::get<TArray>(m_value).back();
+}
+
+TrussDocument& TrussDocument::Add(TrussDocument&& value)
+{
+    std::get<TArray>(m_value).emplace_back(std::move(value));
+    return std::get<TArray>(m_value).back();
 }
 
 
 #pragma clang diagnostic pop
-
