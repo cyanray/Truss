@@ -143,5 +143,18 @@
             "displayName": "",
             "configurePreset": "linux-debug"
         }
+    ],
+    "testPresets": [{
+            "name": "x64-test",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "x64-debug"
+        },
+        {
+            "name": "linux-test",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "linux-debug"
+        }
     ]
 }
