@@ -446,5 +446,15 @@ TrussDocument& TrussDocument::Add(TrussDocument&& value)
     return std::get<TArray>(m_value).back();
 }
 
+TrussDocument::iterator TrussDocument::begin()
+{
+    return {this, false};
+}
+
+TrussDocument::iterator TrussDocument::end()
+{
+    return {this, true};
+}
+
 
 #pragma clang diagnostic pop

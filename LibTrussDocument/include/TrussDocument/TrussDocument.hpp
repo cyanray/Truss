@@ -190,6 +190,12 @@ namespace Truss
             return static_cast<float>(GetOrDefault<double>(default_value));
         }
 
+        class iterator;
+
+        [[nodiscard]] iterator begin();
+
+        [[nodiscard]] iterator end();
+
     private:
         friend class ParserImpl;
 
@@ -201,5 +207,130 @@ namespace Truss
 
         TrussDocument& AssignVaue(bool value);
     };
+
+    class TrussDocument::iterator
+    {
+    private:
+        friend class TrussDocument;
+
+        iterator(TrussDocument* doc, bool is_end): m_doc(doc)
+        {
+            m_is_array = m_doc->IsArray();
+            if (m_is_array)
+            {
+                auto& array = std::get<TArray>(m_doc->m_value);
+                m_array_iterator = (is_end? array.end() : array.begin());
+            }
+            else
+            {
+                auto& object = std::get<TObject>(m_doc->m_value);
+                m_object_iterator = (is_end? object.end() : object.begin());
+            }
+        }
+
+        TrussDocument* m_doc;
+        bool m_is_array{false};
+        int m_array_index{0};
+        TArray::iterator m_array_iterator;
+        TObject::iterator m_object_iterator;
+
+    public:
+        using iterator_category = std::bidirectional_iterator_tag;
+        using value_type = TrussDocument;
+        using difference_type = std::ptrdiff_t;
+        using pointer = TrussDocument*;
+        using reference = TrussDocument&;
+
+        iterator(const iterator&) = default;
+
+        iterator(iterator&&) = default;
+
+        iterator& operator=(const iterator&) = default;
+
+        iterator& operator=(iterator&&) = default;
+
+        iterator& operator++()
+        {
+            if(m_is_array)
+            {
+                ++m_array_iterator;
+                ++m_array_index;
+            }
+            else
+            {
+                ++m_object_iterator;
+            }
+            return *this;
+        }
+
+        iterator operator++(int)
+        {
+            iterator result = *this;
+            ++(*this);
+            return result;
+        }
+
+        iterator& operator--()
+        {
+            if (m_is_array)
+            {
+                --m_array_iterator;
+                --m_array_index;
+            }
+            else
+            {
+                --m_object_iterator;
+            }
+            return *this;
+        }
+
+        iterator operator--(int)
+        {
+            iterator result = *this;
+            --(*this);
+            return result;
+        }
+
+        bool operator==(const iterator& other) const
+        {
+            return (m_is_array ? m_array_iterator == other.m_array_iterator
+                               : m_object_iterator == other.m_object_iterator);
+        }
+
+        bool operator!=(const iterator& other) const
+        {
+            return !(*this == other);
+        }
+
+        reference operator*()
+        {
+            return (m_is_array ? *m_array_iterator : m_object_iterator->second);
+        }
+
+        pointer operator->()
+        {
+            return (m_is_array ? &(*m_array_iterator) : &m_object_iterator->second);
+        }
+
+        [[nodiscard]] int index() const
+        {
+            if (!m_is_array)
+            {
+                throw std::runtime_error("TrussDocument::iterator::index() is only valid for array");
+            }
+            return m_array_index;
+        }
+
+        [[nodiscard]] const std::string& key() const
+        {
+            if (m_is_array)
+            {
+                throw std::runtime_error("TrussDocument::iterator::key() is only valid for object");
+            }
+            return m_object_iterator->first;
+        }
+
+    };
+
 
 }// namespace Truss

@@ -1,5 +1,6 @@
 #include <TrussDocument/TrussDocument.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <array>
 using namespace Truss;
 
 
@@ -387,6 +388,69 @@ TEST_CASE("For array", "[ForArray]")
         REQUIRE(doc[1].IsBoolean());
         REQUIRE(doc[1].Get<bool>() == false);
     }
+
+    SECTION("Iterator test (++it)")
+    {
+        TrussDocument doc = TrussDocument::Array();
+        doc.Add(123);
+        doc.Add(456);
+        doc.Add(789);
+        int i = 0;
+        for (auto it = doc.begin(); it != doc.end(); ++it)
+        {
+            REQUIRE(it->IsInteger());
+            REQUIRE(it.index() == i);
+            REQUIRE(it->Get<int>() == 123 + i * 333);
+            i++;
+        }
+    }
+
+    SECTION("Iterator test (it++)")
+    {
+        TrussDocument doc = TrussDocument::Array();
+        doc.Add(123);
+        doc.Add(456);
+        doc.Add(789);
+        int i = 0;
+        for (auto it = doc.begin(); it != doc.end(); it++)
+        {
+            REQUIRE(it->IsInteger());
+            REQUIRE(it.index() == i);
+            REQUIRE(it->Get<int>() == 123 + i * 333);
+            i++;
+        }
+    }
+
+    SECTION("Iterator test range-base")
+    {
+        TrussDocument doc = TrussDocument::Array();
+        doc.Add(123);
+        doc.Add(456);
+        doc.Add(789);
+        int i = 0;
+        for (auto& it : doc)
+        {
+            REQUIRE(it.IsInteger());
+            REQUIRE(it.Get<int>() == 123 + i * 333);
+            i++;
+        }
+    }
+
+    SECTION("Iterator test range-base const")
+    {
+        TrussDocument doc = TrussDocument::Array();
+        doc.Add(123);
+        doc.Add(456);
+        doc.Add(789);
+        int i = 0;
+        for (const auto& it : doc)
+        {
+            REQUIRE(it.IsInteger());
+            REQUIRE(it.Get<int>() == 123 + i * 333);
+            i++;
+        }
+    }
+
 }
 
 
@@ -409,4 +473,70 @@ TEST_CASE("For object", "[ForObject]")
         REQUIRE(doc["key4"].IsDouble());
         REQUIRE(doc["key4"].Get<double>() == 456.789);
     }
+
+    SECTION("Iterator test (++it)")
+    {
+        TrussDocument doc = TrussDocument::Object();
+        doc.Add("key1", 123);
+        doc.Add("key2", 456);
+        doc.Add("key3", 789);
+        std::array key_list = { "key1", "key2", "key3"};
+        int i = 0;
+        for (auto it = doc.begin(); it != doc.end(); ++it)
+        {
+            REQUIRE(it->IsInteger());
+            REQUIRE(it.key() == key_list[i]);
+            REQUIRE(it->Get<int>() == 123 + i * 333);
+            i++;
+        }
+    }
+
+    SECTION("Iterator test (it++)")
+    {
+        TrussDocument doc = TrussDocument::Object();
+        doc.Add("key1", 123);
+        doc.Add("key2", 456);
+        doc.Add("key3", 789);
+        std::array key_list = { "key1", "key2", "key3"};
+        int i = 0;
+        for (auto it = doc.begin(); it != doc.end(); it++)
+        {
+            REQUIRE(it->IsInteger());
+            REQUIRE(it.key() == key_list[i]);
+            REQUIRE(it->Get<int>() == 123 + i * 333);
+            i++;
+        }
+    }
+
+    SECTION("Iterator test range-base")
+    {
+        TrussDocument doc = TrussDocument::Object();
+        doc.Add("key1", 123);
+        doc.Add("key2", 456);
+        doc.Add("key3", 789);
+        int i = 0;
+        for (auto& it : doc)
+        {
+            REQUIRE(it.IsInteger());
+            REQUIRE(it.Get<int>() == 123 + i * 333);
+            i++;
+        }
+    }
+
+    SECTION("Iterator test range-base const")
+    {
+        TrussDocument doc = TrussDocument::Object();
+        doc.Add("key1", 123);
+        doc.Add("key2", 456);
+        doc.Add("key3", 789);
+        int i = 0;
+        for (const auto& it : doc)
+        {
+            REQUIRE(it.IsInteger());
+            REQUIRE(it.Get<int>() == 123 + i * 333);
+            i++;
+        }
+    }
+
+
 }
