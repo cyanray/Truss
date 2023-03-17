@@ -1,4 +1,7 @@
 # Truss
+![](https://github.com/cyanray/truss/workflows/Build/badge.svg)
+![](https://img.shields.io/github/license/cyanray/truss.svg)
+
 A toy FEM solver written in C++20.
 
 
