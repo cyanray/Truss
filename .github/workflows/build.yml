@@ -26,8 +26,8 @@ jobs:
     # Install latest CMake.
     - uses: lukka/get-cmake@latest
 
-    - name: Restore artifacts, or run vcpkg, build and cache artifacts
-      uses: lukka/run-vcpkg@main
+    - name: Restore artifacts, or setup vcpkg (do not install any package)
+      uses: lukka/run-vcpkg@v10
       id: runvcpkg
       with:
         vcpkgArguments: 'eigen3 catch2 magic-enum'
@@ -39,14 +39,11 @@ jobs:
       run: echo "root='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}', triplet='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}' "
 
     - name: Run CMake
-      uses: lukka/run-cmake@main
+      uses: lukka/run-cmake@v10
       with:
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-        useVcpkgToolchainFile: true
-        buildDirectory: '${{ github.workspace }}/build'
-        cmakeAppendedArgs: '-DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SHARED_LIBS=OFF  -DCMAKE_EXE_LINKER_FLAGS="-static"  -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-11 -DEXECUTABLE_OUTPUT_PATH="${{ github.workspace }}/bin"'
-        buildWithCMake: true
+        configurePreset: 'linux-debug'
+        buildPreset: 'linux-debug'
+
 
     - name: Test
       working-directory: ${{github.workspace}}/build
