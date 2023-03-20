@@ -10,6 +10,7 @@ A toy FEM solver written in C++20.
 - [x] Multiple elements:
   - [x] Truss
   - [x] Beam
+  - [x] Constant Strain Triangle
   - [ ] More...
 - [x] Multiple materials:
   - [x] Linear elastic
