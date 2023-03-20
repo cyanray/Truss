@@ -5,11 +5,20 @@ set(CMAKE_CXX_STANDARD 20)
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
-add_executable(TrussCLI "src/TrussCLI.cpp" include/UTF8CodePage.hpp)
+include(FetchContent)
+
+FetchContent_Declare(backward
+        GIT_REPOSITORY https://github.com/bombela/backward-cpp
+        GIT_TAG v1.6)
+FetchContent_MakeAvailable(backward)
+
+add_executable(TrussCLI "src/TrussCLI.cpp" include/UTF8CodePage.hpp ${BACKWARD_ENABLE})
 target_include_directories(TrussCLI PRIVATE "include")
 
 target_link_libraries(TrussCLI PRIVATE LibTrussDocument)
 target_link_libraries(TrussCLI PRIVATE LibTrussSolver)
+
+add_backward(TrussCLI)
 
 add_custom_command(TARGET TrussCLI POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

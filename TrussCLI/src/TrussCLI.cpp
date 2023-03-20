@@ -1,10 +1,12 @@
 ﻿#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 #include <Eigen/Dense>
 #include <Truss/Solver.hpp>
 #include <TrussDocument/TrussDocument.hpp>
+#include <backward.hpp>
 
 #ifdef _WIN32
 #include "UTF8CodePage.hpp"
@@ -37,19 +39,39 @@ int main(int argc, char* argv[])
         TrussSolver solver;
         solver.LoadTrussDocument(doc);
         auto index = solver.GetFreedomIndex();
+        auto idx = {0,1,6,7,12,13,18,19};
+        cout << solver.GetK(idx) << endl;
         auto K = solver.GetK(index);
         auto F = solver.GetF(index);
-        VectorXf D = K.colPivHouseholderQr().solve(F);
 
         cout << "[K] = " << endl;
         cout << K << endl;
         cout << "{F} = " << endl;
         cout << F << endl;
+
+        VectorXf D = K.colPivHouseholderQr().solve(F);
+
         cout << "{D} = " << endl;
         cout << D << endl;
     }
     catch (const exception& exception)
     {
+        using namespace backward;
+        std::ostringstream ss;
+
+        StackTrace stackTrace;
+        TraceResolver resolver;
+        stackTrace.load_here();
+        resolver.load_stacktrace(stackTrace);
+
+        for (std::size_t i = 0; i < stackTrace.size(); ++i)
+        {
+            const ResolvedTrace trace = resolver.resolve(stackTrace[i]);
+
+            ss << "#" << i << " at " << trace.object_function << ", " << trace.addr << ";\n";
+        }
+
+        cout << ss.str() << endl;
         cout << "Error: " << exception.what() << endl;
     }
 

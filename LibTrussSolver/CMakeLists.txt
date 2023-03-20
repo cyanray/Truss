@@ -17,55 +17,66 @@ endif ()
 find_package(Eigen3 CONFIG REQUIRED)
 
 set(SOURCES
-        include/Truss/Solver.hpp
-        include/Truss/Common/Constants.hpp
-        include/Truss/Common/DegreeOfFreedom.hpp
-        include/Truss/Common/IComponent.hpp
-        include/Truss/Common/Node.hpp
-        include/Truss/Common/Resources.hpp
-        include/Truss/Constraint/ConstraintBase.hpp
-        include/Truss/Constraint/NodeConstraint.hpp
-        include/Truss/Element/Bar.hpp
-        include/Truss/Element/ElementBase.hpp
-        include/Truss/Load/LoadBase.hpp
-        include/Truss/Load/NodeLoad.hpp
-        include/Truss/Material/MaterialBase.hpp
-        include/Truss/Material/Elastic.hpp
-        include/Truss/Section/SectionBase.hpp
-        include/Truss/Section/Section_Bar.hpp
-        include/Truss/Serializer/Serializers.hpp
-        include/Truss/Utils/FunctionPointer.hpp
-        include/Truss/Utils/SimpleReflection.hpp
-        include/Truss/Section/Section_Beam.hpp
-        include/Truss/Element/Beam.hpp
-        src/Solver.cpp
-        src/Bar.cpp
-        src/Serializers.cpp
-        src/SimpleReflection.cpp
-        src/MaterialBase.cpp
-        src/ConstraintBase.cpp
-        src/LoadBase.cpp
-        src/SectionBase.cpp
-        src/ElementBase.cpp
-        src/Section_Bar.cpp
-        src/Beam.cpp
-        src/Section_Beam.cpp
-        src/Node.cpp include/Truss/Load/BeamUniformLoad.hpp src/BeamUniformLoad.cpp)
+        "include/Truss/Solver.hpp"
+        "include/Truss/Common/Constants.hpp"
+        "include/Truss/Common/DegreeOfFreedom.hpp"
+        "include/Truss/Common/IComponent.hpp"
+        "include/Truss/Common/Node.hpp"
+        "include/Truss/Common/Resources.hpp"
+        "include/Truss/Constraint/ConstraintBase.hpp"
+        "include/Truss/Constraint/NodeConstraint.hpp"
+        "include/Truss/Element/Bar.hpp"
+        "include/Truss/Element/ElementBase.hpp"
+        "include/Truss/Load/LoadBase.hpp"
+        "include/Truss/Load/NodeLoad.hpp"
+        "include/Truss/Load/BeamUniformLoad.hpp"
+        "include/Truss/Material/MaterialBase.hpp"
+        "include/Truss/Material/Elastic.hpp"
+        "include/Truss/Section/SectionBase.hpp"
+        "include/Truss/Section/Section_Bar.hpp"
+        "include/Truss/Section/Section_CSTriangle.hpp"
+        "include/Truss/Serializer/Serializers.hpp"
+        "include/Truss/Utils/FunctionPointer.hpp"
+        "include/Truss/Utils/SimpleReflection.hpp"
+        "include/Truss/Section/Section_Beam.hpp"
+        "include/Truss/Element/Beam.hpp"
+        "include/Truss/Element/CSTriangle.hpp"
+        "src/Solver.cpp"
+        "src/Bar.cpp"
+        "src/Serializers.cpp"
+        "src/SimpleReflection.cpp"
+        "src/MaterialBase.cpp"
+        "src/ConstraintBase.cpp"
+        "src/LoadBase.cpp"
+        "src/SectionBase.cpp"
+        "src/ElementBase.cpp"
+        "src/Section_Bar.cpp"
+        "src/Beam.cpp"
+        "src/Section_Beam.cpp"
+        "src/Node.cpp"
+        "src/BeamUniformLoad.cpp"
+        "src/CSTriangle.cpp" src/Section_CSTriangle.cpp)
 
-add_library(LibTrussSolver ${LIBRARY_TYPE} ${SOURCES})
 
 option(LibTrussSolver_DOUBLE_PRECISION "Build LibTrussSolver As Double Precision Version" OFF)
 if(LibTrussSolver_DOUBLE_PRECISION)
     target_compile_definitions(LibTrussSolver PRIVATE TRUSS_DOUBLE_PRECISION)
 endif()
 
+
+add_library(LibTrussSolver ${LIBRARY_TYPE} ${SOURCES})
+target_link_libraries(LibTrussSolver PUBLIC Eigen3::Eigen)
+target_link_libraries(LibTrussSolver PUBLIC LibTrussDocument)
+
 target_include_directories(LibTrussSolver PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
         )
 
-target_link_libraries(LibTrussSolver PUBLIC Eigen3::Eigen)
-target_link_libraries(LibTrussSolver PUBLIC LibTrussDocument)
+option(LibTrussSolver_DOUBLE_PRECISION "Build LibTrussSolver As Double Precision Version" OFF)
+if (LibTrussSolver_DOUBLE_PRECISION)
+    target_compile_definitions(LibTrussSolver PRIVATE TRUSS_DOUBLE_PRECISION)
+endif ()
 
 
 option(LibTrussSolver_INSTALL "INSTALL_LibTrussSolver" ON)
@@ -76,7 +87,7 @@ if (LibTrussSolver_INSTALL)
             LibTrussSolverConfigVersion.cmake
             VERSION ${PACKAGE_VERSION}
             COMPATIBILITY AnyNewerVersion
-            )
+    )
 
     install(DIRECTORY include
             DESTINATION ${CMAKE_INSTALL_PREFIX}

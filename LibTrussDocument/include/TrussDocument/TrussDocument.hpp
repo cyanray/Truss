@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-dcl21-cpp"
 #pragma once
 
 #include <complex>
@@ -257,3 +259,4 @@ namespace Truss
 
 
 }// namespace Truss
+#pragma clang diagnostic pop

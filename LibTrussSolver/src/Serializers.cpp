@@ -34,7 +34,7 @@ void Truss::from_truss(const TrussDocument& doc, Load::NodeLoad& obj)
 {
     obj.Key = doc["key"].Get<ID>();
     obj.NodeKey = doc["node_key"].Get<ID>();
-    obj.YForce = doc["xforce"].GetOrDefault<Numeric>();
+    obj.XForce = doc["xforce"].GetOrDefault<Numeric>();
     obj.YForce = doc["yforce"].GetOrDefault<Numeric>();
     obj.ZForce = doc["zforce"].GetOrDefault<Numeric>();
     obj.XMoment = doc["xmoment"].GetOrDefault<Numeric>();
@@ -106,9 +106,27 @@ SimpleReflection& Truss::GetCompomentReflection()
         refl.Register("NodeConstraint", Creator<Constraint::ConstraintBase, Constraint::NodeConstraint>);
         refl.Register("Bar", Creator<Element::ElementBase, Element::Bar>);
         refl.Register("Beam", Creator<Element::ElementBase, Element::Beam>);
+        refl.Register("CSTriangle", Creator<Element::ElementBase, Element::CSTriangle>);
         refl.Register("NodeLoad", Creator<Load::LoadBase, Load::NodeLoad>);
         refl.Register("Section_Bar", Creator<Section::SectionBase, Section::Section_Bar>);
         refl.Register("Section_Beam", Creator<Section::SectionBase, Section::Section_Beam>);
+        refl.Register("Section_CSTriangle", Creator<Section::SectionBase, Section::Section_CSTriangle>);
     }
     return refl;
+}
+
+void Truss::from_truss(const TrussDocument& doc, Element::CSTriangle& obj)
+{
+    obj.Key = doc["key"].Get<ID>();
+    obj.LeftNodeKey = doc["node1_key"].Get<ID>();
+    obj.RightNodeKey = doc["node2_key"].Get<ID>();
+    obj.TopNodeKey = doc["node3_key"].Get<ID>();
+    obj.SectionKey = doc["section_key"].Get<ID>();
+}
+
+void Truss::from_truss(const TrussDocument& doc, Section::Section_CSTriangle& obj)
+{
+    obj.Key = doc["key"].Get<ID>();
+    obj.MaterialKey = doc["mat_key"].Get<ID>();
+    obj.Thickness = doc["thickness"].Get<Numeric>();
 }
