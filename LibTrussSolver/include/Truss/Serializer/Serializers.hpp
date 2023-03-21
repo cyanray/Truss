@@ -15,6 +15,7 @@
 
 namespace Truss
 {
+    // from_truss
     void from_truss(const TrussDocument& doc, Node& obj);
     void from_truss(const TrussDocument& doc, Element::Bar& obj);
     void from_truss(const TrussDocument& doc, Element::Beam& obj);
@@ -27,6 +28,18 @@ namespace Truss
     void from_truss(const TrussDocument& doc, Section::Section_Beam& obj);
     void from_truss(const TrussDocument& doc, Section::Section_CSTriangle& obj);
 
+    // truss_to
+    void truss_to(TrussDocument& doc, const Node& obj);
+    void truss_to(TrussDocument& doc, const Element::Bar& obj);
+    void truss_to(TrussDocument& doc, const Element::Beam& obj);
+    void truss_to(TrussDocument& doc, const Element::CSTriangle& obj);
+    void truss_to(TrussDocument& doc, const Load::NodeLoad& obj);
+    void truss_to(TrussDocument& doc, const Load::BeamUniformLoad& obj);
+    void truss_to(TrussDocument& doc, const Constraint::NodeConstraint& obj);
+    void truss_to(TrussDocument& doc, const Material::Elastic& obj);
+    void truss_to(TrussDocument& doc, const Section::Section_Bar& obj);
+    void truss_to(TrussDocument& doc, const Section::Section_Beam& obj);
+    void truss_to(TrussDocument& doc, const Section::Section_CSTriangle& obj);
 
     SimpleReflection& GetCompomentReflection();
 }// namespace Truss
