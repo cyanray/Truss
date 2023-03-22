@@ -6,6 +6,7 @@
 #include "Truss/Load/LoadBase.hpp"
 #include "Truss/Material/Elastic.hpp"
 #include "Truss/Section/SectionBase.hpp"
+#include "Truss/Set/NodeSet.hpp"
 #include <map>
 #include <memory>
 
@@ -20,5 +21,6 @@ namespace Truss
         std::map<ID, std::shared_ptr<Load::LoadBase>> Loads;
         std::map<ID, std::shared_ptr<Constraint::ConstraintBase>> Constraints;
         std::map<ID, std::shared_ptr<Section::SectionBase>> Sections;
+        std::map<ID, std::shared_ptr<Set::SetBase>> Sets;
     };
 }// namespace Truss

@@ -24,6 +24,13 @@ namespace Truss
     template<typename T>
     concept HasToTruss = requires(TrussDocument& d, const T& a) { to_truss(d, a); };
 
+    template<typename T>
+    concept ElementIterable = requires(T x)
+    {
+        x.begin();
+        x.end();
+    };
+
     class TrussDocument
     {
     public:
@@ -68,6 +75,15 @@ namespace Truss
         explicit TrussDocument(const T& value) : m_type(Type::Object), m_value(TObject{})
         {
             to_truss(*this, value);
+        }
+
+        template<ElementIterable T>
+        explicit TrussDocument(const T& value) : m_type(Type::Array), m_value(TArray{})
+        {
+            for (const auto& item : value)
+            {
+                Add(TrussDocument(item));
+            }
         }
 
         static TrussDocument Object();

@@ -58,7 +58,7 @@ set(SOURCES
         "src/Section_Beam.cpp"
         "src/Node.cpp"
         "src/BeamUniformLoad.cpp"
-        "src/CSTriangle.cpp" src/Section_CSTriangle.cpp include/Truss/Set/NodeSet.cpp include/Truss/Set/NodeSet.hpp include/Truss/Set/SetBase.hpp)
+        "src/CSTriangle.cpp" src/Section_CSTriangle.cpp include/Truss/Set/NodeSet.cpp include/Truss/Set/NodeSet.hpp include/Truss/Set/SetBase.hpp include/Truss/Load/NodeSetLoad.hpp include/Truss/Constraint/NodeSetConstraint.hpp)
 
 
 option(LibTrussSolver_DOUBLE_PRECISION "Build LibTrussSolver As Double Precision Version" OFF)

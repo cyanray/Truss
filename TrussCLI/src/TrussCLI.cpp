@@ -39,15 +39,13 @@ int main(int argc, char* argv[])
         TrussSolver solver;
         solver.LoadTrussDocument(doc);
         auto index = solver.GetFreedomIndex();
-        auto idx = {0,1,6,7,12,13,18,19};
-        cout << solver.GetK(idx) << endl;
         auto K = solver.GetK(index);
         auto F = solver.GetF(index);
 
         cout << "[K] = " << endl;
-        cout << K << endl;
+        // cout << K << endl;
         cout << "{F} = " << endl;
-        cout << F << endl;
+        // cout << F << endl;
 
         VectorXf D = K.colPivHouseholderQr().solve(F);
 

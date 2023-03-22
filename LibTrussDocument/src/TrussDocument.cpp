@@ -444,14 +444,16 @@ TrussDocument TrussDocument::Array()
 
 TrussDocument& TrussDocument::Add(const TrussDocument& value)
 {
-    std::get<TArray>(m_value).emplace_back(value);
-    return std::get<TArray>(m_value).back();
+    auto& array = std::get<TArray>(m_value);
+    array.emplace_back(value);
+    return array.back();
 }
 
 TrussDocument& TrussDocument::Add(TrussDocument&& value)
 {
-    std::get<TArray>(m_value).emplace_back(std::move(value));
-    return std::get<TArray>(m_value).back();
+    auto& array = std::get<TArray>(m_value);
+    array.emplace_back(value);
+    return array.back();
 }
 
 TrussDocument::iterator TrussDocument::begin()

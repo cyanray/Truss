@@ -1,11 +1,13 @@
 #pragma once
 #include "Truss/Common/Node.hpp"
 #include "Truss/Constraint/NodeConstraint.hpp"
+#include "Truss/Constraint/NodeSetConstraint.hpp"
 #include "Truss/Element/Bar.hpp"
 #include "Truss/Element/Beam.hpp"
 #include "Truss/Element/CSTriangle.hpp"
 #include "Truss/Load/BeamUniformLoad.hpp"
 #include "Truss/Load/NodeLoad.hpp"
+#include "Truss/Load/NodeSetLoad.hpp"
 #include "Truss/Material/Elastic.hpp"
 #include "Truss/Section/Section_Bar.hpp"
 #include "Truss/Section/Section_Beam.hpp"
@@ -24,7 +26,9 @@ namespace Truss
     void from_truss(const TrussDocument& doc, Element::CSTriangle& obj);
     void from_truss(const TrussDocument& doc, Load::NodeLoad& obj);
     void from_truss(const TrussDocument& doc, Load::BeamUniformLoad& obj);
+    void from_truss(const TrussDocument& doc, Load::NodeSetLoad& obj);
     void from_truss(const TrussDocument& doc, Constraint::NodeConstraint& obj);
+    void from_truss(const TrussDocument& doc, Constraint::NodeSetConstraint& obj);
     void from_truss(const TrussDocument& doc, Material::Elastic& obj);
     void from_truss(const TrussDocument& doc, Section::Section_Bar& obj);
     void from_truss(const TrussDocument& doc, Section::Section_Beam& obj);
@@ -38,11 +42,14 @@ namespace Truss
     void to_truss(TrussDocument& doc, const Element::CSTriangle& obj);
     void to_truss(TrussDocument& doc, const Load::NodeLoad& obj);
     void to_truss(TrussDocument& doc, const Load::BeamUniformLoad& obj);
+    void to_truss(TrussDocument& doc, const Load::NodeSetLoad& obj);
     void to_truss(TrussDocument& doc, const Constraint::NodeConstraint& obj);
+    void to_truss(TrussDocument& doc, const Constraint::NodeSetConstraint& obj);
     void to_truss(TrussDocument& doc, const Material::Elastic& obj);
     void to_truss(TrussDocument& doc, const Section::Section_Bar& obj);
     void to_truss(TrussDocument& doc, const Section::Section_Beam& obj);
     void to_truss(TrussDocument& doc, const Section::Section_CSTriangle& obj);
+    void to_truss(TrussDocument& doc, const Set::NodeSet& obj);
 
     SimpleReflection& GetCompomentReflection();
 }// namespace Truss

@@ -143,5 +143,16 @@ TEST_CASE("Test (De)Serializer", "[de_serializer]")
         REQUIRE(result.PoissonRation == original.PoissonRation);
     }
 
+    SECTION("Truss::Set::NodeSet")
+    {
+        Set::NodeSet original;
+        original.Key = 123;
+        original.NodeKeys = { 1, 2, 3, 4, 5 };
+        TrussDocument doc = TrussDocument(original);
+        auto result = doc.Get<Set::NodeSet>();
+        REQUIRE(result.Key == original.Key);
+        REQUIRE(result.NodeKeys == original.NodeKeys);
+    }
+
 
 }

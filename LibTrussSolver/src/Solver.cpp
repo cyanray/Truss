@@ -51,6 +51,7 @@ void TrussSolver::LoadTrussDocument(const TrussDocument& doc)
     LoadCompomentsWeak<Constraint::ConstraintBase>("Constraint", doc, m_Resources.Constraints);
     LoadCompomentsWeak<Load::LoadBase>("Load", doc, m_Resources.Loads);
     LoadCompomentsWeak<Section::SectionBase>("Section", doc, m_Resources.Sections);
+    LoadCompomentsWeak<Set::SetBase>("Set", doc, m_Resources.Sets);
 
     BuildAllComponents();
 }
@@ -58,6 +59,7 @@ void TrussSolver::LoadTrussDocument(const TrussDocument& doc)
 void TrussSolver::BuildAllComponents()
 {
     // order is important!!
+    for (auto&& [_, entity]: m_Resources.Sets) entity->Build(m_Resources);
     for (auto&& [_, entity]: m_Resources.Sections) entity->Build(m_Resources);
     for (auto&& [_, entity]: m_Resources.Elements) entity->Build(m_Resources);
     for (auto&& [_, entity]: m_Resources.Constraints) entity->Build(m_Resources);

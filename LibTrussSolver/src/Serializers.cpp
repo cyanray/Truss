@@ -105,13 +105,17 @@ SimpleReflection& Truss::GetCompomentReflection()
     {
         refl.Register("Elastic", Creator<Material::MaterialBase, Material::Elastic>);
         refl.Register("NodeConstraint", Creator<Constraint::ConstraintBase, Constraint::NodeConstraint>);
+        refl.Register("NodeSetConstraint", Creator<Constraint::ConstraintBase, Constraint::NodeSetConstraint>);
         refl.Register("Bar", Creator<Element::ElementBase, Element::Bar>);
         refl.Register("Beam", Creator<Element::ElementBase, Element::Beam>);
         refl.Register("CSTriangle", Creator<Element::ElementBase, Element::CSTriangle>);
         refl.Register("NodeLoad", Creator<Load::LoadBase, Load::NodeLoad>);
+        refl.Register("BeamUniformLoad", Creator<Load::LoadBase, Load::BeamUniformLoad>);
+        refl.Register("NodeSetLoad", Creator<Load::LoadBase, Load::NodeSetLoad>);
         refl.Register("Section_Bar", Creator<Section::SectionBase, Section::Section_Bar>);
         refl.Register("Section_Beam", Creator<Section::SectionBase, Section::Section_Beam>);
         refl.Register("Section_CSTriangle", Creator<Section::SectionBase, Section::Section_CSTriangle>);
+        refl.Register("NodeSet", Creator<Set::SetBase, Set::NodeSet>);
     }
     return refl;
 }
@@ -235,4 +239,58 @@ void Truss::to_truss(TrussDocument& doc, const Section::Section_CSTriangle& obj)
     doc["key"] = obj.Key;
     doc["mat_key"] = obj.MaterialKey;
     doc["thickness"] = obj.Thickness;
+}
+
+void Truss::to_truss(TrussDocument& doc, const Set::NodeSet& obj)
+{
+    doc["key"] = obj.Key;
+    doc["nodes"] = TrussDocument(obj.NodeKeys);
+}
+
+void Truss::from_truss(const TrussDocument& doc, Load::NodeSetLoad& obj)
+{
+    obj.Key = doc["key"].Get<ID>();
+    obj.NodeSetKey = doc["node_set_key"].Get<ID>();
+    obj.XForce = doc["xforce"].GetOrDefault<Numeric>();
+    obj.YForce = doc["yforce"].GetOrDefault<Numeric>();
+    obj.ZForce = doc["zforce"].GetOrDefault<Numeric>();
+    obj.XMoment = doc["xmoment"].GetOrDefault<Numeric>();
+    obj.YMoment = doc["ymoment"].GetOrDefault<Numeric>();
+    obj.ZMoment = doc["zmoment"].GetOrDefault<Numeric>();
+}
+
+void Truss::from_truss(const TrussDocument& doc, Constraint::NodeSetConstraint& obj)
+{
+    obj.Key = doc["key"].Get<ID>();
+    obj.NodeSetKey = doc["node_set_key"].Get<ID>();
+    obj.XDisplacement = doc["xdisplacement"].GetOrDefault<bool>();
+    obj.YDisplacement = doc["ydisplacement"].GetOrDefault<bool>();
+    obj.ZDisplacement = doc["zdisplacement"].GetOrDefault<bool>();
+    obj.XRotation = doc["xrotation"].GetOrDefault<bool>();
+    obj.YRotation = doc["yrotation"].GetOrDefault<bool>();
+    obj.ZRotation = doc["zrotation"].GetOrDefault<bool>();
+}
+
+void Truss::to_truss(TrussDocument& doc, const Load::NodeSetLoad& obj)
+{
+    doc["key"] = obj.Key;
+    doc["node_set_key"] = obj.NodeSetKey;
+    doc["xforce"] = obj.XForce;
+    doc["yforce"] = obj.YForce;
+    doc["zforce"] = obj.ZForce;
+    doc["xmoment"] = obj.XMoment;
+    doc["ymoment"] = obj.YMoment;
+    doc["zmoment"] = obj.ZMoment;
+}
+
+void Truss::to_truss(TrussDocument& doc, const Constraint::NodeSetConstraint& obj)
+{
+    doc["key"] = obj.Key;
+    doc["node_set_key"] = obj.NodeSetKey;
+    doc["xdisplacement"] = obj.XDisplacement;
+    doc["ydisplacement"] = obj.YDisplacement;
+    doc["zdisplacement"] = obj.ZDisplacement;
+    doc["xrotation"] = obj.XRotation;
+    doc["yrotation"] = obj.YRotation;
+    doc["zrotation"] = obj.ZRotation;
 }
