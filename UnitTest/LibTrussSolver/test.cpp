@@ -45,6 +45,29 @@ TEST_CASE("Test (De)Serializer", "[de_serializer]")
         REQUIRE(result.NodeKey == original.NodeKey);
     }
 
+    SECTION("Truss::Constraint::NodeSetConstraint")
+    {
+        Constraint::NodeSetConstraint original;
+        original.Key = 123;
+        original.XDisplacement = true;
+        original.YDisplacement = false;
+        original.ZDisplacement = true;
+        original.XRotation = false;
+        original.YRotation = true;
+        original.ZRotation = false;
+        original.NodeSetKey = 456;
+        TrussDocument doc = TrussDocument(original);
+        auto result = doc.Get<Constraint::NodeSetConstraint>();
+        REQUIRE(result.Key == original.Key);
+        REQUIRE(result.XDisplacement == original.XDisplacement);
+        REQUIRE(result.YDisplacement == original.YDisplacement);
+        REQUIRE(result.ZDisplacement == original.ZDisplacement);
+        REQUIRE(result.XRotation == original.XRotation);
+        REQUIRE(result.YRotation == original.YRotation);
+        REQUIRE(result.ZRotation == original.ZRotation);
+        REQUIRE(result.NodeSetKey == original.NodeSetKey);
+    }
+
     SECTION("Truss::Element::Bar")
     {
         Element::Bar original;
@@ -130,6 +153,29 @@ TEST_CASE("Test (De)Serializer", "[de_serializer]")
         REQUIRE(result.ZForce == original.ZForce);
     }
 
+    SECTION("Truss::Load::NodeSetLoad")
+    {
+        Load::NodeSetLoad original;
+        original.Key = 123;
+        original.NodeSetKey = 456;
+        original.XForce = 1.0f;
+        original.YForce = 2.0f;
+        original.ZForce = 3.0f;
+        original.XMoment = 4.0f;
+        original.YMoment = 5.0f;
+        original.ZMoment = 6.0f;
+        TrussDocument doc = TrussDocument(original);
+        auto result = doc.Get<Load::NodeSetLoad>();
+        REQUIRE(result.Key == original.Key);
+        REQUIRE(result.NodeSetKey == original.NodeSetKey);
+        REQUIRE(result.XForce == original.XForce);
+        REQUIRE(result.YForce == original.YForce);
+        REQUIRE(result.ZForce == original.ZForce);
+        REQUIRE(result.XMoment == original.XMoment);
+        REQUIRE(result.YMoment == original.YMoment);
+        REQUIRE(result.ZMoment == original.ZMoment);
+    }
+
     SECTION("Truss::Material::Elastic")
     {
         Material::Elastic original;
@@ -153,6 +199,7 @@ TEST_CASE("Test (De)Serializer", "[de_serializer]")
         REQUIRE(result.Key == original.Key);
         REQUIRE(result.NodeKeys == original.NodeKeys);
     }
+
 
 
 }
