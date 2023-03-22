@@ -19,7 +19,7 @@ set(SOURCES
         include/TrussDocument/Tokenizer.hpp src/Tokenizer.cpp
         include/TrussDocument/TrussDocument.hpp src/TrussDocument.cpp
         include/TrussDocument/ParserErrorException.hpp src/ParserErrorException.cpp
-        )
+        include/TrussDocument/TrussDocumentFormatter.hpp)
 
 add_library(LibTrussDocument ${LIBRARY_TYPE} ${SOURCES})
 

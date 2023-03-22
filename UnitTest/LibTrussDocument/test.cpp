@@ -1,6 +1,7 @@
 #include <TrussDocument/TrussDocument.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <array>
+#include <vector>
 using namespace Truss;
 
 
@@ -450,6 +451,36 @@ TEST_CASE("For array", "[ForArray]")
             i++;
         }
     }
+
+    SECTION("Iterator test range-base of const TrussDocument")
+    {
+        TrussDocument doc = TrussDocument::Array();
+        doc.Add(123);
+        doc.Add(456);
+        doc.Add(789);
+        const TrussDocument& doc2 = doc;
+        int i = 0;
+        for (const auto& it : doc2)
+        {
+            REQUIRE(it.IsInteger());
+            REQUIRE(it.Get<int>() == 123 + i * 333);
+            i++;
+        }
+    }
+
+    SECTION("Get std::vector<T> from TrussDocument::Array()")
+    {
+        TrussDocument doc = TrussDocument::Array();
+        doc.Add(123);
+        doc.Add(456);
+        doc.Add(789);
+        auto vec = doc.Get<std::vector<int>>();
+        REQUIRE(vec.size() == 3);
+        REQUIRE(vec[0] == 123);
+        REQUIRE(vec[1] == 456);
+        REQUIRE(vec[2] == 789);
+    }
+
 
 }
 

@@ -1,4 +1,5 @@
 #include "Truss/Serializer/Serializers.hpp"
+#include "TrussDocument/TrussDocument.hpp"
 #include <memory>
 using namespace Truss;
 
@@ -131,7 +132,14 @@ void Truss::from_truss(const TrussDocument& doc, Section::Section_CSTriangle& ob
     obj.Thickness = doc["thickness"].Get<Numeric>();
 }
 
-void Truss::truss_to(TrussDocument& doc, const Node& obj)
+void Truss::from_truss(const TrussDocument& doc, Set::NodeSet& obj)
+{
+    obj.Key = doc["key"].Get<ID>();
+    obj.NodeKeys = doc["nodes"].Get<std::vector<ID>>();
+}
+
+
+void Truss::to_truss(TrussDocument& doc, const Node& obj)
 {
     doc["key"] = obj.Key;
     doc["x"] = obj.X;
@@ -139,7 +147,7 @@ void Truss::truss_to(TrussDocument& doc, const Node& obj)
     doc["z"] = obj.Z;
 }
 
-void Truss::truss_to(TrussDocument& doc, const Element::Bar& obj)
+void Truss::to_truss(TrussDocument& doc, const Element::Bar& obj)
 {
     doc["key"] = obj.Key;
     doc["node1_key"] = obj.LeftNodeKey;
@@ -147,7 +155,7 @@ void Truss::truss_to(TrussDocument& doc, const Element::Bar& obj)
     doc["section_key"] = obj.SectionKey;
 }
 
-void Truss::truss_to(TrussDocument& doc, const Element::Beam& obj)
+void Truss::to_truss(TrussDocument& doc, const Element::Beam& obj)
 {
     doc["key"] = obj.Key;
     doc["node1_key"] = obj.LeftNodeKey;
@@ -155,7 +163,7 @@ void Truss::truss_to(TrussDocument& doc, const Element::Beam& obj)
     doc["section_key"] = obj.SectionKey;
 }
 
-void Truss::truss_to(TrussDocument& doc, const Element::CSTriangle& obj)
+void Truss::to_truss(TrussDocument& doc, const Element::CSTriangle& obj)
 {
     doc["key"] = obj.Key;
     doc["node1_key"] = obj.LeftNodeKey;
@@ -164,7 +172,7 @@ void Truss::truss_to(TrussDocument& doc, const Element::CSTriangle& obj)
     doc["section_key"] = obj.SectionKey;
 }
 
-void Truss::truss_to(TrussDocument& doc, const Load::NodeLoad& obj)
+void Truss::to_truss(TrussDocument& doc, const Load::NodeLoad& obj)
 {
     doc["key"] = obj.Key;
     doc["node_key"] = obj.NodeKey;
@@ -176,7 +184,7 @@ void Truss::truss_to(TrussDocument& doc, const Load::NodeLoad& obj)
     doc["zmoment"] = obj.ZMoment;
 }
 
-void Truss::truss_to(TrussDocument& doc, const Load::BeamUniformLoad& obj)
+void Truss::to_truss(TrussDocument& doc, const Load::BeamUniformLoad& obj)
 {
     doc["key"] = obj.Key;
     doc["beam_key"] = obj.BeamKey;
@@ -184,7 +192,7 @@ void Truss::truss_to(TrussDocument& doc, const Load::BeamUniformLoad& obj)
     doc["zforce"] = obj.ZForce;
 }
 
-void Truss::truss_to(TrussDocument& doc, const Constraint::NodeConstraint& obj)
+void Truss::to_truss(TrussDocument& doc, const Constraint::NodeConstraint& obj)
 {
     doc["key"] = obj.Key;
     doc["xdisplacement"] = obj.XDisplacement;
@@ -196,7 +204,7 @@ void Truss::truss_to(TrussDocument& doc, const Constraint::NodeConstraint& obj)
     doc["node_key"] = obj.NodeKey;
 }
 
-void Truss::truss_to(TrussDocument& doc, const Material::Elastic& obj)
+void Truss::to_truss(TrussDocument& doc, const Material::Elastic& obj)
 {
     doc["key"] = obj.Key;
 
@@ -205,14 +213,14 @@ void Truss::truss_to(TrussDocument& doc, const Material::Elastic& obj)
     doc["pr"] = obj.PoissonRation;
 }
 
-void Truss::truss_to(TrussDocument& doc, const Section::Section_Bar& obj)
+void Truss::to_truss(TrussDocument& doc, const Section::Section_Bar& obj)
 {
     doc["key"] = obj.Key;
     doc["mat_key"] = obj.MaterialKey;
     doc["area"] = obj.Area;
 }
 
-void Truss::truss_to(TrussDocument& doc, const Section::Section_Beam& obj)
+void Truss::to_truss(TrussDocument& doc, const Section::Section_Beam& obj)
 {
     doc["key"] = obj.Key;
     doc["mat_key"] = obj.MaterialKey;
@@ -222,7 +230,7 @@ void Truss::truss_to(TrussDocument& doc, const Section::Section_Beam& obj)
     doc["J"] = obj.J;
 }
 
-void Truss::truss_to(TrussDocument& doc, const Section::Section_CSTriangle& obj)
+void Truss::to_truss(TrussDocument& doc, const Section::Section_CSTriangle& obj)
 {
     doc["key"] = obj.Key;
     doc["mat_key"] = obj.MaterialKey;

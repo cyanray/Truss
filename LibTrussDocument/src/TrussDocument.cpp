@@ -9,6 +9,7 @@
 #include <cctype>
 #include <charconv>
 #include <complex>
+#include <format>
 #include <string>
 using namespace std;
 using namespace Truss;
@@ -463,24 +464,76 @@ TrussDocument::iterator TrussDocument::end()
     return {this, true};
 }
 
+TrussDocument::const_iterator TrussDocument::begin() const
+{
+    return {this, false};
+}
+
+TrussDocument::const_iterator TrussDocument::end() const
+{
+    return {this, true};
+}
+
+
+string TrussDocument::ToString(const TrussDocumentFormatter& formatter) const
+{
+    if (m_type == Type::Integer)
+    {
+        return std::to_string(std::get<int>(m_value));
+    }
+    if (m_type == Type::Double)
+    {
+        return std::to_string(std::get<double>(m_value));
+    }
+    if (m_type == Type::Boolean)
+    {
+        return std::get<bool>(m_value) ? "true" : "false";
+    }
+    if (m_type == Type::String)
+    {
+        return std::format("\"{}\"", std::get<string>(m_value));
+    }
+    auto f = formatter;
+    ++f.Counter;
+    string indent = string(formatter.Counter * formatter.Indent, ' ');
+    if (m_type == Type::Array)
+    {
+        string member{};
+        for (const auto& item: std::get<TArray>(m_value))
+        {
+            member += std::format("{}{}, \n", indent, item.ToString(f));
+        }
+        if (!member.empty()) member.resize(member.size() - 3);
+        return std::format("{}[\n{}\n{}]", indent, member, indent);
+    }
+    if (m_type == Type::Object)
+    {
+        string member{};
+        for (const auto& [key, value]: std::get<TObject>(m_value))
+        {
+            member += std::format("{}{}{}:{}, \n", indent, indent, key, value.ToString(f));
+        }
+        if (!member.empty()) member.resize(member.size() - 3);
+        return std::format("{}{{\n{}\n{}}}", indent, member, indent);
+    }
+    throw std::runtime_error("TrussDocument::ToString(): Unknown type.");
+}
+
+void TrussDocument::InitObject()
+{
+    m_type = Type::Object;
+    m_value = TObject{};
+}
+
+void TrussDocument::InitArray()
+{
+    m_type = Type::Array;
+    m_value = TArray{};
+}
+
 namespace Truss
 {
-    TrussDocument::iterator::iterator(TrussDocument* doc, bool is_end) : m_doc(doc)
-    {
-        m_is_array = m_doc->IsArray();
-        if (m_is_array)
-        {
-            auto& array = std::get<TArray>(m_doc->m_value);
-            m_array_iterator = (is_end ? array.end() : array.begin());
-        }
-        else
-        {
-            auto& object = std::get<TObject>(m_doc->m_value);
-            m_object_iterator = (is_end ? object.end() : object.begin());
-        }
-    }
-
-    TrussDocument::iterator& TrussDocument::iterator::operator++()
+    TrussDocument::iterator_base& TrussDocument::iterator_base::operator++()
     {
         if (m_is_array)
         {
@@ -494,14 +547,14 @@ namespace Truss
         return *this;
     }
 
-    TrussDocument::iterator TrussDocument::iterator::operator++(int)
+    TrussDocument::iterator_base TrussDocument::iterator_base::operator++(int)
     {
-        iterator result = *this;
+        iterator_base result = *this;
         ++(*this);
         return result;
     }
 
-    TrussDocument::iterator& TrussDocument::iterator::operator--()
+    TrussDocument::iterator_base& TrussDocument::iterator_base::operator--()
     {
         if (m_is_array)
         {
@@ -515,50 +568,55 @@ namespace Truss
         return *this;
     }
 
-    TrussDocument::iterator TrussDocument::iterator::operator--(int)
+    TrussDocument::iterator_base TrussDocument::iterator_base::operator--(int)
     {
-        iterator result = *this;
+        iterator_base result = *this;
         --(*this);
         return result;
     }
 
-    bool TrussDocument::iterator::operator==(const TrussDocument::iterator& other) const
+    bool TrussDocument::iterator_base::operator==(const TrussDocument::iterator_base& other) const
     {
         return (m_is_array ? m_array_iterator == other.m_array_iterator
                            : m_object_iterator == other.m_object_iterator);
     }
 
-    bool TrussDocument::iterator::operator!=(const TrussDocument::iterator& other) const
+    bool TrussDocument::iterator_base::operator!=(const TrussDocument::iterator_base& other) const
     {
         return !(*this == other);
     }
 
-    TrussDocument& TrussDocument::iterator::operator*()
-    {
-        return (m_is_array ? *m_array_iterator : m_object_iterator->second);
-    }
-
-    TrussDocument::iterator::pointer TrussDocument::iterator::operator->()
-    {
-        return (m_is_array ? &(*m_array_iterator) : &m_object_iterator->second);
-    }
-
-    int TrussDocument::iterator::index() const
+    int TrussDocument::iterator_base::index() const
     {
         if (!m_is_array)
         {
-            throw std::runtime_error("TrussDocument::iterator::index() is only valid for array");
+            throw std::runtime_error("TrussDocument::iterator_base::index() is only valid for array");
         }
         return m_array_index;
     }
 
-    const std::string& TrussDocument::iterator::key() const
+    const std::string& TrussDocument::iterator_base::key() const
     {
         if (m_is_array)
         {
-            throw std::runtime_error("TrussDocument::iterator::key() is only valid for object");
+            throw std::runtime_error("TrussDocument::iterator_base::key() is only valid for object");
         }
         return m_object_iterator->first;
+    }
+
+    TrussDocument::iterator_base::iterator_base(TrussDocument* doc, bool is_end) : m_doc(doc)
+    {
+        m_is_array = m_doc->IsArray();
+        if (m_is_array)
+        {
+            auto& array = std::get<TArray>(m_doc->m_value);
+            m_array_iterator = (is_end ? array.end() : array.begin());
+        }
+        else
+        {
+            auto& object = std::get<TObject>(m_doc->m_value);
+            m_object_iterator = (is_end ? object.end() : object.begin());
+        }
     }
 
 }// namespace Truss

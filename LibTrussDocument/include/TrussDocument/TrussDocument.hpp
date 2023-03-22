@@ -10,11 +10,20 @@
 #include <variant>
 #include <vector>
 
+#include "TrussDocumentFormatter.hpp"
+
 using std::string;
 
 
 namespace Truss
 {
+    class TrussDocument;
+    template<typename T>
+    concept HasFromTruss = requires(const TrussDocument& d, T a) { from_truss(d, a); };
+
+    template<typename T>
+    concept HasToTruss = requires(TrussDocument& d, const T& a) { to_truss(d, a); };
+
     class TrussDocument
     {
     public:
@@ -29,7 +38,19 @@ namespace Truss
             Array
         };
 
-        TrussDocument() : m_type(Type::Null) {}
+    private:
+        friend class ParserImpl;
+
+        using TArray = std::vector<TrussDocument>;
+        using TObject = std::map<std::string, TrussDocument>;
+        using TValue = std::variant<bool, int, double, std::string, TArray, TObject>;
+        Type m_type;
+        TValue m_value;
+
+        TrussDocument& AssignVaue(bool value);
+
+    public:
+        TrussDocument() : m_type(Type::Object), m_value(TObject{}) {}
 
         explicit TrussDocument(std::nullptr_t) : m_type(Type::Null) {}
 
@@ -43,11 +64,21 @@ namespace Truss
 
         explicit TrussDocument(std::string&& value) : m_type(Type::String), m_value(std::move(value)) {}
 
+        template<HasToTruss T>
+        explicit TrussDocument(const T& value) : m_type(Type::Object), m_value(TObject{})
+        {
+            to_truss(*this, value);
+        }
+
         static TrussDocument Object();
 
         static TrussDocument Array();
 
         static TrussDocument Parse(std::string_view input);
+
+        void InitObject();
+
+        void InitArray();
 
         [[nodiscard]] Type GetValueType() const noexcept;
 
@@ -127,6 +158,14 @@ namespace Truss
         template<typename T, typename... All_T>
         struct get_detail
         {
+        };
+
+        template<typename T, typename... All_T>
+            requires(std::same_as<T, All_T> || ...)
+        struct get_detail<T, std::variant<All_T...>>
+        {
+            using type = bool;
+
             static T Get(const TrussDocument& doc)
             {
                 return std::get<T>(doc.m_value);
@@ -141,9 +180,11 @@ namespace Truss
         };
 
         template<typename T, typename... All_T>
-            requires(!std::same_as<T, All_T> && ...)
+            requires((!std::same_as<T, All_T> && ...) && HasFromTruss<T>)
         struct get_detail<T, std::variant<All_T...>>
         {
+            using type = bool;
+
             static T Get(const TrussDocument& doc)
             {
                 T result{};
@@ -165,7 +206,7 @@ namespace Truss
         };
 
         template<typename T>
-            requires(!std::same_as<T, float>)
+            requires std::same_as<bool, typename get_detail<T, TValue>::type>
         [[nodiscard]] T Get() const
         {
             return get_detail<T, TValue>::Get(*this);
@@ -179,7 +220,21 @@ namespace Truss
         }
 
         template<typename T>
-            requires(!std::same_as<T, float>)
+            requires std::same_as<T, std::vector<typename T::value_type>>
+        [[nodiscard]] T Get() const
+        {
+            using U = typename T::value_type;
+            T result{};
+            result.reserve(Count());
+            for (const auto& item: *this)
+            {
+                result.push_back(item.Get<U>());
+            }
+            return result;
+        }
+
+        template<typename T>
+            requires std::same_as<bool, typename get_detail<T, TValue>::type>
         [[nodiscard]] T GetOrDefault(const T& default_value = {}) const
         {
             return get_detail<T, TValue>::GetOrDefault(*this, default_value);
@@ -192,69 +247,80 @@ namespace Truss
             return static_cast<float>(GetOrDefault<double>(default_value));
         }
 
-        class iterator;
+        [[nodiscard]] string ToString(const TrussDocumentFormatter& f = {}) const;
+
+        class iterator_base;
+        template<typename T>
+        class iterator_impl;
+        using iterator = iterator_impl<TrussDocument>;
+        using const_iterator = iterator_impl<const TrussDocument>;
 
         [[nodiscard]] iterator begin();
-
         [[nodiscard]] iterator end();
 
-    private:
-        friend class ParserImpl;
-
-        using TArray = std::vector<TrussDocument>;
-        using TObject = std::map<std::string, TrussDocument>;
-        using TValue = std::variant<bool, int, double, std::string, TArray, TObject>;
-        Type m_type;
-        TValue m_value;
-
-        TrussDocument& AssignVaue(bool value);
+        [[nodiscard]] const_iterator begin() const;
+        [[nodiscard]] const_iterator end() const;
     };
 
-    class TrussDocument::iterator
+    class TrussDocument::iterator_base
     {
-    private:
+    protected:
         friend class TrussDocument;
-        iterator(TrussDocument* doc, bool is_end);
-
         TrussDocument* m_doc;
         bool m_is_array{false};
         int m_array_index{0};
         TArray::iterator m_array_iterator;
         TObject::iterator m_object_iterator;
+        iterator_base(TrussDocument* doc, bool is_end);
+
     public:
-        using iterator_category = std::bidirectional_iterator_tag;
-        using value_type = TrussDocument;
-        using difference_type = std::ptrdiff_t;
-        using pointer = TrussDocument*;
-        using reference = TrussDocument&;
-
-        iterator(const iterator&) = default;
-
-        iterator(iterator&&) = default;
-
-        iterator& operator=(const iterator&) = default;
-
-        iterator& operator=(iterator&&) = default;
-
-        iterator& operator++();
-
-        iterator operator++(int);
-
-        iterator& operator--();
-
-        iterator operator--(int);
-
-        bool operator==(const iterator& other) const;
-
-        bool operator!=(const iterator& other) const;
-
-        reference operator*();
-
-        pointer operator->();
+        iterator_base(const iterator_base&) = default;
+        iterator_base(iterator_base&&) = default;
+        iterator_base& operator=(const iterator_base&) = default;
+        iterator_base& operator=(iterator_base&&) = default;
+        iterator_base& operator++();
+        iterator_base operator++(int);
+        iterator_base& operator--();
+        iterator_base operator--(int);
+        bool operator==(const iterator_base& other) const;
+        bool operator!=(const iterator_base& other) const;
 
         [[nodiscard]] int index() const;
-
         [[nodiscard]] const std::string& key() const;
+    };
+
+    template<typename T>
+    class TrussDocument::iterator_impl : public TrussDocument::iterator_base
+    {
+    private:
+        friend class TrussDocument;
+
+        iterator_impl(T* doc, bool is_end)
+            : iterator_base(const_cast<std::remove_cv_t<T>*>(doc), is_end)
+        {
+        }
+
+    public:
+        using iterator_category = std::bidirectional_iterator_tag;
+        using value_type = T;
+        using difference_type = std::ptrdiff_t;
+        using pointer = T*;
+        using reference = T&;
+
+        iterator_impl(const iterator_impl<T>&) = default;
+        iterator_impl(iterator_impl<T>&&) noexcept = default;
+        iterator_impl<T>& operator=(const iterator_impl<T>&) = default;
+        iterator_impl<T>& operator=(iterator_impl<T>&&) noexcept = default;
+
+        [[nodiscard]] T& operator*() const
+        {
+            return (m_is_array ? *m_array_iterator : m_object_iterator->second);
+        }
+
+        [[nodiscard]] T* operator->() const
+        {
+            return &(operator*());
+        }
     };
 
 
