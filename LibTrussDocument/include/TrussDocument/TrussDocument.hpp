@@ -226,7 +226,7 @@ namespace Truss
             using U = typename T::value_type;
             T result{};
             result.reserve(Count());
-            for (const auto& item: *this)
+            for (const auto& item: std::get<TArray>(m_value))
             {
                 result.push_back(item.Get<U>());
             }

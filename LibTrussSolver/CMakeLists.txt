@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 20)
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
+add_compile_options("$<$<C_COMPILER_ID:Clang>:-stdlib=libc++>")
+add_compile_options("$<$<CXX_COMPILER_ID:Clang>:-stdlib=libc++>")
+
 option(LibTrussSolver_BUILD_SHARED_LIBS "Build LibTrussSolver as a shared library." OFF)
 if (LibTrussSolver_BUILD_SHARED_LIBS)
     set(LIBRARY_TYPE SHARED)
