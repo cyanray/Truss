@@ -156,3 +156,8 @@ int TrussSolver::GetNumberOfNode() const noexcept
 {
     return static_cast<int>(m_Resources.Nodes.size());
 }
+
+const Resources& TrussSolver::GetResources() const noexcept
+{
+    return m_Resources;
+}

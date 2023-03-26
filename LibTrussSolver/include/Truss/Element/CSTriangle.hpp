@@ -43,6 +43,17 @@ namespace Truss::Element
         [[nodiscard]] MatrixX<Numeric> GetStiffnessLocal() const;
 
         [[nodiscard]] MatrixX<Numeric> GetStiffnessGlobal() const override;
+
+        [[nodiscard]] Matrix3x3<Numeric> GetDMatrix() const;
+
+        [[nodiscard]] Eigen::Matrix<Numeric, 3, 18> GetBMatrix() const;
+
+        [[nodiscard]] StressVector CalculateStress(const VectorX<Numeric>& displacement) const override;
+
+        [[nodiscard]] constexpr std::string GetElementName() const noexcept override
+        {
+            return "CSTriangle";
+        }
     };
 
 }// namespace Truss::Element

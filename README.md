@@ -27,10 +27,10 @@ Truss
 
 
 ## Dependencies
-1. [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page): Liner algebra library.
-2. [magic_enum](https://github.com/Neargye/magic_enum): Useful library for enum.
-3. [Catch2](https://github.com/catchorg/Catch2): For unit testing.
-4. [backward-cpp](https://github.com/bombela/backward-cpp): For printing stack trace.
+1. [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page): Liner algebra library. (vcpkg)
+2. [magic_enum](https://github.com/Neargye/magic_enum): Useful library for enum. (vcpkg) 
+3. [Catch2](https://github.com/catchorg/Catch2): For unit testing. (vcpkg)
+4. [backward-cpp](https://github.com/bombela/backward-cpp): For printing stack trace. (CMake FetchContent)
 
 ## How to use it?
 In progress...

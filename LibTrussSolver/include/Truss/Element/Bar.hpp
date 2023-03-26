@@ -53,5 +53,15 @@ namespace Truss::Element
         [[nodiscard]] MatrixX<Numeric> GetStiffnessGlobal() const override;
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override;
+
+        [[nodiscard]] StressVector CalculateStress(const VectorX<Numeric>& displacement) const override
+        {
+            return {};
+        }
+
+        [[nodiscard]] constexpr std::string GetElementName() const noexcept override
+        {
+            return "Bar";
+        }
     };
 }// namespace Truss::Element

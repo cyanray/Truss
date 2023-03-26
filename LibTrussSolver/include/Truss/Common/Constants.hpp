@@ -42,6 +42,10 @@ namespace Truss
 
     using LoadVector = Eigen::Vector<Numeric, ALL_DOF>;
 
+    using DisplacementVector = Eigen::Vector<Numeric, ALL_DOF>;
+
+    using StressVector = Eigen::Vector<Numeric, ALL_DOF>;
+
     template<typename T>
     Matrix3x3<T> GetTransformationMatrix(
             const Vector3<T>& XAxis,

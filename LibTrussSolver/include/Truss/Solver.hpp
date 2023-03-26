@@ -33,6 +33,8 @@ namespace Truss
 
         std::vector<int> GetFreedomIndex();
 
+        [[nodiscard]] const Resources& GetResources() const noexcept;
+
     private:
         Resources m_Resources;
 

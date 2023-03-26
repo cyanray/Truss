@@ -363,6 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Custom
-/.idea
+.idea
 /cmake-build-*
 /CMakeUserPresets.json

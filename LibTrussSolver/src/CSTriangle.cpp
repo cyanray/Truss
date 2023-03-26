@@ -1,5 +1,5 @@
-#include "Truss/Common/Resources.hpp"
 #include "Truss/Element/CSTriangle.hpp"
+#include "Truss/Common/Resources.hpp"
 #include <cassert>
 #include <iostream>
 using namespace Truss;
@@ -32,21 +32,13 @@ namespace Truss::Element
 
     [[nodiscard]] MatrixX<Numeric> CSTriangle::GetStiffnessLocal() const
     {
+        auto DMatrix = GetDMatrix();
+        auto BMatrix = GetBMatrix();
+
         Numeric A = GetTriangleArea();
         Numeric t = Section->Thickness;
         Numeric E = Section->Mat->YoungsModules;
         Numeric v = Section->Mat->PoissonRation;
-        Matrix3x3<Numeric> DMatrix{{1, v, 0},
-                                   {v, 1, 0},
-                                   {0, 0, (1 - v) / 2}};
-
-        Numeric xi = LeftNode->X, xj = RightNode->X, xk = TopNode->X;
-        Numeric yi = LeftNode->Y, yj = RightNode->Y, yk = TopNode->Y;
-        Numeric bi = yj - yk, bj = yk - yi, bk = yi - yj;
-        Numeric gi = xk - xj, gj = xi - xk, gk = xj - xi;
-        Eigen::Matrix<Numeric, 3, 18> BMatrix{{bi, 0, 0, 0, 0, 0, bj, 0, 0, 0, 0, 0, bk, 0, 0, 0, 0, 0},
-                                              {0, gi, 0, 0, 0, 0, 0, gj, 0, 0, 0, 0, 0, gk, 0, 0, 0, 0},
-                                              {gi, bi, 0, 0, 0, 0, gj, bj, 0, 0, 0, 0, gk, bk, 0, 0, 0, 0}};
 
         Numeric k = (t * E) / (4 * A * (1 - v * v));
         return k * BMatrix.transpose() * DMatrix * BMatrix;
@@ -55,5 +47,34 @@ namespace Truss::Element
     MatrixX<Numeric> CSTriangle::GetStiffnessGlobal() const
     {
         return GetStiffnessLocal();
+    }
+
+    Matrix3x3<Numeric> CSTriangle::GetDMatrix() const
+    {
+        Numeric v = Section->Mat->PoissonRation;
+        Matrix3x3<Numeric> DMatrix{{1, v, 0},
+                                   {v, 1, 0},
+                                   {0, 0, (1 - v) / 2}};
+        return DMatrix;
+    }
+
+    Eigen::Matrix<Numeric, 3, 18> CSTriangle::GetBMatrix() const
+    {
+        Numeric xi = LeftNode->X, xj = RightNode->X, xk = TopNode->X;
+        Numeric yi = LeftNode->Y, yj = RightNode->Y, yk = TopNode->Y;
+        Numeric bi = yj - yk, bj = yk - yi, bk = yi - yj;
+        Numeric gi = xk - xj, gj = xi - xk, gk = xj - xi;
+        Eigen::Matrix<Numeric, 3, 18> BMatrix{{bi, 0, 0, 0, 0, 0, bj, 0, 0, 0, 0, 0, bk, 0, 0, 0, 0, 0},
+                                              {0, gi, 0, 0, 0, 0, 0, gj, 0, 0, 0, 0, 0, gk, 0, 0, 0, 0},
+                                              {gi, bi, 0, 0, 0, 0, gj, bj, 0, 0, 0, 0, gk, bk, 0, 0, 0, 0}};
+        return BMatrix;
+    }
+
+    StressVector CSTriangle::CalculateStress(const VectorX<Numeric>& displacement) const
+    {
+        assert(displacement.size() == 18);
+        StressVector result = StressVector::Zero();
+        result({0, 1, 3}) = GetDMatrix() * GetBMatrix() * displacement;
+        return result;
     }
 }// namespace Truss::Element

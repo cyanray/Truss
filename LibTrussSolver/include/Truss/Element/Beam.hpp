@@ -46,6 +46,16 @@ namespace Truss::Element
 
         [[nodiscard]] MatrixX<Numeric> GetStiffnessGlobal() const override;
 
+        [[nodiscard]] StressVector CalculateStress(const VectorX<Truss::Numeric>& displacement) const override
+        {
+            return {};
+        }
+
+        [[nodiscard]] constexpr std::string GetElementName() const noexcept override
+        {
+            return "Beam";
+        }
+
         ~Beam() override = default;
     };
 
