@@ -1,8 +1,12 @@
-#include <Truss/Serializer/Serializers.hpp>
-#include <TrussDocument/TrussDocument.hpp>
 #include <array>
-#include <catch2/catch_test_macros.hpp>
 #include <vector>
+
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
+
+#include <Truss/Serializer/Serializers.hpp>
+#include <Truss/Utils/GaussianQuadrature.hpp>
+#include <TrussDocument/TrussDocument.hpp>
 using namespace Truss;
 
 TEST_CASE("Test (De)Serializer", "[de_serializer]")
@@ -193,13 +197,72 @@ TEST_CASE("Test (De)Serializer", "[de_serializer]")
     {
         Set::NodeSet original;
         original.Key = 123;
-        original.NodeKeys = { 1, 2, 3, 4, 5 };
+        original.NodeKeys = {1, 2, 3, 4, 5};
         TrussDocument doc = TrussDocument(original);
         auto result = doc.Get<Set::NodeSet>();
         REQUIRE(result.Key == original.Key);
         REQUIRE(result.NodeKeys == original.NodeKeys);
     }
+}
 
+
+TEST_CASE("Utils", "[Utils]")
+{
+    SECTION("GetGaussWeightsAndPoints2D(GaussianPoint2D::One)")
+    {
+        auto [weight, points] = GetGaussWeightsAndPoints2D<float>(GaussianPoint2D::One);
+        REQUIRE(weight.size() == 1);
+        REQUIRE(points.size() == 2);
+        REQUIRE(weight(0) == Catch::Approx(4.0f));
+        REQUIRE(points(0) == Catch::Approx(0.0f));
+        REQUIRE(points(1) == Catch::Approx(0.0f));
+    }
+
+    SECTION("GetGaussWeightsAndPoints2D(GaussianPoint2D::Four)")
+    {
+        auto [weight, points] = GetGaussWeightsAndPoints2D<float>(GaussianPoint2D::Four);
+        REQUIRE(weight.size() == 4);
+        REQUIRE(points.size() == 8);
+        REQUIRE(weight(0) == Catch::Approx(1.0f));
+        REQUIRE(weight(1) == Catch::Approx(1.0f));
+        REQUIRE(weight(2) == Catch::Approx(1.0f));
+        REQUIRE(weight(3) == Catch::Approx(1.0f));
+        REQUIRE(points(0, 0) == Catch::Approx(-0.577350269189626f));
+        REQUIRE(points(0, 1) == Catch::Approx(-0.577350269189626f));
+        REQUIRE(points(1, 0) == Catch::Approx(-0.577350269189626f));
+        REQUIRE(points(1, 1) == Catch::Approx(0.577350269189626f));
+        REQUIRE(points(2, 0) == Catch::Approx(0.577350269189626f));
+        REQUIRE(points(2, 1) == Catch::Approx(-0.577350269189626f));
+        REQUIRE(points(3, 0) == Catch::Approx(0.577350269189626f));
+        REQUIRE(points(3, 1) == Catch::Approx(0.577350269189626f));
+
+    }
+
+    SECTION("GaussianQuadrature_1")
+    {
+        IntegrateFunc<float> func = [](const VectorX<float>& x, const VectorX<float>&) -> VectorX<float> {
+            return VectorX<float>::Ones(x.size());
+        };
+        Eigen::Matrix<float, 4, 2> vertices;
+        vertices << 0, 0, 5, -1, 4, 5, 1, 4;
+        auto result1 = GaussianQuadrature2D(func, vertices, GaussianPoint2D::One);
+        REQUIRE(result1 == Catch::Approx(20.0f));
+        auto result2 = GaussianQuadrature2D(func, vertices, GaussianPoint2D::Four);
+        REQUIRE(result2 == Catch::Approx(20.0f));
+    }
+
+    SECTION("GaussianQuadrature_2")
+    {
+        IntegrateFunc<float> func = [](const VectorX<float>& x, const VectorX<float>&) -> VectorX<float> {
+            return VectorX<float>::Ones(x.size());
+        };
+        Eigen::Matrix<float, 4, 2> vertices;
+        vertices << -1,-1, 5,-3, 10,5, 7,9;
+        auto result1 = GaussianQuadrature2D(func, vertices, GaussianPoint2D::One);
+        REQUIRE(result1 == Catch::Approx(60.0f));
+        auto result2 = GaussianQuadrature2D(func, vertices, GaussianPoint2D::Four);
+        REQUIRE(result2 == Catch::Approx(60.0f));
+    }
 
 
 }

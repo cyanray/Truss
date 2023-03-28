@@ -40,15 +40,15 @@ class PostProcessing:
     def __init__(self, elements_csv_path, nodes_csv_path):
         self.elements = read_csv(elements_csv_path)
         self.nodes = read_csv(nodes_csv_path)
-        self.node_id_map = {value: index for index, value in enumerate(self.nodes['node_id'])}
+        self.node_id_to_index_map = {value: index for index, value in enumerate(self.nodes['node_id'])}
 
     def get_element_node_index3(self, element_index):
         node1_id = self.elements['node1_id'][element_index]
         node2_id = self.elements['node2_id'][element_index]
         node3_id = self.elements['node3_id'][element_index]
-        node1_index = self.node_id_map[node1_id]
-        node2_index = self.node_id_map[node2_id]
-        node3_index = self.node_id_map[node3_id]
+        node1_index = self.node_id_to_index_map[node1_id]
+        node2_index = self.node_id_to_index_map[node2_id]
+        node3_index = self.node_id_to_index_map[node3_id]
         return [node1_index, node2_index, node3_index]
 
     def get_node_xy(self, node_index_list):
@@ -140,3 +140,4 @@ if __name__ == '__main__':
     post_processing.draw_fem_mesh()
     post_processing.draw_displacement(300)
     post_processing.draw_stress(300)
+
