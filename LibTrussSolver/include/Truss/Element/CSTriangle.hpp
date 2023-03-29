@@ -10,6 +10,7 @@ namespace Truss::Element
     class CSTriangle : public ElementBase
     {
     public:
+        bool IsConstantStrainTriangle{false};
         ID LeftNodeKey{INVALID_ID};
         ID RightNodeKey{INVALID_ID};
         ID TopNodeKey{INVALID_ID};

@@ -1,3 +1,7 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "UnusedParameter"
+#pragma ide diagnostic ignored "UnusedLocalVariable"
+#pragma ide diagnostic ignored "UnusedValue"
 #pragma once
 #include <Eigen/Dense>
 #include <cmath>
@@ -69,6 +73,7 @@ namespace Truss
                                   GaussianPoint2D p = GaussianPoint2D::Four)
     {
         using namespace Eigen;
+        using Eigen::all;
         auto [weights, points] = GetGaussWeightsAndPoints2D<T>(p);
         /* Shape functions */
         auto Psi1 = []<typename U>(U x, U y) constexpr { return (1 - x.array()) * (1 - y.array()) / 4; };
@@ -125,3 +130,4 @@ namespace Truss
         return result;
     }
 }// namespace Truss
+#pragma clang diagnostic pop

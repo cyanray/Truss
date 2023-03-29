@@ -37,10 +37,8 @@ namespace Truss::Element
 
         Numeric A = GetTriangleArea();
         Numeric t = Section->Thickness;
-        Numeric E = Section->Mat->YoungsModules;
-        Numeric v = Section->Mat->PoissonRation;
 
-        Numeric k = (t * E) / (4 * A * (1 - v * v));
+        Numeric k = t / (4 * A);
         return k * BMatrix.transpose() * DMatrix * BMatrix;
     }
 
@@ -52,10 +50,21 @@ namespace Truss::Element
     Matrix3x3<Numeric> CSTriangle::GetDMatrix() const
     {
         Numeric v = Section->Mat->PoissonRation;
-        Matrix3x3<Numeric> DMatrix{{1, v, 0},
-                                   {v, 1, 0},
-                                   {0, 0, (1 - v) / 2}};
-        return DMatrix;
+        Numeric E = Section->Mat->YoungsModules;
+        if (!IsConstantStrainTriangle) [[likely]]
+        {
+            Matrix3x3<Numeric> DMatrix{{1, v, 0},
+                                       {v, 1, 0},
+                                       {0, 0, (1 - v) / 2}};
+            return (E / (1 - v * v)) * DMatrix;
+        }
+        else [[unlikely]]
+        {
+            Matrix3x3<Numeric> DMatrix{{1 - v, v, 0},
+                                       {v, 1 - v, 0},
+                                       {0, 0, (1 - 2 * v) / 2}};
+            return (E / ((1 + v) * (1 - 2 * v))) * DMatrix;
+        }
     }
 
     Eigen::Matrix<Numeric, 3, 18> CSTriangle::GetBMatrix() const

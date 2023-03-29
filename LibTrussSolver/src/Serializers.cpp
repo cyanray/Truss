@@ -127,6 +127,7 @@ void Truss::from_truss(const TrussDocument& doc, Element::CSTriangle& obj)
     obj.RightNodeKey = doc["node2_key"].Get<ID>();
     obj.TopNodeKey = doc["node3_key"].Get<ID>();
     obj.SectionKey = doc["section_key"].Get<ID>();
+    obj.IsConstantStrainTriangle = doc["ConstantStrain"].GetOrDefault<bool>(false);
 }
 
 void Truss::from_truss(const TrussDocument& doc, Section::Section_CSTriangle& obj)
@@ -174,6 +175,7 @@ void Truss::to_truss(TrussDocument& doc, const Element::CSTriangle& obj)
     doc["node2_key"] = obj.RightNodeKey;
     doc["node3_key"] = obj.TopNodeKey;
     doc["section_key"] = obj.SectionKey;
+    doc["ConstantStrain"] = obj.IsConstantStrainTriangle;
 }
 
 void Truss::to_truss(TrussDocument& doc, const Load::NodeLoad& obj)
