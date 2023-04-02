@@ -1,8 +1,9 @@
 #include <array>
+#include <iostream>
 #include <vector>
 
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <Truss/Serializer/Serializers.hpp>
 #include <Truss/Utils/GaussianQuadrature.hpp>
@@ -235,7 +236,6 @@ TEST_CASE("Utils", "[Utils]")
         REQUIRE(points(2, 1) == Catch::Approx(-0.577350269189626f));
         REQUIRE(points(3, 0) == Catch::Approx(0.577350269189626f));
         REQUIRE(points(3, 1) == Catch::Approx(0.577350269189626f));
-
     }
 
     SECTION("GaussianQuadrature_1")
@@ -257,12 +257,32 @@ TEST_CASE("Utils", "[Utils]")
             return VectorX<float>::Ones(x.size());
         };
         Eigen::Matrix<float, 4, 2> vertices;
-        vertices << -1,-1, 5,-3, 10,5, 7,9;
+        vertices << -1, -1, 5, -3, 10, 5, 7, 9;
         auto result1 = GaussianQuadrature2D(func, vertices, GaussianPoint2D::One);
         REQUIRE(result1 == Catch::Approx(60.0f));
         auto result2 = GaussianQuadrature2D(func, vertices, GaussianPoint2D::Four);
         REQUIRE(result2 == Catch::Approx(60.0f));
     }
 
-
+    SECTION("GaussianQuadrature_3")
+    {
+        using namespace std;
+        IntegrateFunc<float, Matrix3x3<float>> func = [](const VectorX<float>& x, const VectorX<float>&) -> VectorX<Matrix3x3<float>> {
+            VectorX<Matrix3x3<float>> result;
+            result.resize(x.size());
+            for (int i = 0; i < x.size(); i++)
+            {
+                result(i) = Matrix3x3<float>::Ones();
+            }
+            return result;
+        };
+        Eigen::Matrix<float, 4, 2> vertices;
+        vertices << 0, 0, 5, -1, 4, 5, 1, 4;
+        auto result1 = GaussianQuadrature2D(func, vertices, GaussianPoint2D::One);
+        // requires all element of result1 is 20
+        for (float element: Eigen::Vector<float, 9>(result1.reshaped(9, 1)))
+        {
+            REQUIRE(element == Catch::Approx(20.0f));
+        }
+    }
 }

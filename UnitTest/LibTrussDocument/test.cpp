@@ -468,7 +468,7 @@ TEST_CASE("For array", "[ForArray]")
         }
     }
 
-    SECTION("Get std::vector<T> from TrussDocument::Array()")
+    SECTION("Get std::vector<TScalar> from TrussDocument::Array()")
     {
         TrussDocument doc = TrussDocument::Array();
         doc.Add(123);

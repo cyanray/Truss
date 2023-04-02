@@ -19,7 +19,7 @@ namespace Truss
     };
 
     template<typename T>
-    inline std::tuple<Eigen::VectorX<T>, Eigen::MatrixX<T>>
+    inline std::tuple<Eigen::VectorX<T>, Eigen::Matrix<T, Eigen::Dynamic, 2>>
     GetGaussWeightsAndPoints2D(GaussianPoint2D gaussPoint2D)
     {
         using namespace Eigen;
@@ -65,16 +65,12 @@ namespace Truss
     }
 
     template<typename T>
-    using IntegrateFunc = std::function<Eigen::VectorX<T>(const Eigen::VectorX<T>&, const Eigen::VectorX<T>&)>;
-
-    template<typename T>
-    inline T GaussianQuadrature2D(const IntegrateFunc<T>& func,
-                                  Eigen::Matrix<T, 4, 2> vertices,
-                                  GaussianPoint2D p = GaussianPoint2D::Four)
+    inline std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>>
+    GetDomainPoints(const Eigen::Matrix<T, 4, 2>& vertices,
+                    const Eigen::Matrix<T, Eigen::Dynamic, 2>& points)
     {
         using namespace Eigen;
         using Eigen::all;
-        auto [weights, points] = GetGaussWeightsAndPoints2D<T>(p);
         /* Shape functions */
         auto Psi1 = []<typename U>(U x, U y) constexpr { return (1 - x.array()) * (1 - y.array()) / 4; };
         auto Psi2 = []<typename U>(U x, U y) constexpr { return (1 + x.array()) * (1 - y.array()) / 4; };
@@ -112,7 +108,7 @@ namespace Truss
         }();
         /* evaluate Jacobian contribution for each point */
         auto evalDetJacb = [&]() {
-            Matrix<T, Dynamic, 1> result;
+            VectorX<T> result;
             result.resize(xi.size());
             for (int i = 0; i < xi.size(); ++i)
             {
@@ -120,14 +116,39 @@ namespace Truss
             }
             return result;
         }();
+        return {ptGaussDomain, evalDetJacb};
+    }
+
+
+    template<typename TScalar, typename TFuncRetrun = TScalar>
+    using IntegrateFunc = std::function<Eigen::VectorX<TFuncRetrun>(const Eigen::VectorX<TScalar>&, const Eigen::VectorX<TScalar>&)>;
+
+    template<typename TScalar, typename TFuncRetrun = TScalar>
+    inline TFuncRetrun GaussianQuadrature2D(const IntegrateFunc<TScalar, TFuncRetrun>& func,
+                                            const Eigen::Matrix<TScalar, 4, 2>& vertices,
+                                            GaussianPoint2D p = GaussianPoint2D::Four)
+    {
+        using namespace Eigen;
+        using Eigen::all;
+        auto [weights, points] = GetGaussWeightsAndPoints2D<TScalar>(p);
+        auto [ptGaussDomain, evalDetJacb] = GetDomainPoints<TScalar>(vertices, points);
+
         /* evaluate the function on the domain points */
         auto evalF = func(ptGaussDomain(all, 0), ptGaussDomain(all, 1));
-        T result = 0;
-        for (int i = 0; i < ptGaussDomain.rows(); ++i)
+
+        if constexpr (std::is_same_v<TFuncRetrun, TScalar>)
         {
-            result += weights(i) * evalF(i) * evalDetJacb(i);
+            return (weights.array() * evalF.array() * evalDetJacb.array()).sum();
         }
-        return result;
+        else
+        {
+            TFuncRetrun result = TFuncRetrun::Zero();
+            for (int i = 0; i < evalF.size(); ++i)
+            {
+                result += weights(i) * evalF(i) * evalDetJacb(i);
+            }
+            return result;
+        }
     }
 }// namespace Truss
 #pragma clang diagnostic pop
