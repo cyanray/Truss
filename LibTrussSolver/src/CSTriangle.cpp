@@ -21,7 +21,6 @@ namespace Truss::Element
                            (LeftNode->X * (RightNode->Y - TopNode->Y) +
                             RightNode->X * (TopNode->Y - LeftNode->Y) +
                             TopNode->X * (LeftNode->Y - RightNode->Y)));
-        assert(area > 0);
         return area;
     }
 

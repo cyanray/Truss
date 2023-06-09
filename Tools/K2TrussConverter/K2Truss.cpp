@@ -18,9 +18,9 @@ using namespace Truss::Tools;
 
 int main(int argc, char* argv[])
 {
-    if (argc < 2)
+    if (argc < 3)
     {
-        cout << "Usage: " << argv[0] << " <kdoc file>" << endl;
+        cout << "Usage: K2Truss <input.k> <output.truss>" << endl;
         return 1;
     }
 
@@ -32,21 +32,35 @@ int main(int argc, char* argv[])
             cout << "Failed to open file: " << argv[1] << endl;
             return 1;
         }
+        ofstream ofs(argv[2]);
+        if (!ofs.is_open())
+        {
+            cout << "Failed to open file: " << argv[2] << endl;
+            return 1;
+        }
+
         string kdoc((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
         auto result = KDoc::Parse(kdoc);
+
+        auto tdoc = TrussDocument::Object();
+
         for (auto& doc: result)
         {
             if (doc.Keyword == "NODE")
             {
                 auto nodes = GetNodes(doc);
-                cout << nodes.ToString() << endl;
+                tdoc.Add("Node", nodes);
             }
             else if (doc.Keyword == "ELEMENT_SHELL")
             {
                 auto triangles = GetTriangles(doc);
-                cout << triangles.ToString() << endl;
+                tdoc.Add("Element", triangles);
             }
         }
+
+        ofs << tdoc.ToString() << endl;
+        cout << "Done." << endl;
+
     }
     catch (exception& e)
     {

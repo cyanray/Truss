@@ -8,7 +8,7 @@
 #include "csv_to_string.hpp"
 #include "Csv/CsvWriter.hpp"
 #include <Eigen/Dense>
-#include <Truss/Element/CSTriangle.hpp>
+
 #include <Truss/Solver.hpp>
 #include <TrussDocument/TrussDocument.hpp>
 #include <backward.hpp>
@@ -86,7 +86,9 @@ int main(int argc, char* argv[])
         basic_output_file << K << endl;
         basic_output_file << "{F} = " << endl;
         basic_output_file << F << endl;
-        VectorXf D = K.colPivHouseholderQr().solve(F);
+        // VectorXf D = K.colPivHouseholderQr().solve(F);
+        // VectorXf D = K.fullPivLu().solve(F);
+        VectorXf D = K.bdcSvd(ComputeThinU | ComputeThinV).solve(F);
         basic_output_file << "{D} = " << endl;
         basic_output_file << D << endl;
 
@@ -124,6 +126,8 @@ int main(int argc, char* argv[])
             node_keys.segment(node_count, 8 - node_count).fill(-1);
             elements_csv_file << std::make_tuple(element->Key, element->GetElementName(), node_count, node_keys, stress);
         }
+
+        cout << "Done." << endl;
     }
     catch (const exception& exception)
     {

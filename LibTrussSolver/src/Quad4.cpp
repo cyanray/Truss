@@ -1,10 +1,10 @@
-#include "Truss/Element/CSQuad.hpp"
+#include "Truss/Element/Quad4.hpp"
 #include "Truss/Common/Resources.hpp"
 #include "Truss/Utils/GaussianQuadrature.hpp"
 
 namespace Truss::Element
 {
-    void CSQuad::Build(Resources& resources)
+    void Quad4::Build(Resources& resources)
     {
         Node1 = &resources.Nodes.at(Node1Key);
         Node2 = &resources.Nodes.at(Node2Key);
@@ -14,34 +14,35 @@ namespace Truss::Element
         Section = std::static_pointer_cast<Section::Section_CSQuad>(section).get();
     }
 
-    std::vector<ID> CSQuad::GetNodeIds() const
+    std::vector<ID> Quad4::GetNodeIds() const
     {
         return {Node1->Id, Node2->Id, Node3->Id, Node4->Id};
     }
 
-    MatrixX<Numeric> CSQuad::GetStiffnessGlobal() const
+    MatrixX<Numeric> Quad4::GetStiffnessGlobal() const
     {
         return {};
     }
 
-    StressVector CSQuad::CalculateStress(const VectorX<Numeric>& displacement) const
+    StressVector Quad4::CalculateStress(const VectorX<Numeric>& displacement) const
     {
         return {};
     }
 
-    MatrixX<Numeric> CSQuad::GetStiffnessLocal() const
+    MatrixX<Numeric> Quad4::GetStiffnessLocal() const
     {
         // TODO: integrate B^TScalar D B
         return {};
     }
 
-    Eigen::Matrix<Numeric, 3, 24> CSQuad::GetBMatrix() const
+    Eigen::Matrix<Numeric, 3, 24> Quad4::GetBMatrix(const VectorX<Numeric>& x, const VectorX<Numeric>& y) const
     {
-        // TODO: is a function about x,y
+        Eigen::Matrix<Numeric, 3, 24> result = Eigen::Matrix<Numeric, 3, 24>::Zero();
+        //result(Eigen::all, {0, 1}) <<
         return {};
     }
 
-    Matrix3x3<Numeric> CSQuad::GetDMatrix() const
+    Matrix3x3<Numeric> Quad4::GetDMatrix() const
     {
         Numeric v = Section->Mat->PoissonRation;
         Numeric E = Section->Mat->YoungsModules;

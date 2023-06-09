@@ -120,8 +120,8 @@ namespace Truss
     }
 
 
-    template<typename TScalar, typename TFuncRetrun = TScalar>
-    using IntegrateFunc = std::function<Eigen::VectorX<TFuncRetrun>(const Eigen::VectorX<TScalar>&, const Eigen::VectorX<TScalar>&)>;
+    template<typename TScalar, typename TFuncRetrun = TScalar, typename TFuncArg = const Eigen::VectorX<TScalar>&>
+    using IntegrateFunc = std::function<Eigen::VectorX<TFuncRetrun>(TFuncArg, TFuncArg)>;
 
     template<typename TScalar, typename TFuncRetrun = TScalar>
     inline TFuncRetrun GaussianQuadrature2D(const IntegrateFunc<TScalar, TFuncRetrun>& func,

@@ -5,7 +5,7 @@
 
 namespace Truss::Element
 {
-    class CSQuad : public ElementBase
+    class Quad4 : public ElementBase
     {
     public:
         bool IsConstantStrainTriangle{false};
@@ -20,11 +20,11 @@ namespace Truss::Element
         Node* Node4{};
         Section::Section_CSQuad* Section{};
 
-        ~CSQuad() override = default;
+        ~Quad4() override = default;
 
         [[nodiscard]] constexpr std::string GetElementName() const noexcept override
         {
-            return "CSQuad";
+            return "Quad4";
         }
 
         void Build(Resources& resources) override;
@@ -46,7 +46,7 @@ namespace Truss::Element
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override;
 
-        [[nodiscard]] Eigen::Matrix<Numeric, 3, 24> GetBMatrix() const;
+        [[nodiscard]] Eigen::Matrix<Numeric, 3, 24> GetBMatrix(const VectorX<Numeric>& x, const VectorX<Numeric>& y) const;
 
         [[nodiscard]] Matrix3x3<Numeric> GetDMatrix() const;
 

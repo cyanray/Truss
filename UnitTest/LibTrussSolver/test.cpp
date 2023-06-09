@@ -279,7 +279,7 @@ TEST_CASE("Utils", "[Utils]")
         Eigen::Matrix<float, 4, 2> vertices;
         vertices << 0, 0, 5, -1, 4, 5, 1, 4;
         auto result1 = GaussianQuadrature2D(func, vertices, GaussianPoint2D::One);
-        // requires all element of result1 is 20
+
         for (float element: Eigen::Vector<float, 9>(result1.reshaped(9, 1)))
         {
             REQUIRE(element == Catch::Approx(20.0f));
