@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SectionBase.hpp"
-#include "Truss/Common/Constants.hpp"
+#include "Truss/Common/Common.hpp"
 #include "Truss/Material/Elastic.hpp"
 
 namespace Truss::Section

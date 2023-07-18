@@ -3,6 +3,40 @@
 #include <memory>
 using namespace Truss;
 
+namespace
+{
+    template<typename TBase, typename T>
+        requires std::derived_from<T, TBase>
+    std::shared_ptr<TBase> Creator(const TrussDocument& doc)
+    {
+        auto value = std::make_shared<T>();
+        from_truss(doc, *value);
+        return std::static_pointer_cast<TBase>(value);
+    }
+}// namespace
+
+SimpleReflection& Truss::GetCompomentReflection()
+{
+    static SimpleReflection refl;
+    if (refl.IsEmpty()) [[unlikely]]
+    {
+        refl.Register("Elastic", Creator<Material::MaterialBase, Material::Elastic>);
+        refl.Register("NodeConstraint", Creator<Constraint::ConstraintBase, Constraint::NodeConstraint>);
+        refl.Register("NodeSetConstraint", Creator<Constraint::ConstraintBase, Constraint::NodeSetConstraint>);
+        refl.Register("Bar", Creator<Element::ElementBase, Element::Bar>);
+        refl.Register("Beam", Creator<Element::ElementBase, Element::Beam>);
+        refl.Register("CSTriangle", Creator<Element::ElementBase, Element::CSTriangle>);
+        refl.Register("NodeLoad", Creator<Load::LoadBase, Load::NodeLoad>);
+        refl.Register("BeamUniformLoad", Creator<Load::LoadBase, Load::BeamUniformLoad>);
+        refl.Register("NodeSetLoad", Creator<Load::LoadBase, Load::NodeSetLoad>);
+        refl.Register("Section_Bar", Creator<Section::SectionBase, Section::Section_Bar>);
+        refl.Register("Section_Beam", Creator<Section::SectionBase, Section::Section_Beam>);
+        refl.Register("Section_CSTriangle", Creator<Section::SectionBase, Section::Section_CSTriangle>);
+        refl.Register("NodeSet", Creator<Set::SetBase, Set::NodeSet>);
+    }
+    return refl;
+}
+
 void Truss::from_truss(const TrussDocument& doc, Node& obj)
 {
     obj.Key = doc["key"].Get<ID>();
@@ -86,39 +120,6 @@ void Truss::from_truss(const TrussDocument& doc, Load::BeamUniformLoad& obj)
     obj.ZForce = doc["zforce"].GetOrDefault<Numeric>();
 }
 
-namespace
-{
-    template<typename TBase, typename T>
-        requires std::derived_from<T, TBase>
-    std::shared_ptr<TBase> Creator(const TrussDocument& doc)
-    {
-        auto value = std::make_shared<T>();
-        from_truss(doc, *value);
-        return std::static_pointer_cast<TBase>(value);
-    }
-}// namespace
-
-SimpleReflection& Truss::GetCompomentReflection()
-{
-    static SimpleReflection refl;
-    if (refl.IsEmpty()) [[unlikely]]
-    {
-        refl.Register("Elastic", Creator<Material::MaterialBase, Material::Elastic>);
-        refl.Register("NodeConstraint", Creator<Constraint::ConstraintBase, Constraint::NodeConstraint>);
-        refl.Register("NodeSetConstraint", Creator<Constraint::ConstraintBase, Constraint::NodeSetConstraint>);
-        refl.Register("Bar", Creator<Element::ElementBase, Element::Bar>);
-        refl.Register("Beam", Creator<Element::ElementBase, Element::Beam>);
-        refl.Register("CSTriangle", Creator<Element::ElementBase, Element::CSTriangle>);
-        refl.Register("NodeLoad", Creator<Load::LoadBase, Load::NodeLoad>);
-        refl.Register("BeamUniformLoad", Creator<Load::LoadBase, Load::BeamUniformLoad>);
-        refl.Register("NodeSetLoad", Creator<Load::LoadBase, Load::NodeSetLoad>);
-        refl.Register("Section_Bar", Creator<Section::SectionBase, Section::Section_Bar>);
-        refl.Register("Section_Beam", Creator<Section::SectionBase, Section::Section_Beam>);
-        refl.Register("Section_CSTriangle", Creator<Section::SectionBase, Section::Section_CSTriangle>);
-        refl.Register("NodeSet", Creator<Set::SetBase, Set::NodeSet>);
-    }
-    return refl;
-}
 
 void Truss::from_truss(const TrussDocument& doc, Element::CSTriangle& obj)
 {
@@ -127,7 +128,6 @@ void Truss::from_truss(const TrussDocument& doc, Element::CSTriangle& obj)
     obj.RightNodeKey = doc["node2_key"].Get<ID>();
     obj.TopNodeKey = doc["node3_key"].Get<ID>();
     obj.SectionKey = doc["section_key"].Get<ID>();
-    obj.IsConstantStrainTriangle = doc["ConstantStrain"].GetOrDefault<bool>(false);
 }
 
 void Truss::from_truss(const TrussDocument& doc, Section::Section_CSTriangle& obj)
@@ -135,6 +135,7 @@ void Truss::from_truss(const TrussDocument& doc, Section::Section_CSTriangle& ob
     obj.Key = doc["key"].Get<ID>();
     obj.MaterialKey = doc["mat_key"].Get<ID>();
     obj.Thickness = doc["thickness"].Get<Numeric>();
+    obj.IsConstantStrainTriangle = doc["ConstantStrain"].GetOrDefault<bool>(false);
 }
 
 void Truss::from_truss(const TrussDocument& doc, Set::NodeSet& obj)
@@ -175,7 +176,6 @@ void Truss::to_truss(TrussDocument& doc, const Element::CSTriangle& obj)
     doc["node2_key"] = obj.RightNodeKey;
     doc["node3_key"] = obj.TopNodeKey;
     doc["section_key"] = obj.SectionKey;
-    doc["ConstantStrain"] = obj.IsConstantStrainTriangle;
 }
 
 void Truss::to_truss(TrussDocument& doc, const Load::NodeLoad& obj)
@@ -241,6 +241,7 @@ void Truss::to_truss(TrussDocument& doc, const Section::Section_CSTriangle& obj)
     doc["key"] = obj.Key;
     doc["mat_key"] = obj.MaterialKey;
     doc["thickness"] = obj.Thickness;
+    doc["ConstantStrain"] = obj.IsConstantStrainTriangle;
 }
 
 void Truss::to_truss(TrussDocument& doc, const Set::NodeSet& obj)

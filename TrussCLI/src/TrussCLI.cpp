@@ -88,11 +88,11 @@ int main(int argc, char* argv[])
         basic_output_file << F << endl;
         // VectorXf D = K.colPivHouseholderQr().solve(F);
         // VectorXf D = K.fullPivLu().solve(F);
-        VectorXf D = K.bdcSvd(ComputeThinU | ComputeThinV).solve(F);
+        Truss::VectorX D = K.bdcSvd(ComputeThinU | ComputeThinV).solve(F);
         basic_output_file << "{D} = " << endl;
         basic_output_file << D << endl;
 
-        VectorXf D_full = VectorXf::Zero(solver.GetKSize());
+        Truss::VectorX D_full = Truss::VectorX::Zero(solver.GetKSize());
         for (int i = 0; i < index.size(); ++i)
         {
             D_full(index[i]) = D(i);
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
             auto node_count = element->GetNodeCount();
             vector<ID> nodes = element->GetNodeIds();
             // Compute displacement for each node
-            Truss::VectorX<Numeric> displacement = Truss::VectorX<Numeric>::Zero(ALL_DOF * node_count);
+            Truss::VectorX displacement = Truss::VectorX::Zero(ALL_DOF * node_count);
             for (int i = 0; i < node_count; ++i)
             {
                 auto node = nodes[i];

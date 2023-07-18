@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Truss/Common/Constants.hpp"
+#include "Truss/Common/Common.hpp"
 #include "Truss/Common/IComponent.hpp"
 #include <Eigen/Dense>
 namespace Truss::Load

@@ -1,7 +1,7 @@
 #pragma once
 #include "ElementBase.hpp"
 #include "Truss/Common/Node.hpp"
-#include "Truss/Section/Section_CSQuad.hpp"
+#include "Truss/Section/Section_Quad4.hpp"
 
 namespace Truss::Element
 {
@@ -18,16 +18,16 @@ namespace Truss::Element
         Node* Node2{};
         Node* Node3{};
         Node* Node4{};
-        Section::Section_CSQuad* Section{};
+        Section::Section_Quad4* Section{};
 
-        ~Quad4() override = default;
+        void Build(Resources& resources) override;
+
+        [[nodiscard]] ValidationInfo Validate() const override;
 
         [[nodiscard]] constexpr std::string GetElementName() const noexcept override
         {
             return "Quad4";
         }
-
-        void Build(Resources& resources) override;
 
         [[nodiscard]] constexpr int GetNodeCount() const noexcept override
         {
@@ -46,14 +46,14 @@ namespace Truss::Element
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override;
 
-        [[nodiscard]] Eigen::Matrix<Numeric, 3, 24> GetBMatrix(const VectorX<Numeric>& x, const VectorX<Numeric>& y) const;
+        [[nodiscard]] Eigen::Matrix<Numeric, 3, 24> GetBMatrix(Numeric s, Numeric t) const;
 
-        [[nodiscard]] Matrix3x3<Numeric> GetDMatrix() const;
+        [[nodiscard]] Matrix3x3 GetDMatrix() const;
 
-        [[nodiscard]] MatrixX<Numeric> GetStiffnessLocal() const;
+        [[nodiscard]] MatrixX GetStiffnessLocal() const;
 
-        [[nodiscard]] MatrixX<Numeric> GetStiffnessGlobal() const override;
+        [[nodiscard]] MatrixX GetStiffnessGlobal() const override;
 
-        [[nodiscard]] StressVector CalculateStress(const VectorX<Numeric>& displacement) const override;
+        [[nodiscard]] StressVector CalculateStress(const VectorX& displacement) const override;
     };
 }// namespace Truss::Element

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Constants.hpp"
+#include "Common.hpp"
 #include <string>
 using std::string;
 namespace Truss

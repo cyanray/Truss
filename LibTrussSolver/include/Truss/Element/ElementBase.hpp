@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Truss/Common/ValidationInfo.hpp"
 #include "Truss/Common/DegreeOfFreedom.hpp"
 #include "Truss/Common/IComponent.hpp"
 #include <bit>
@@ -11,6 +12,8 @@ namespace Truss::Element
     {
     public:
         virtual void Build(Resources&) = 0;
+
+        [[nodiscard]] virtual ValidationInfo Validate() const = 0;
 
         [[nodiscard]] constexpr virtual std::string GetElementName() const noexcept = 0;
 
@@ -32,9 +35,9 @@ namespace Truss::Element
 
         [[nodiscard]] virtual std::vector<ID> GetNodeIds() const = 0;
 
-        [[nodiscard]] virtual MatrixX<Numeric> GetStiffnessGlobal() const = 0;
+        [[nodiscard]] virtual MatrixX GetStiffnessGlobal() const = 0;
 
-        [[nodiscard]] virtual StressVector CalculateStress(const VectorX<Numeric>& displacement) const = 0;
+        [[nodiscard]] virtual StressVector CalculateStress(const VectorX& displacement) const = 0;
     };
 
 }// namespace Truss::Element

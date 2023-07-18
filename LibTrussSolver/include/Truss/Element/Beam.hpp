@@ -23,6 +23,8 @@ namespace Truss::Element
 
         void Build(Resources& resources) override;
 
+        [[nodiscard]] ValidationInfo Validate() const override;
+
         [[nodiscard]] constexpr int GetNodeCount() const noexcept override
         {
             return 2;
@@ -42,11 +44,11 @@ namespace Truss::Element
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override;
 
-        [[nodiscard]] MatrixX<Numeric> GetStiffnessLocal() const;
+        [[nodiscard]] MatrixX GetStiffnessLocal() const;
 
-        [[nodiscard]] MatrixX<Numeric> GetStiffnessGlobal() const override;
+        [[nodiscard]] MatrixX GetStiffnessGlobal() const override;
 
-        [[nodiscard]] StressVector CalculateStress(const VectorX<Truss::Numeric>& displacement) const override
+        [[nodiscard]] StressVector CalculateStress(const VectorX& displacement) const override
         {
             return {};
         }

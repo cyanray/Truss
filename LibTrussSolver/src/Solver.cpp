@@ -5,6 +5,7 @@
 #include "Truss/Utils/SimpleReflection.hpp"
 
 #include <bitset>
+#include <iostream>
 #include <vector>
 
 using namespace Truss;
@@ -66,14 +67,15 @@ void TrussSolver::BuildAllComponents()
     for (auto&& [_, entity]: m_Resources.Loads) entity->Build(m_Resources);
 }
 
-MatrixX<Numeric> TrussSolver::GetK()
+MatrixX TrussSolver::GetK()
 {
     int K_size = GetKSize();
-    MatrixX<Numeric> K = MatrixX<Numeric>::Zero(K_size, K_size);
+    MatrixX K = MatrixX::Zero(K_size, K_size);
     for (auto& [_, element]: m_Resources.Elements)
     {
         auto ids = element->GetNodeIds();
         auto ke = element->GetStiffnessGlobal();
+        // std::cout << ke << std::endl << std::endl;
         // Get index of element node in K
         std::vector<int> index = GenerateAllDOFIndex(ids);
         K(index, index) += ke;
@@ -81,10 +83,10 @@ MatrixX<Numeric> TrussSolver::GetK()
     return K;
 }
 
-VectorX<Numeric> TrussSolver::GetF()
+VectorX TrussSolver::GetF()
 {
     int K_size = GetKSize();
-    VectorX<Numeric> F = VectorX<Numeric>::Zero(K_size);
+    VectorX F = VectorX::Zero(K_size);
     for (auto&& [_, load_item]: m_Resources.Loads)
     {
         for (auto&& [id, load]: load_item->GetLoads())
@@ -96,13 +98,13 @@ VectorX<Numeric> TrussSolver::GetF()
 }
 
 
-MatrixX<Numeric> TrussSolver::GetK(const std::vector<int>& index)
+MatrixX TrussSolver::GetK(const std::vector<int>& index)
 {
     auto K = GetK();
     return K(index, index);
 }
 
-VectorX<Numeric> TrussSolver::GetF(const std::vector<int>& index)
+VectorX TrussSolver::GetF(const std::vector<int>& index)
 {
     auto F = GetF();
     return F(index);

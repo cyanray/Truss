@@ -5,7 +5,7 @@
 
 namespace Truss::Section
 {
-    class Section_CSQuad : public SectionBase
+    class Section_Quad4 : public SectionBase
     {
     public:
         ID MaterialKey{INVALID_ID};

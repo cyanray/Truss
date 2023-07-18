@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MaterialBase.hpp"
-#include "Truss/Common/Constants.hpp"
+#include "Truss/Common/Common.hpp"
 
 namespace Truss::Material
 {

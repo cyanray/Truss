@@ -1,26 +1,38 @@
 #include "Truss/Element/CSTriangle.hpp"
+#include "Truss/Common/Coordinate.hpp"
 #include "Truss/Common/Resources.hpp"
 #include <cassert>
 #include <iostream>
+#include <mutex>
 using namespace Truss;
 
 namespace Truss::Element
 {
-    void CSTriangle::Build(Resources& resources)
+    void CSTriangle::Build(Resources& res)
     {
-        LeftNode = &resources.Nodes[LeftNodeKey];
-        RightNode = &resources.Nodes[RightNodeKey];
-        TopNode = &resources.Nodes[TopNodeKey];
-        auto& section = resources.Sections.at(SectionKey);
-        this->Section = std::static_pointer_cast<Section::Section_CSTriangle>(section).get();
+        LeftNode = res.Get<Node>(res.Nodes, LeftNodeKey);
+        RightNode = res.Get<Node>(res.Nodes, RightNodeKey);
+        TopNode = res.Get<Node>(res.Nodes, TopNodeKey);
+        Section = res.GetAndCast<Section::Section_CSTriangle>(res.Sections, SectionKey);
+    }
+
+    ValidationInfo CSTriangle::Validate() const
+    {
+        if (LeftNode == nullptr) return {"LeftNode is null"};
+        if (RightNode == nullptr) return {"RightNode is null"};
+        if (TopNode == nullptr) return {"TopNode is null"};
+        if (Section == nullptr) return {"Section is null"};
+        return {};
     }
 
     Numeric CSTriangle::GetTriangleArea() const
     {
+        auto [xi, xj, xk] = GetTransformedX();
+        auto [yi, yj, yk] = GetTransformedY();
         Numeric area = abs(static_cast<Numeric>(0.5) *
-                           (LeftNode->X * (RightNode->Y - TopNode->Y) +
-                            RightNode->X * (TopNode->Y - LeftNode->Y) +
-                            TopNode->X * (LeftNode->Y - RightNode->Y)));
+                           (xi * (yj - yk) +
+                            xj * (yk - yi) +
+                            xk * (yi - yj)));
         return area;
     }
 
@@ -29,7 +41,7 @@ namespace Truss::Element
         return {LeftNode->Id, RightNode->Id, TopNode->Id};
     }
 
-    [[nodiscard]] MatrixX<Numeric> CSTriangle::GetStiffnessLocal() const
+    [[nodiscard]] MatrixX CSTriangle::GetStiffnessLocal() const
     {
         auto DMatrix = GetDMatrix();
         auto BMatrix = GetBMatrix();
@@ -41,25 +53,27 @@ namespace Truss::Element
         return k * BMatrix.transpose() * DMatrix * BMatrix;
     }
 
-    MatrixX<Numeric> CSTriangle::GetStiffnessGlobal() const
+    MatrixX CSTriangle::GetStiffnessGlobal() const
     {
-        return GetStiffnessLocal();
+        auto& T = GetTransformMatrix();
+        auto TExt = BlockDiagonal(T, 2 * GetNodeCount());
+        return TExt.transpose() * GetStiffnessLocal() * TExt;
     }
 
-    Matrix3x3<Numeric> CSTriangle::GetDMatrix() const
+    Matrix3x3 CSTriangle::GetDMatrix() const
     {
         Numeric v = Section->Mat->PoissonRation;
         Numeric E = Section->Mat->YoungsModules;
-        if (!IsConstantStrainTriangle) [[likely]]
+        if (!Section->IsConstantStrainTriangle) [[likely]]
         {
-            Matrix3x3<Numeric> DMatrix{{1, v, 0},
+            Matrix3x3 DMatrix{{1, v, 0},
                                        {v, 1, 0},
                                        {0, 0, (1 - v) / 2}};
             return (E / (1 - v * v)) * DMatrix;
         }
         else [[unlikely]]
         {
-            Matrix3x3<Numeric> DMatrix{{1 - v, v, 0},
+            Matrix3x3 DMatrix{{1 - v, v, 0},
                                        {v, 1 - v, 0},
                                        {0, 0, (1 - 2 * v) / 2}};
             return (E / ((1 + v) * (1 - 2 * v))) * DMatrix;
@@ -68,8 +82,8 @@ namespace Truss::Element
 
     Eigen::Matrix<Numeric, 3, 18> CSTriangle::GetBMatrix() const
     {
-        Numeric xi = LeftNode->X, xj = RightNode->X, xk = TopNode->X;
-        Numeric yi = LeftNode->Y, yj = RightNode->Y, yk = TopNode->Y;
+        auto [xi, xj, xk] = GetTransformedX();
+        auto [yi, yj, yk] = GetTransformedY();
         Numeric bi = yj - yk, bj = yk - yi, bk = yi - yj;
         Numeric gi = xk - xj, gj = xi - xk, gk = xj - xi;
         Eigen::Matrix<Numeric, 3, 18> BMatrix{{bi, 0, 0, 0, 0, 0, bj, 0, 0, 0, 0, 0, bk, 0, 0, 0, 0, 0},
@@ -78,11 +92,48 @@ namespace Truss::Element
         return BMatrix;
     }
 
-    StressVector CSTriangle::CalculateStress(const VectorX<Numeric>& displacement) const
+    StressVector CSTriangle::CalculateStress(const VectorX& displacement) const
     {
         assert(displacement.size() == 18);
         StressVector result = StressVector::Zero();
         result({0, 1, 3}) = GetDMatrix() * GetBMatrix() * displacement;
         return result;
     }
+
+
+    const Matrix3x3& CSTriangle::GetTransformMatrix() const
+    {
+        std::call_once(m_TransformMatrixFlag, [this]() {
+            auto xAxis = MakeVector(*LeftNode, *RightNode);
+            auto temp = MakeVector(*LeftNode, *TopNode);
+            auto zAxis = xAxis.cross(temp);
+            auto yAxis = zAxis.cross(xAxis);
+            m_TransformMatrix = GetTransformationMatrix(xAxis, yAxis);
+        });
+        return m_TransformMatrix;
+    }
+
+    const CSTriangle::Tuple3& CSTriangle::GetTransformedX() const
+    {
+        CalcTransformedXY();
+        return m_TransformedX;
+    }
+
+    const CSTriangle::Tuple3& CSTriangle::GetTransformedY() const
+    {
+        CalcTransformedXY();
+        return m_TransformedY;
+    }
+    void CSTriangle::CalcTransformedXY() const
+    {
+        std::call_once(m_TransformedXYFlag, [this]() {
+            Matrix3x3 result;
+            auto& T = GetTransformMatrix();
+            result << ToVector(*LeftNode), ToVector(*RightNode), ToVector(*TopNode);
+            result = T * result;
+            m_TransformedX = std::make_tuple(result(0, 0), result(0, 1), result(0, 2));
+            m_TransformedY = std::make_tuple(result(1, 0), result(1, 1), result(1, 2));
+        });
+    }
+
 }// namespace Truss::Element

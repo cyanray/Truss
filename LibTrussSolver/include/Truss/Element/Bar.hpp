@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ElementBase.hpp"
-#include "Truss/Common/Constants.hpp"
+#include "Truss/Common/Common.hpp"
 #include "Truss/Common/DegreeOfFreedom.hpp"
 #include "Truss/Common/Node.hpp"
 #include "Truss/Material/Elastic.hpp"
@@ -18,6 +18,10 @@ namespace Truss::Element
         Node* LeftNode{};
         Node* RightNode{};
         Section::Section_Bar* Section{};
+
+        void Build(Resources& resources) override;
+
+        [[nodiscard]] ValidationInfo Validate() const override;
 
         [[nodiscard]] constexpr int GetNodeCount() const noexcept override
         {
@@ -46,15 +50,13 @@ namespace Truss::Element
 
         [[nodiscard]] Numeric GetBarLength() const;
 
-        [[nodiscard]] MatrixX<Numeric> GetStiffnessLocal() const;
+        [[nodiscard]] MatrixX GetStiffnessLocal() const;
 
-        void Build(Resources& resources) override;
-
-        [[nodiscard]] MatrixX<Numeric> GetStiffnessGlobal() const override;
+        [[nodiscard]] MatrixX GetStiffnessGlobal() const override;
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override;
 
-        [[nodiscard]] StressVector CalculateStress(const VectorX<Numeric>& displacement) const override
+        [[nodiscard]] StressVector CalculateStress(const VectorX& displacement) const override
         {
             return {};
         }

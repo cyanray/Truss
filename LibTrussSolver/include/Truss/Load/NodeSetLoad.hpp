@@ -1,9 +1,9 @@
 #pragma once
 
 #include "LoadBase.hpp"
-#include "Truss/Common/Constants.hpp"
-#include "Truss/Set/NodeSet.hpp"
+#include "Truss/Common/Common.hpp"
 #include "Truss/Common/Resources.hpp"
+#include "Truss/Set/NodeSet.hpp"
 
 namespace Truss::Load
 {

@@ -8,6 +8,7 @@ namespace Truss::Section
     {
     public:
         ID MaterialKey{INVALID_ID};
+        bool IsConstantStrainTriangle{false};
         Numeric Thickness{};
         Material::Elastic* Mat{};
 

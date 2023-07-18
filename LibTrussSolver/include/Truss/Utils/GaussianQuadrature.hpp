@@ -8,6 +8,7 @@
 #include <functional>
 #include <stdexcept>
 #include <tuple>
+#include "Truss/Common/Common.hpp"
 
 namespace Truss
 {
@@ -64,10 +65,9 @@ namespace Truss
         throw std::runtime_error("Invalid GaussianPoint2D");
     }
 
-    template<typename T>
-    inline std::tuple<Eigen::MatrixX<T>, Eigen::VectorX<T>>
-    GetDomainPoints(const Eigen::Matrix<T, 4, 2>& vertices,
-                    const Eigen::Matrix<T, Eigen::Dynamic, 2>& points)
+    inline std::tuple<MatrixX, VectorX>
+    GetDomainPoints(const Eigen::Matrix<Numeric, 4, 2>& vertices,
+                    const Eigen::Matrix<Numeric, Eigen::Dynamic, 2>& points)
     {
         using namespace Eigen;
         using Eigen::all;
@@ -86,8 +86,8 @@ namespace Truss
         auto dPsi41 = []<typename U>(U x, U y) constexpr { return -(1 + y) / 4; };
         auto dPsi42 = []<typename U>(U x, U y) constexpr { return (1 - x) / 4; };
         /* Gradient matrix */
-        auto Jacobian = [&]<typename U>(U x, U y) constexpr {
-            Eigen::Matrix<T, 2, 4> result;
+        auto Jacobian = [&]<typename U>(U x, U y) {
+            Eigen::Matrix<Numeric, 2, 4> result;
             result << dPsi11(x, y), dPsi21(x, y), dPsi31(x, y), dPsi41(x, y),
                     dPsi12(x, y), dPsi22(x, y), dPsi32(x, y), dPsi42(x, y);
             return result;
@@ -101,14 +101,14 @@ namespace Truss
         auto evalPsi4 = Psi4(xi, eta);
         /* from the change of variables function */
         auto ptGaussDomain = [&]() {
-            MatrixX<T> result;
+            MatrixX result;
             result.resize(xi.size(), 4);
             result << evalPsi1, evalPsi2, evalPsi3, evalPsi4;
-            return MatrixX<T>(result * vertices);
+            return MatrixX(result * vertices);
         }();
         /* evaluate Jacobian contribution for each point */
         auto evalDetJacb = [&]() {
-            VectorX<T> result;
+            VectorX result;
             result.resize(xi.size());
             for (int i = 0; i < xi.size(); ++i)
             {

@@ -1,13 +1,29 @@
 #include "Truss/Element/Bar.hpp"
 #include "Truss/Common/Resources.hpp"
+#include "Truss/Common/Coordinate.hpp"
 using namespace Truss;
+
+void Element::Bar::Build(Resources& res)
+{
+    LeftNode = res.Get<Node>(res.Nodes, LeftNodeKey);
+    RightNode = res.Get<Node>(res.Nodes, RightNodeKey);
+    Section = res.GetAndCast<Section::Section_Bar>(res.Sections, SectionKey);
+}
+
+ValidationInfo Element::Bar::Validate() const
+{
+    if (LeftNode == nullptr) return {"LeftNode is null"};
+    if (RightNode == nullptr) return {"RightNode is null"};
+    if (Section == nullptr) return {"Section is null"};
+    return {};
+}
 
 Numeric Element::Bar::GetBarLength() const
 {
     return GetLength(*LeftNode, *RightNode);
 }
 
-MatrixX<Numeric> Element::Bar::GetStiffnessLocal() const
+MatrixX Element::Bar::GetStiffnessLocal() const
 {
     auto E = Section->Mat->YoungsModules;
     Numeric bar_length = GetBarLength();
@@ -17,24 +33,16 @@ MatrixX<Numeric> Element::Bar::GetStiffnessLocal() const
         {  1, -1 },
         { -1,  1 }
     };
-    Matrix12x12<Numeric> result = Matrix12x12<Numeric>::Zero();
+    Matrix12x12 result = Matrix12x12::Zero();
     result({0, 6}, {0, 6}) = local;
     return (E * A / bar_length) * result;
 }
 
-void Element::Bar::Build(Resources& resources)
+MatrixX Element::Bar::GetStiffnessGlobal() const
 {
-    this->LeftNode = &resources.Nodes.at(LeftNodeKey);
-    this->RightNode = &resources.Nodes.at(RightNodeKey);
-    auto& section = resources.Sections.at(SectionKey);
-    this->Section = std::static_pointer_cast<Section::Section_Bar>(section).get();
-}
-
-MatrixX<Numeric> Element::Bar::GetStiffnessGlobal() const
-{
-    Vector3<Numeric> x_axis = MakeVector<Numeric>(*LeftNode, *RightNode);
-    auto lambda_matrix = GetTransformationMatrix<Numeric>(x_axis);
-    auto trans_matrix = BlockDiagonal<Numeric>(lambda_matrix, 2 * GetNodeCount());
+    Vector3 x_axis = MakeVector(*LeftNode, *RightNode);
+    auto lambda_matrix = GetTransformationMatrix(x_axis);
+    auto trans_matrix = BlockDiagonal(lambda_matrix, 2 * GetNodeCount());
     return trans_matrix.transpose() * GetStiffnessLocal() * trans_matrix;
 }
 

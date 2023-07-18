@@ -15,7 +15,15 @@ FetchContent_Declare(backward
 FetchContent_MakeAvailable(backward)
 
 ## Target: TrussCLI
-set(SOURCES "src/TrussCLI.cpp" "include/UTF8CodePage.hpp" include/Csv/CsvWriter.cpp include/Csv/CsvWriter.hpp include/csv_to_string.hpp include/CsvHeaders.hpp include/Csv/CsvToString.hpp)
+set(SOURCES
+        "src/TrussCLI.cpp"
+        "include/UTF8CodePage.hpp"
+        "include/Csv/CsvWriter.cpp"
+        "include/Csv/CsvWriter.hpp"
+        "include/csv_to_string.hpp"
+        "include/CsvHeaders.hpp"
+        "include/Csv/CsvToString.hpp"
+        )
 add_executable(TrussCLI ${SOURCES} ${BACKWARD_ENABLE})
 target_include_directories(TrussCLI PRIVATE "include")
 

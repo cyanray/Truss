@@ -21,29 +21,39 @@ find_package(Eigen3 CONFIG REQUIRED)
 
 set(SOURCES
         "include/Truss/Solver.hpp"
-        "include/Truss/Common/Constants.hpp"
+        "include/Truss/Common/Common.hpp"
         "include/Truss/Common/DegreeOfFreedom.hpp"
         "include/Truss/Common/IComponent.hpp"
         "include/Truss/Common/Node.hpp"
         "include/Truss/Common/Resources.hpp"
+        "include/Truss/Common/Coordinate.hpp"
+        "include/Truss/Common/ValidationInfo.hpp"
         "include/Truss/Constraint/ConstraintBase.hpp"
         "include/Truss/Constraint/NodeConstraint.hpp"
-        "include/Truss/Element/Bar.hpp"
+        "include/Truss/Constraint/NodeSetConstraint.hpp"
         "include/Truss/Element/ElementBase.hpp"
+        "include/Truss/Element/Bar.hpp"
+        "include/Truss/Element/Beam.hpp"
+        "include/Truss/Element/CSTriangle.hpp"
+        "include/Truss/Element/Quad4.hpp"
         "include/Truss/Load/LoadBase.hpp"
         "include/Truss/Load/NodeLoad.hpp"
         "include/Truss/Load/BeamUniformLoad.hpp"
+        "include/Truss/Load/NodeSetLoad.hpp"
         "include/Truss/Material/MaterialBase.hpp"
         "include/Truss/Material/Elastic.hpp"
         "include/Truss/Section/SectionBase.hpp"
         "include/Truss/Section/Section_Bar.hpp"
+        "include/Truss/Section/Section_Beam.hpp"
         "include/Truss/Section/Section_CSTriangle.hpp"
+        "include/Truss/Section/Section_Quad4.hpp"
         "include/Truss/Serializer/Serializers.hpp"
         "include/Truss/Utils/FunctionPointer.hpp"
         "include/Truss/Utils/SimpleReflection.hpp"
-        "include/Truss/Section/Section_Beam.hpp"
-        "include/Truss/Element/Beam.hpp"
-        "include/Truss/Element/CSTriangle.hpp"
+        "include/Truss/Utils/GaussianQuadrature.hpp"
+        "include/Truss/Set/NodeSet.cpp"
+        "include/Truss/Set/NodeSet.hpp"
+        "include/Truss/Set/SetBase.hpp"
         "src/Solver.cpp"
         "src/Bar.cpp"
         "src/Serializers.cpp"
@@ -56,15 +66,13 @@ set(SOURCES
         "src/Section_Bar.cpp"
         "src/Beam.cpp"
         "src/Section_Beam.cpp"
-        "src/Node.cpp"
         "src/BeamUniformLoad.cpp"
-        "src/CSTriangle.cpp" src/Section_CSTriangle.cpp include/Truss/Set/NodeSet.cpp include/Truss/Set/NodeSet.hpp include/Truss/Set/SetBase.hpp include/Truss/Load/NodeSetLoad.hpp include/Truss/Constraint/NodeSetConstraint.hpp include/Truss/Utils/GaussianQuadrature.hpp include/Truss/Element/Quad4.hpp src/Quad4.cpp include/Truss/Section/Section_CSQuad.hpp src/Section_CSQuad.cpp)
-
-
-option(LibTrussSolver_DOUBLE_PRECISION "Build LibTrussSolver As Double Precision Version" OFF)
-if(LibTrussSolver_DOUBLE_PRECISION)
-    target_compile_definitions(LibTrussSolver PRIVATE TRUSS_DOUBLE_PRECISION)
-endif()
+        "src/CSTriangle.cpp"
+        "src/Section_CSTriangle.cpp"
+        "src/Quad4.cpp"
+        "src/Section_Quad4.cpp"
+        "src/Coordinate.cpp"
+        )
 
 
 add_library(LibTrussSolver ${LIBRARY_TYPE} ${SOURCES})
@@ -78,7 +86,7 @@ target_include_directories(LibTrussSolver PUBLIC
 
 option(LibTrussSolver_DOUBLE_PRECISION "Build LibTrussSolver As Double Precision Version" OFF)
 if (LibTrussSolver_DOUBLE_PRECISION)
-    target_compile_definitions(LibTrussSolver PRIVATE TRUSS_DOUBLE_PRECISION)
+    target_compile_definitions(LibTrussSolver PUBLIC TRUSS_DOUBLE_PRECISION)
 endif ()
 
 

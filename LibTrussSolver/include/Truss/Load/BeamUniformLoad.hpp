@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LoadBase.hpp"
-#include "Truss/Common/Constants.hpp"
+#include "Truss/Common/Common.hpp"
 #include "Truss/Common/Node.hpp"
 #include "Truss/Common/Resources.hpp"
 #include "Truss/Element/Beam.hpp"

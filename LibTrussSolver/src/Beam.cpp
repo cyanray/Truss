@@ -1,18 +1,26 @@
 #include "Truss/Element/Beam.hpp"
 #include "Truss/Common/Resources.hpp"
+#include "Truss/Common/Coordinate.hpp"
 
 namespace Truss::Element
 {
-    void Beam::Build(Resources& resources)
+    void Beam::Build(Resources& res)
     {
-        this->LeftNode = &resources.Nodes.at(LeftNodeKey);
-        this->RightNode = &resources.Nodes.at(RightNodeKey);
-        auto& section = resources.Sections.at(SectionKey);
-        this->Section = std::static_pointer_cast<Section::Section_Beam>(section).get();
+        LeftNode = res.Get<Node>(res.Nodes, LeftNodeKey);
+        RightNode = res.Get<Node>(res.Nodes, RightNodeKey);
+        Section = res.GetAndCast<Section::Section_Beam>(res.Sections, SectionKey);
         if (YDirectionNodeKey != INVALID_ID)
         {
-            this->YDirectionNode = &resources.Nodes.at(YDirectionNodeKey);
+            YDirectionNode = res.Get<Node>(res.Nodes, YDirectionNodeKey);
         }
+    }
+
+    ValidationInfo Beam::Validate() const
+    {
+        if (LeftNode == nullptr) return {"LeftNode is null"};
+        if (RightNode == nullptr) return {"RightNode is null"};
+        if (Section == nullptr) return {"Section is null"};
+        return {};
     }
 
     std::vector<ID> Beam::GetNodeIds() const
@@ -20,7 +28,7 @@ namespace Truss::Element
         return {this->LeftNode->Id, this->RightNode->Id};
     }
 
-    MatrixX<Numeric> Beam::GetStiffnessLocal() const
+    MatrixX Beam::GetStiffnessLocal() const
     {
         Numeric L = GetBeamLength();
         Numeric L2 = L * L;
@@ -33,7 +41,7 @@ namespace Truss::Element
         Numeric E = Section->Mat->YoungsModules;
         Numeric G = Section->Mat->CalculateShearModules();
 
-        Matrix12x12<Numeric> result = Matrix12x12<Numeric>::Zero();
+        Matrix12x12 result = Matrix12x12::Zero();
 
         Eigen::Matrix<Numeric, 2, 2> local1
         {
@@ -56,11 +64,11 @@ namespace Truss::Element
         return result;
     }
 
-    MatrixX<Numeric> Beam::GetStiffnessGlobal() const
+    MatrixX Beam::GetStiffnessGlobal() const
     {
-        Vector3<Numeric> x_axis = MakeVector<Numeric>(*LeftNode, *RightNode);
-        auto lambda_matrix = GetTransformationMatrixAuto<Numeric>(x_axis);
-        auto trans_matrix = BlockDiagonal<Numeric>(lambda_matrix, 2 * GetNodeCount());
+        Vector3 x_axis = MakeVector(*LeftNode, *RightNode);
+        auto lambda_matrix = GetTransformationMatrixNature(x_axis);
+        auto trans_matrix = BlockDiagonal(lambda_matrix, 2 * GetNodeCount());
         return trans_matrix.transpose() * GetStiffnessLocal() * trans_matrix;
     }
 

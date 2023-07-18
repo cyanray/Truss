@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Truss/Common/Constants.hpp"
+#include "Truss/Common/Common.hpp"
 #include "Truss/Common/Node.hpp"
 #include "Truss/Common/Resources.hpp"
 #include "Truss/Constraint/NodeConstraint.hpp"
@@ -21,13 +21,13 @@ namespace Truss
     public:
         void LoadTrussDocument(const TrussDocument& doc);
 
-        VectorX<Numeric> GetF();
+        VectorX GetF();
 
-        VectorX<Numeric> GetF(const std::vector<int>& index);
+        VectorX GetF(const std::vector<int>& index);
 
-        MatrixX<Numeric> GetK();
+        MatrixX GetK();
 
-        MatrixX<Numeric> GetK(const std::vector<int>& index);
+        MatrixX GetK(const std::vector<int>& index);
 
         [[nodiscard]] int GetKSize() const noexcept;
 

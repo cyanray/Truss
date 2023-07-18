@@ -22,5 +22,21 @@ namespace Truss
         std::map<ID, std::shared_ptr<Constraint::ConstraintBase>> Constraints;
         std::map<ID, std::shared_ptr<Section::SectionBase>> Sections;
         std::map<ID, std::shared_ptr<Set::SetBase>> Sets;
+
+        template<typename T>
+        T* Get(const std::map<ID, T>& from, ID key)
+        {
+            auto it = from.find(key);
+            if (it == from.end()) return nullptr;
+            return const_cast<T*>(&it->second);
+        }
+
+        template<typename TCast, typename TPtr>
+        TCast* GetAndCast(const std::map<ID, std::shared_ptr<TPtr>>& from, ID key)
+        {
+            auto it = from.find(key);
+            if (it == from.end()) return nullptr;
+            return const_cast<TCast*>(std::static_pointer_cast<TCast>(it->second).get());
+        }
     };
 }// namespace Truss
