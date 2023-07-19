@@ -2,6 +2,7 @@
 #include "ElementBase.hpp"
 #include "Truss/Common/Node.hpp"
 #include "Truss/Section/Section_Quad4.hpp"
+#include <mutex>
 
 namespace Truss::Element
 {
@@ -20,6 +21,16 @@ namespace Truss::Element
         Node* Node4{};
         Section::Section_Quad4* Section{};
 
+    private:
+        mutable Matrix3x3 m_TransformMatrix;
+        mutable std::once_flag m_TransformMatrixFlag;
+        mutable Vector4 m_TransformedX;
+        mutable Vector4 m_TransformedY;
+        mutable std::once_flag m_TransformedXYFlag;
+
+        void CalcTransformedXY() const;
+
+    public:
         void Build(Resources& resources) override;
 
         [[nodiscard]] ValidationInfo Validate() const override;
@@ -46,7 +57,9 @@ namespace Truss::Element
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override;
 
-        [[nodiscard]] Eigen::Matrix<Numeric, 3, 24> GetBMatrix(Numeric s, Numeric t) const;
+        [[nodiscard]] Numeric CalcJacobian(Numeric s, Numeric t) const;
+
+        [[nodiscard]] Eigen::Matrix<Numeric, 3, 24> GetBMatrix(Numeric s, Numeric t, Numeric J) const;
 
         [[nodiscard]] Matrix3x3 GetDMatrix() const;
 
@@ -55,5 +68,12 @@ namespace Truss::Element
         [[nodiscard]] MatrixX GetStiffnessGlobal() const override;
 
         [[nodiscard]] StressVector CalculateStress(const VectorX& displacement) const override;
+
+        const Matrix3x3& GetTransformMatrix() const;
+
+        const Vector4 & GetTransformedX() const;
+
+        const Vector4 & GetTransformedY() const;
+
     };
 }// namespace Truss::Element

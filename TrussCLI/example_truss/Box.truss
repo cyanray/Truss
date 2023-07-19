@@ -1,0 +1,61 @@
+# Box with 12 nodes (10 elements)
+
+Node:
+[
+    { key:0,  x:0.000, y:0.000, z:0.000 }
+    { key:1,  x:0.000, y:0.000, z:0.020 }
+    { key:2,  x:0.000, y:0.050, z:0.020 }
+    { key:3,  x:0.000, y:0.050, z:0.000 }
+    { key:4,  x:0.050, y:0.050, z:0.000 }
+    { key:5,  x:0.050, y:0.050, z:0.020 }
+    { key:6,  x:0.100, y:0.050, z:0.020 }
+    { key:7,  x:0.100, y:0.050, z:0.000 }
+    { key:8,  x:0.100, y:0.000, z:0.000 }
+    { key:9,  x:0.100, y:0.000, z:0.020 }
+    { key:10, x:0.050, y:0.000, z:0.020 }
+    { key:11, x:0.050, y:0.000, z:0.000 }
+]
+
+Material:
+[
+    { key:0, type:"Elastic", rho:7850.0, E:2.06E11, pr:0.30 }
+]
+
+Section:
+[
+    { key:0, type:"Section_Quad4", mat_key:0, thickness:0.01 }
+]
+
+Element:
+[
+    { key:0, type:"Quad4", node1_key:0, node2_key:1, node3_key:2, node4_key:3, section_key:0 }
+    { key:1, type:"Quad4", node1_key:3, node2_key:2, node3_key:5, node4_key:4, section_key:0 }
+    { key:2, type:"Quad4", node1_key:4, node2_key:5, node3_key:6, node4_key:7, section_key:0 }
+    { key:3, type:"Quad4", node1_key:7, node2_key:6, node3_key:9, node4_key:8, section_key:0 }
+    { key:4, type:"Quad4", node1_key:11, node2_key:10, node3_key:9, node4_key:8, section_key:0 }
+    { key:5, type:"Quad4", node1_key:0, node2_key:1, node3_key:10, node4_key:11, section_key:0 }
+    { key:6, type:"Quad4", node1_key:0, node2_key:3, node3_key:4, node4_key:11, section_key:0 }
+    { key:7, type:"Quad4", node1_key:1, node2_key:2, node3_key:5, node4_key:10, section_key:0 }
+    { key:8, type:"Quad4", node1_key:11, node2_key:4, node3_key:7, node4_key:8, section_key:0 }
+    { key:9, type:"Quad4", node1_key:10, node2_key:5, node3_key:6, node4_key:9, section_key:0 }
+]
+
+Set:
+[
+  # Boundary Set
+  { type:"NodeSet", key:0, nodes:[ 0, 1, 2, 3 ] },
+  # Load Set
+  { type:"NodeSet", key:1, nodes:[ 8, 9 ] }, # +Z
+  { type:"NodeSet", key:2, nodes:[ 6, 7 ] }  # -Z
+]
+
+Constraint:
+[
+  { key:0, type:"NodeSetConstraint", node_set_key:0, XDisplacement:true,  YDisplacement:true, ZDisplacement:true }
+]
+
+Load:
+[
+  { type:"NodeSetLoad", key:0, node_set_key:1, ZForce:2000.0 }
+  { type:"NodeSetLoad", key:1, node_set_key:2, ZForce:-2000.0 }
+]

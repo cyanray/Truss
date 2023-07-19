@@ -104,11 +104,7 @@ namespace Truss::Element
     const Matrix3x3& CSTriangle::GetTransformMatrix() const
     {
         std::call_once(m_TransformMatrixFlag, [this]() {
-            auto xAxis = MakeVector(*LeftNode, *RightNode);
-            auto temp = MakeVector(*LeftNode, *TopNode);
-            auto zAxis = xAxis.cross(temp);
-            auto yAxis = zAxis.cross(xAxis);
-            m_TransformMatrix = GetTransformationMatrix(xAxis, yAxis);
+            m_TransformMatrix = GetTransformationMatrixNature(*LeftNode, *RightNode, *TopNode);
         });
         return m_TransformMatrix;
     }
@@ -124,6 +120,7 @@ namespace Truss::Element
         CalcTransformedXY();
         return m_TransformedY;
     }
+
     void CSTriangle::CalcTransformedXY() const
     {
         std::call_once(m_TransformedXYFlag, [this]() {
@@ -131,8 +128,8 @@ namespace Truss::Element
             auto& T = GetTransformMatrix();
             result << ToVector(*LeftNode), ToVector(*RightNode), ToVector(*TopNode);
             result = T * result;
-            m_TransformedX = std::make_tuple(result(0, 0), result(0, 1), result(0, 2));
-            m_TransformedY = std::make_tuple(result(1, 0), result(1, 1), result(1, 2));
+            m_TransformedX = ToTuple((Vector3)result.row(0));
+            m_TransformedY = ToTuple((Vector3)result.row(1));
         });
     }
 

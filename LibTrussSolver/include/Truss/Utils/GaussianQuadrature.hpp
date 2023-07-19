@@ -19,7 +19,7 @@ namespace Truss
         Nine = 3
     };
 
-    template<typename T>
+    template<typename T = Numeric>
     inline std::tuple<Eigen::VectorX<T>, Eigen::Matrix<T, Eigen::Dynamic, 2>>
     GetGaussWeightsAndPoints2D(GaussianPoint2D gaussPoint2D)
     {

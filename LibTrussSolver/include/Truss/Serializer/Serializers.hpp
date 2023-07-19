@@ -5,6 +5,7 @@
 #include "Truss/Element/Bar.hpp"
 #include "Truss/Element/Beam.hpp"
 #include "Truss/Element/CSTriangle.hpp"
+#include "Truss/Element/Quad4.hpp"
 #include "Truss/Load/BeamUniformLoad.hpp"
 #include "Truss/Load/NodeLoad.hpp"
 #include "Truss/Load/NodeSetLoad.hpp"
@@ -12,6 +13,7 @@
 #include "Truss/Section/Section_Bar.hpp"
 #include "Truss/Section/Section_Beam.hpp"
 #include "Truss/Section/Section_CSTriangle.hpp"
+#include "Truss/Section/Section_Quad4.hpp"
 #include "Truss/Set/NodeSet.hpp"
 #include "Truss/Utils/SimpleReflection.hpp"
 
@@ -24,6 +26,7 @@ namespace Truss
     void from_truss(const TrussDocument& doc, Element::Bar& obj);
     void from_truss(const TrussDocument& doc, Element::Beam& obj);
     void from_truss(const TrussDocument& doc, Element::CSTriangle& obj);
+    void from_truss(const TrussDocument& doc, Element::Quad4& obj);
     void from_truss(const TrussDocument& doc, Load::NodeLoad& obj);
     void from_truss(const TrussDocument& doc, Load::BeamUniformLoad& obj);
     void from_truss(const TrussDocument& doc, Load::NodeSetLoad& obj);
@@ -33,6 +36,7 @@ namespace Truss
     void from_truss(const TrussDocument& doc, Section::Section_Bar& obj);
     void from_truss(const TrussDocument& doc, Section::Section_Beam& obj);
     void from_truss(const TrussDocument& doc, Section::Section_CSTriangle& obj);
+    void from_truss(const TrussDocument& doc, Section::Section_Quad4& obj);
     void from_truss(const TrussDocument& doc, Set::NodeSet& obj);
 
     // to_truss
@@ -40,6 +44,7 @@ namespace Truss
     void to_truss(TrussDocument& doc, const Element::Bar& obj);
     void to_truss(TrussDocument& doc, const Element::Beam& obj);
     void to_truss(TrussDocument& doc, const Element::CSTriangle& obj);
+    void to_truss(TrussDocument& doc, const Element::Quad4& obj);
     void to_truss(TrussDocument& doc, const Load::NodeLoad& obj);
     void to_truss(TrussDocument& doc, const Load::BeamUniformLoad& obj);
     void to_truss(TrussDocument& doc, const Load::NodeSetLoad& obj);
@@ -49,6 +54,7 @@ namespace Truss
     void to_truss(TrussDocument& doc, const Section::Section_Bar& obj);
     void to_truss(TrussDocument& doc, const Section::Section_Beam& obj);
     void to_truss(TrussDocument& doc, const Section::Section_CSTriangle& obj);
+    void to_truss(TrussDocument& doc, const Section::Section_Quad4& obj);
     void to_truss(TrussDocument& doc, const Set::NodeSet& obj);
 
     SimpleReflection& GetCompomentReflection();

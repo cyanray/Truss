@@ -28,6 +28,8 @@ namespace Truss
 
     using Vector3 = Eigen::Vector<Numeric, 3>;
 
+    using Vector4 = Eigen::Vector<Numeric, 4>;
+
     using Matrix3x3 = Eigen::Matrix<Numeric, 3, 3>;
 
     using Matrix6x6 = Eigen::Matrix<Numeric, 6, 6>;
@@ -39,6 +41,26 @@ namespace Truss
     using DisplacementVector = Eigen::Vector<Numeric, ALL_DOF>;
 
     using StressVector = Eigen::Vector<Numeric, ALL_DOF>;
+
+    namespace _gen_tuple_impl
+    {
+        template <typename F, size_t... Is>
+        auto gen_tuple_impl(F func, std::index_sequence<Is...>) {
+            return std::make_tuple(func(Is)...);
+        }
+
+        template <size_t N, typename F>
+        auto gen_tuple(F func) {
+            return gen_tuple_impl(func, std::make_index_sequence<N>{});
+        }
+    }
+
+    template<typename T, int Count>
+    auto ToTuple(const Eigen::Vector<T, Count>& vec)
+    {
+        using namespace _gen_tuple_impl;
+        return gen_tuple<Count>([&](size_t index) { return vec(index); });
+    }
 
     template<typename Derived>
     MatrixX BlockDiagonal(const Eigen::MatrixBase<Derived>& mat, int count)

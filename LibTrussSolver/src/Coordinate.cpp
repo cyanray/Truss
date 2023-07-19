@@ -23,4 +23,13 @@ namespace Truss
         return result;
     }
 
+    Matrix3x3 GetTransformationMatrixNature(const Node& origin, const Node& node1, const Node& node2)
+    {
+        auto xAxis = MakeVector(origin, node1);
+        auto temp = MakeVector(origin, node2);
+        auto zAxis = xAxis.cross(temp);
+        auto yAxis = zAxis.cross(xAxis);
+        return GetTransformationMatrix(xAxis, yAxis);
+    }
+
 }

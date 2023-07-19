@@ -26,12 +26,14 @@ SimpleReflection& Truss::GetCompomentReflection()
         refl.Register("Bar", Creator<Element::ElementBase, Element::Bar>);
         refl.Register("Beam", Creator<Element::ElementBase, Element::Beam>);
         refl.Register("CSTriangle", Creator<Element::ElementBase, Element::CSTriangle>);
+        refl.Register("Quad4", Creator<Element::ElementBase, Element::Quad4>);
         refl.Register("NodeLoad", Creator<Load::LoadBase, Load::NodeLoad>);
         refl.Register("BeamUniformLoad", Creator<Load::LoadBase, Load::BeamUniformLoad>);
         refl.Register("NodeSetLoad", Creator<Load::LoadBase, Load::NodeSetLoad>);
         refl.Register("Section_Bar", Creator<Section::SectionBase, Section::Section_Bar>);
         refl.Register("Section_Beam", Creator<Section::SectionBase, Section::Section_Beam>);
         refl.Register("Section_CSTriangle", Creator<Section::SectionBase, Section::Section_CSTriangle>);
+        refl.Register("Section_Quad4", Creator<Section::SectionBase, Section::Section_Quad4>);
         refl.Register("NodeSet", Creator<Set::SetBase, Set::NodeSet>);
     }
     return refl;
@@ -296,4 +298,38 @@ void Truss::to_truss(TrussDocument& doc, const Constraint::NodeSetConstraint& ob
     doc["xrotation"] = obj.XRotation;
     doc["yrotation"] = obj.YRotation;
     doc["zrotation"] = obj.ZRotation;
+}
+
+void Truss::from_truss(const TrussDocument& doc, Element::Quad4& obj)
+{
+    obj.Key = doc["key"].Get<ID>();
+    obj.SectionKey = doc["section_key"].Get<ID>();
+    obj.Node1Key = doc["node1_key"].Get<ID>();
+    obj.Node2Key = doc["node2_key"].Get<ID>();
+    obj.Node3Key = doc["node3_key"].Get<ID>();
+    obj.Node4Key = doc["node4_key"].Get<ID>();
+}
+
+void Truss::from_truss(const TrussDocument& doc, Section::Section_Quad4& obj)
+{
+    obj.Key = doc["key"].Get<ID>();
+    obj.MaterialKey = doc["mat_key"].Get<ID>();
+    obj.Thickness = doc["thickness"].Get<Numeric>();
+}
+
+void Truss::to_truss(TrussDocument& doc, const Element::Quad4& obj)
+{
+    doc["key"] = obj.Key;
+    doc["section_key"] = obj.SectionKey;
+    doc["node1_key"] = obj.Node1Key;
+    doc["node2_key"] = obj.Node2Key;
+    doc["node3_key"] = obj.Node3Key;
+    doc["node4_key"] = obj.Node4Key;
+}
+
+void Truss::to_truss(TrussDocument& doc, const Section::Section_Quad4& obj)
+{
+    doc["key"] = obj.Key;
+    doc["mat_key"] = obj.MaterialKey;
+    doc["thickness"] = obj.Thickness;
 }
