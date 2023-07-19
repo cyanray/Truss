@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
-set(SOURCES "K2Truss.cpp" "KDoc.cpp" "KDoc.hpp" K2Truss.hpp)
+set(SOURCES "K2Truss.cpp" "KDoc.cpp" "KDoc.hpp" K2Truss.hpp main.cpp)
 
 add_executable(K2Truss ${SOURCES} ${BACKWARD_ENABLE})
 target_include_directories(K2Truss PRIVATE "include")

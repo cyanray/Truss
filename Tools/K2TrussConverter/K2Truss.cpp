@@ -1,72 +1,58 @@
-#include <format>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
-#include <initializer_list>
-
-#include <TrussDocument/TrussDocument.hpp>
-
 #include "K2Truss.hpp"
-#include "KDoc.hpp"
-
-using namespace std;
 using namespace Truss;
-using namespace Truss::Tools;
 
-
-int main(int argc, char* argv[])
+namespace Truss::Tools
 {
-    if (argc < 3)
+    TrussDocument GetNodes(const KDoc& kdoc)
     {
-        cout << "Usage: K2Truss <input.k> <output.truss>" << endl;
-        return 1;
+        // nid, x, y, z, tc, rc
+        TrussDocument result = TrussDocument::Array();
+        for (auto& row: kdoc.Data)
+        {
+            TrussDocument node = TrussDocument::Object();
+            node["key"] = int(lround(row[0]));
+            node["x"] = row[1];
+            node["y"] = row[2];
+            node["z"] = row[3];
+            result.Add(std::move(node));
+        }
+        return result;
     }
 
-    try
+    TrussDocument GetPlane(const KDoc& kdoc)
     {
-        ifstream ifs(argv[1]);
-        if (!ifs.is_open())
+        // eid, pid,  n1,  n2,  n3,  n4,  n5,  n6,  n7,  n8
+        TrussDocument result = TrussDocument::Array();
+        for (auto& row: kdoc.Data)
         {
-            cout << "Failed to open file: " << argv[1] << endl;
-            return 1;
+            bool isQuad = (row[4] != row[5]);
+            TrussDocument plane = TrussDocument::Object();
+            plane["type"] = (isQuad) ? "Quad4" : "CSTriangle";
+            plane["key"] = int(lround(row[0]));
+            plane["section_key"] = 0;
+            plane["node1_key"] = int(lround(row[2]));
+            plane["node2_key"] = int(lround(row[3]));
+            plane["node3_key"] = int(lround(row[4]));
+            if (isQuad) plane["node4_key"] = int(lround(row[5]));
+            result.Add(std::move(plane));
         }
-        ofstream ofs(argv[2]);
-        if (!ofs.is_open())
+        return result;
+    }
+    TrussDocument GetNodeSet(const KDoc& kdoc)
+    {
+        TrussDocument result = TrussDocument::Object();
+        result["key"] = 0;
+        result["type"] = "NodeSet";
+        result["nodes"] = TrussDocument::Array();
+        for (int i = 1; i < kdoc.Data.size(); ++i)
         {
-            cout << "Failed to open file: " << argv[2] << endl;
-            return 1;
-        }
-
-        string kdoc((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
-        auto result = KDoc::Parse(kdoc);
-
-        auto tdoc = TrussDocument::Object();
-
-        for (auto& doc: result)
-        {
-            if (doc.Keyword == "NODE")
+            for (auto val: kdoc.Data[i])
             {
-                auto nodes = GetNodes(doc);
-                tdoc.Add("Node", nodes);
-            }
-            else if (doc.Keyword == "ELEMENT_SHELL")
-            {
-                auto triangles = GetTriangles(doc);
-                tdoc.Add("Element", triangles);
+                if (val == 0) continue;
+                result["nodes"].Add(int(lround(val)));
             }
         }
-
-        ofs << tdoc.ToString() << endl;
-        cout << "Done." << endl;
-
-    }
-    catch (exception& e)
-    {
-        cout << e.what() << endl;
-        return 1;
+        return result;
     }
 
-    return 0;
-}
+}// namespace Truss::Tools
