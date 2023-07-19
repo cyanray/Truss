@@ -11,4 +11,13 @@ namespace Truss::Set
             Nodes.emplace_back(&resources.Nodes.at(key));
         }
     }
+    vector<ID> NodeSet::GetNodeIds() const
+    {
+        vector<ID> result;
+        for(Node* node : Nodes)
+        {
+            result.push_back(node->Id);
+        }
+        return result;
+    }
 }// namespace Truss::Set

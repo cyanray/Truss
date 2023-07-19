@@ -26,7 +26,7 @@ namespace Truss::Constraint
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override
         {
-            return NodeSet->NodeKeys;
+            return NodeSet->GetNodeIds();
         }
 
         [[nodiscard]] std::vector<bool> GetConstraint() const override

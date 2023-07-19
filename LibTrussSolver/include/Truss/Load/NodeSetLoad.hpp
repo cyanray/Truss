@@ -27,16 +27,16 @@ namespace Truss::Load
 
         [[nodiscard]] std::vector<ID> GetNodeIds() const override
         {
-            return NodeSet->NodeKeys;
+            return NodeSet->GetNodeIds();
         }
 
         [[nodiscard]] std::vector<std::pair<ID, LoadVector>> GetLoads() const override
         {
             LoadVector load = {XForce, YForce, ZForce, XMoment, YMoment, ZMoment};
             std::vector<std::pair<ID, LoadVector>> loads;
-            for (auto& nodeKey : NodeSet->NodeKeys)
+            for (auto& nodeId : NodeSet->GetNodeIds())
             {
-                loads.emplace_back(nodeKey, load);
+                loads.emplace_back(nodeId, load);
             }
             return loads;
         }
