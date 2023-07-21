@@ -122,9 +122,9 @@ int main(int argc, char* argv[])
             // Compute stress
             auto stress = element->CalculateStress(displacement);
             // Write to csv
-            Eigen::Vector<int, 8> node_keys(nodes.data());
-            node_keys.segment(node_count, 8 - node_count).fill(-1);
-            elements_csv_file << std::make_tuple(element->Key, element->GetElementName(), node_count, node_keys, stress);
+            Eigen::Vector<int, 8> node_ids(nodes.data());
+            node_ids.segment(node_count, 8 - node_count).fill(-1);
+            elements_csv_file << std::make_tuple(element->Id, element->Key, element->GetElementName(), node_count, node_ids, stress);
         }
 
         cout << "Done." << endl;
