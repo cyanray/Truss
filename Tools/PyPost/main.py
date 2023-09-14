@@ -3,8 +3,8 @@ import matplotlib
 
 matplotlib.use('Qt5Agg')
 
-elements_path = "E:/test/result2/elements.csv"
-nodes_path = "E:/test/result2/nodes.csv"
+elements_path = "E:/test/Plane/result/elements.csv"
+nodes_path = "E:/test/Plane/result/nodes.csv"
 
 mesh = MeshDrawing(elements_path, nodes_path)
 mesh.draw().show()
