@@ -86,9 +86,9 @@ int main(int argc, char* argv[])
         basic_output_file << K << endl;
         basic_output_file << "{F} = " << endl;
         basic_output_file << F << endl;
-        // VectorXf D = K.colPivHouseholderQr().solve(F);
-        // VectorXf D = K.fullPivLu().solve(F);
-        Truss::VectorX D = K.bdcSvd(ComputeThinU | ComputeThinV).solve(F);
+        Truss::VectorX D = K.colPivHouseholderQr().solve(F);
+        // Truss::VectorX D = K.fullPivLu().solve(F);
+        // Truss::VectorX D = K.bdcSvd(ComputeThinU | ComputeThinV).solve(F);
         basic_output_file << "{D} = " << endl;
         basic_output_file << D << endl;
 

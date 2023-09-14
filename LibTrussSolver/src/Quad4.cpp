@@ -54,9 +54,9 @@ namespace Truss::Element
             Numeric s = points(i, 0), t = points(i, 1);
             auto J = CalcJacobian(s, t);
             auto B = GetBMatrix(s, t, J);
-            ke = ke + (B.transpose() * D * B) * w * J * h;
+            ke += (B.transpose() * D * B) * J * w;
         }
-        return ke;
+        return ke * h;
     }
 
     Numeric Quad4::CalcJacobian(Numeric s, Numeric t) const
@@ -69,7 +69,7 @@ namespace Truss::Element
             t - 1, 0, s + 1, -s - t,
             s - t, -s - 1, 0, t + 1,
             1 - s, s + t, -t - 1, 0;
-        result = 1.0 / 8.0 * (x.transpose() * T * y).value();
+        result = (x.transpose() * T * y).value() / 8.0;
         return result;
     }
 
@@ -87,11 +87,13 @@ namespace Truss::Element
               -(1 + t), 1 - s;
         dN = dN / 4.0;
         auto [c,d,b,a] = ToTuple((Vector4)((xy.transpose() * dN).reshaped(4, 1)));
-        auto Bi = [&](int t){
+        auto Bi = [&](int u){
             Eigen::Matrix<Numeric, 3, 2> result;
-            result << (a * dN(t, 0) - b * dN(t, 1)), 0,
-                      0, (c * dN(t, 1) - d * dN(t, 0)),
-                      (c * dN(t, 1) - d * dN(t, 0)), (a * dN(t, 0) - b * dN(t, 1));
+            Numeric v1 = (a * dN(u, 0) - b * dN(u, 1));
+            Numeric v2 = (c * dN(u, 1) - d * dN(u, 0));
+            result << v1, 0,
+                      0, v2,
+                      v2, v1;
             return result;
         };
         result(Eigen::all, {0, 1}) = Bi(0);
